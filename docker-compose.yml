@@ -1,0 +1,22 @@
+version: '3.8'
+
+services:
+  assassin:
+    build: .
+    container_name: reverse-assassin
+    ports:
+      - "8080:8080"
+    environment:
+      - LLM_API_KEY=${LLM_API_KEY}
+      - LLM_BASE_URL=${LLM_BASE_URL:-https://api.deepseek.com/v1}
+      - LLM_MODEL=${LLM_MODEL:-deepseek-chat}
+      - STATIC_DIR=/app/web/static
+    volumes:
+      - ./data:/app/data
+    command: ["-mode", "server", "-port", "8080", "-db", "/app/data/assassin.db"]
+    restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"

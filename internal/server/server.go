@@ -24,7 +24,9 @@ import (
 
 // Server provides HTTP API + SSE + static file service
 type contextKey string
-const namespaceKey contextKey = "namespace"
+const (
+	namespaceKey contextKey = "namespace"
+)
 
 type Server struct {
 	store      *store.Store
@@ -138,7 +140,7 @@ func (s *Server) Close() error {
 }
 
 func (s *Server) Handler() http.Handler {
-	return corsMiddleware(namespaceMiddleware(loggingMiddleware(s.mux)))
+	return corsMiddleware(s.namespaceMiddleware(loggingMiddleware(s.mux)))
 }
 
 func (s *Server) isRunning() bool {
@@ -279,8 +281,6 @@ func (s *Server) handleWorldline(w http.ResponseWriter, r *http.Request) {
 }
 
 // API - State (character states + timeline for a story)
-
-// API - State (character states + timeline for a story)
 func (s *Server) handleState(w http.ResponseWriter, r *http.Request) {
 	workID := strings.TrimPrefix(r.URL.Path, "/api/states/")
 	workID = strings.TrimSuffix(workID, "/")
@@ -298,8 +298,13 @@ func (s *Server) handleState(w http.ResponseWriter, r *http.Request) {
 		writeJSON(w, map[string]interface{}{
 			"story_work_id": story.WorkID,
 			"story_title":   story.Title,
-			"nodes":         []interface{}{},
-			"edges":         []interface{}{},
+			"current_round": 0,
+			"worldview":     "",
+			"summary":       "",
+			"characters":    []interface{}{},
+			"timeline":      []interface{}{},
+			"pivots":        []interface{}{},
+			"plot_threads":  []interface{}{},
 		})
 		return
 	}
@@ -1003,13 +1008,16 @@ func corsMiddleware(next http.Handler) http.Handler {
 	})
 }
 
-func namespaceMiddleware(next http.Handler) http.Handler {
+func (s *Server) namespaceMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		ns := r.Header.Get("X-Namespace")
 		if ns == "" {
 			ns = "default"
 		}
-		ctx := context.WithValue(r.Context(), namespaceKey, ns)
+		nr := r.WithContext(context.WithValue(r.Context(), namespaceKey, ns))
+		st := s.getStore(nr)
+		ctx := context.WithValue(nr.Context(), store.ContextKey("store"), st)
+		config.SetProvider(st)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }

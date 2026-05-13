@@ -10,7 +10,10 @@ type SettingsProvider interface {
 	GetSetting(key string) (string, error)
 }
 
-var provider SettingsProvider
+var (
+	provider   SettingsProvider
+	providerMu sync.RWMutex
+)
 
 // EnableDemoMode controls whether demo/sandbox mode is active.
 // When enabled, authorization checks are bypassed and any story can be "taken over".
@@ -33,13 +36,22 @@ func SetDemoMode(v bool) {
 
 // SetProvider 设置运行时配置源 (由 server 在初始化时调用)
 func SetProvider(p SettingsProvider) {
+	providerMu.Lock()
 	provider = p
+	providerMu.Unlock()
 }
 
-// 知乎 API 凭证 — 优先级: DB 存储 > 环境变量 > 默认值
+func getProvider() SettingsProvider {
+	providerMu.RLock()
+	p := provider
+	providerMu.RUnlock()
+	return p
+}
+
+// 知乎 API 凭证 — 优先级: DB 存储 > 环境变量
 func AppKey() string {
-	if provider != nil {
-		if v, err := provider.GetSetting("zhihu_token"); err == nil && v != "" {
+	if p := getProvider(); p != nil {
+		if v, err := p.GetSetting("zhihu_token"); err == nil && v != "" {
 			return v
 		}
 	}
@@ -50,8 +62,8 @@ func AppKey() string {
 }
 
 func AppSecret() string {
-	if provider != nil {
-		if v, err := provider.GetSetting("zhihu_secret"); err == nil && v != "" {
+	if p := getProvider(); p != nil {
+		if v, err := p.GetSetting("zhihu_secret"); err == nil && v != "" {
 			return v
 		}
 	}
@@ -98,8 +110,8 @@ const (
 
 // LLM 配置 — 优先级: 数据库存储 > 环境变量 > 默认值
 func LLMBaseURL() string {
-	if provider != nil {
-		if v, err := provider.GetSetting("llm_base_url"); err == nil && v != "" {
+	if p := getProvider(); p != nil {
+		if v, err := p.GetSetting("llm_base_url"); err == nil && v != "" {
 			return v
 		}
 	}
@@ -110,8 +122,8 @@ func LLMBaseURL() string {
 }
 
 func LLMAPIKey() string {
-	if provider != nil {
-		if v, err := provider.GetSetting("llm_api_key"); err == nil && v != "" {
+	if p := getProvider(); p != nil {
+		if v, err := p.GetSetting("llm_api_key"); err == nil && v != "" {
 			return v
 		}
 	}
@@ -119,8 +131,8 @@ func LLMAPIKey() string {
 }
 
 func LLMModel() string {
-	if provider != nil {
-		if v, err := provider.GetSetting("llm_model"); err == nil && v != "" {
+	if p := getProvider(); p != nil {
+		if v, err := p.GetSetting("llm_model"); err == nil && v != "" {
 			return v
 		}
 	}

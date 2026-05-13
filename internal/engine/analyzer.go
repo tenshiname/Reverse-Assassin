@@ -22,6 +22,14 @@ func NewAnalyzer(zc *zhihu.Client, lc *llm.Client, s *store.Store) *Analyzer {
 	return &Analyzer{zhihuClient: zc, llmClient: lc, store: s}
 }
 
+// resolveStore picks the namespace store from context if available, otherwise uses the default.
+func (a *Analyzer) resolveStore(ctx context.Context) *store.Store {
+	if st := store.StoreFromContext(ctx); st != nil {
+		return st
+	}
+	return a.store
+}
+
 // DiscoverAndAnalyze 获取新故事并分析
 func (a *Analyzer) DiscoverAndAnalyze(ctx context.Context) (int, error) {
 	summaries, err := a.zhihuClient.GetStoryList(ctx)
@@ -31,7 +39,7 @@ func (a *Analyzer) DiscoverAndAnalyze(ctx context.Context) (int, error) {
 
 	newCount := 0
 	for _, summary := range summaries {
-		if a.store.StoryExists(summary.WorkID) {
+		if a.resolveStore(ctx).StoryExists(summary.WorkID) {
 			continue
 		}
 
@@ -50,7 +58,7 @@ func (a *Analyzer) DiscoverAndAnalyze(ctx context.Context) (int, error) {
 			Content: detail.Content,
 			Status:  model.StatusPending,
 		}
-		if err := a.store.InsertStory(record); err != nil {
+		if err := a.resolveStore(ctx).InsertStory(record); err != nil {
 			log.Printf("[Analyzer] 保存故事失败: %v", err)
 			continue
 		}
@@ -64,7 +72,7 @@ func (a *Analyzer) DiscoverAndAnalyze(ctx context.Context) (int, error) {
 
 // AnalyzePendingStories 分析所有待处理的故事
 func (a *Analyzer) AnalyzePendingStories(ctx context.Context) (int, error) {
-	pending, err := a.store.ListStoriesByStatus(model.StatusPending)
+	pending, err := a.resolveStore(ctx).ListStoriesByStatus(model.StatusPending)
 	if err != nil {
 		return 0, fmt.Errorf("list pending: %w", err)
 	}
@@ -81,14 +89,14 @@ func (a *Analyzer) AnalyzePendingStories(ctx context.Context) (int, error) {
 
 		if analysis.Classification == "real_modern" {
 			log.Printf("[Analyzer] 拦截近现代史: %s", story.Title)
-			if err := a.store.UpdateStoryAnalysis(story.WorkID, analysis); err != nil {
+			if err := a.resolveStore(ctx).UpdateStoryAnalysis(story.WorkID, analysis); err != nil {
 				log.Printf("[Analyzer] 保存分析结果失败: %v", err)
 			}
-			a.store.UpdateStoryStatus(story.WorkID, "blocked")
+			a.resolveStore(ctx).UpdateStoryStatus(story.WorkID, "blocked")
 			continue
 		}
 
-		if err := a.store.UpdateStoryAnalysis(story.WorkID, analysis); err != nil {
+		if err := a.resolveStore(ctx).UpdateStoryAnalysis(story.WorkID, analysis); err != nil {
 			log.Printf("[Analyzer] 保存分析结果失败: %v", err)
 			continue
 		}
@@ -103,7 +111,7 @@ func (a *Analyzer) AnalyzePendingStories(ctx context.Context) (int, error) {
 
 // AnalyzeOneStory analyzes a single story by workID.
 func (a *Analyzer) AnalyzeOneStory(ctx context.Context, workID string) error {
-	story, err := a.store.GetStory(workID)
+	story, err := a.resolveStore(ctx).GetStory(workID)
 	if err != nil {
 		return fmt.Errorf("get story: %w", err)
 	}
@@ -112,11 +120,11 @@ func (a *Analyzer) AnalyzeOneStory(ctx context.Context, workID string) error {
 		return err
 	}
 	if analysis.Classification == "real_modern" {
-		a.store.UpdateStoryAnalysis(workID, analysis)
-		a.store.UpdateStoryStatus(workID, "blocked")
+		a.resolveStore(ctx).UpdateStoryAnalysis(workID, analysis)
+		a.resolveStore(ctx).UpdateStoryStatus(workID, "blocked")
 		return fmt.Errorf("内容涉及近现代真实历史，已拦截")
 	}
-	return a.store.UpdateStoryAnalysis(workID, analysis)
+	return a.resolveStore(ctx).UpdateStoryAnalysis(workID, analysis)
 }
 
 func (a *Analyzer) analyzeStory(ctx context.Context, content string) (*model.AnalysisResult, error) {

@@ -1,6 +1,7 @@
 package store
 
 import (
+	"context"
 	"database/sql"
 	"encoding/json"
 	"fmt"
@@ -38,6 +39,18 @@ func New(path string) (*Store, error) {
 	}
 
 	return &Store{db: db}, nil
+}
+
+
+// ContextKey is used for context value keys to avoid collisions.
+type ContextKey string
+
+// StoreFromContext retrieves the namespace store from context, or returns nil.
+func StoreFromContext(ctx context.Context) *Store {
+	if st, ok := ctx.Value(ContextKey("store")).(*Store); ok {
+		return st
+	}
+	return nil
 }
 
 func (s *Store) Close() error {

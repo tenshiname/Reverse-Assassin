@@ -23,9 +23,15 @@ import (
 )
 
 // Server provides HTTP API + SSE + static file service
+type contextKey string
+const namespaceKey contextKey = "namespace"
+
 type Server struct {
 	store      *store.Store
 	llmClient  *llm.Client
+	stores     map[string]*store.Store
+	storesMu   sync.RWMutex
+	dbBasePath string
 	analyzer   *engine.Analyzer
 	monitor    *engine.Monitor
 	generator  *engine.Generator
@@ -40,19 +46,33 @@ type Server struct {
 	stopCh  chan struct{}
 }
 
+func getNamespace(r *http.Request) string {
+	if ns, ok := r.Context().Value(namespaceKey).(string); ok && ns != "" {
+		return ns
+	}
+	return "default"
+}
+
 func New(dbPath string) (*Server, error) {
+	// Open default store for startup
 	db, err := store.New(dbPath)
 	if err != nil {
 		return nil, fmt.Errorf("init store: %w", err)
 	}
-	// Must set provider BEFORE creating LLM client so it reads from DB
 	config.SetProvider(db)
+	// Derive base path for namespace DBs
+	basePath := strings.TrimSuffix(dbPath, ".db")
+	if !strings.HasSuffix(dbPath, ".db") {
+		basePath = filepath.Join(filepath.Dir(dbPath), "ns")
+	}
 
 	zhihuClient := zhihu.NewClient()
 	llmClient := llm.NewClient()
 	s := &Server{
 		store:      db,
 		llmClient:  llmClient,
+		stores:     make(map[string]*store.Store),
+		dbBasePath: basePath,
 		analyzer:   engine.NewAnalyzer(zhihuClient, llmClient, db),
 		monitor:    engine.NewMonitor(zhihuClient, llmClient, db),
 		generator:  engine.NewGenerator(llmClient),
@@ -70,6 +90,35 @@ func New(dbPath string) (*Server, error) {
 	return s, nil
 }
 
+// getStore returns the store for the current request'''s namespace.
+func (s *Server) getStore(r *http.Request) *store.Store {
+	ns := getNamespace(r)
+	if ns == "default" {
+		return s.store
+	}
+	s.storesMu.RLock()
+	st, ok := s.stores[ns]
+	s.storesMu.RUnlock()
+	if ok {
+		return st
+	}
+	s.storesMu.Lock()
+	defer s.storesMu.Unlock()
+	// Double-check
+	if st, ok = s.stores[ns]; ok {
+		return st
+	}
+	dbPath := fmt.Sprintf("%s_%s.db", s.dbBasePath, ns)
+	var err error
+	st, err = store.New(dbPath)
+	if err != nil {
+		log.Printf("failed to create namespace store %s: %v", ns, err)
+		return s.store
+	}
+	s.stores[ns] = st
+	return st
+}
+
 func (s *Server) Close() error {
 	s.mu.Lock()
 	if !s.closed {
@@ -80,11 +129,16 @@ func (s *Server) Close() error {
 		}
 	}
 	s.mu.Unlock()
+	s.storesMu.Lock()
+	for _, st := range s.stores {
+		st.Close()
+	}
+	s.storesMu.Unlock()
 	return s.store.Close()
 }
 
 func (s *Server) Handler() http.Handler {
-	return corsMiddleware(loggingMiddleware(s.mux))
+	return corsMiddleware(namespaceMiddleware(loggingMiddleware(s.mux)))
 }
 
 func (s *Server) isRunning() bool {
@@ -136,23 +190,23 @@ func (s *Server) registerRoutes() {
 // ============================================================
 
 func (s *Server) handleStatus(w http.ResponseWriter, r *http.Request) {
-	allStories, err := s.store.ListStoriesByStatus("")
+	allStories, err := s.getStore(r).ListStoriesByStatus("")
 	if err != nil {
 		log.Printf("[status] list stories: %v", err)
 	}
-	pending, err := s.store.ListStoriesByStatus(model.StatusPending)
+	pending, err := s.getStore(r).ListStoriesByStatus(model.StatusPending)
 	if err != nil {
 		log.Printf("[status] list pending: %v", err)
 	}
-	analyzed, err := s.store.ListStoriesByStatus(model.StatusAnalyzed)
+	analyzed, err := s.getStore(r).ListStoriesByStatus(model.StatusAnalyzed)
 	if err != nil {
 		log.Printf("[status] list analyzed: %v", err)
 	}
-	branched, err := s.store.ListStoriesByStatus(model.StatusBranched)
+	branched, err := s.getStore(r).ListStoriesByStatus(model.StatusBranched)
 	if err != nil {
 		log.Printf("[status] list branched: %v", err)
 	}
-	activePins, err := s.store.ListActivePinIDs()
+	activePins, err := s.getStore(r).ListActivePinIDs()
 	if err != nil {
 		log.Printf("[status] list active pins: %v", err)
 	}
@@ -160,7 +214,7 @@ func (s *Server) handleStatus(w http.ResponseWriter, r *http.Request) {
 	branchCount := 0
 	unlockedCount := 0
 	for _, st := range allStories {
-		branches, err := s.store.GetBranchesByStory(st.WorkID)
+		branches, err := s.getStore(r).GetBranchesByStory(st.WorkID)
 		if err != nil {
 			log.Printf("[status] get branches for %s: %v", st.WorkID, err)
 			continue
@@ -196,13 +250,13 @@ func (s *Server) handleWorldline(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	story, err := s.store.GetStory(workID)
+	story, err := s.getStore(r).GetStory(workID)
 	if err != nil {
 		writeError(w, "story not found", 404)
 		return
 	}
 
-	nodes, err := s.store.GetWorldlineTree(workID)
+	nodes, err := s.getStore(r).GetWorldlineTree(workID)
 	if err != nil {
 		writeError(w, "load worldline: "+err.Error(), 500)
 		return
@@ -235,7 +289,7 @@ func (s *Server) handleState(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	story, err := s.store.GetStory(workID)
+	story, err := s.getStore(r).GetStory(workID)
 	if err != nil {
 		writeError(w, "story not found", 404)
 		return
@@ -346,7 +400,7 @@ func (s *Server) handleStories(w http.ResponseWriter, r *http.Request) {
 
 	var allStories []*model.StoryRecord
 	if statusFilter != "" {
-		allStories, err = s.store.ListStoriesByStatus(model.StoryStatus(statusFilter))
+		allStories, err = s.getStore(r).ListStoriesByStatus(model.StoryStatus(statusFilter))
 		if err != nil {
 			log.Printf("[stories] list by status: %v", err)
 		}
@@ -355,7 +409,7 @@ func (s *Server) handleStories(w http.ResponseWriter, r *http.Request) {
 			model.StatusPending, model.StatusAnalyzed,
 			model.StatusBranched, model.StatusDispatched,
 		} {
-			list, err := s.store.ListStoriesByStatus(st)
+			list, err := s.getStore(r).ListStoriesByStatus(st)
 			if err != nil {
 				log.Printf("[stories] list %s: %v", st, err)
 				continue
@@ -393,7 +447,7 @@ func (s *Server) handleStories(w http.ResponseWriter, r *http.Request) {
 	}
 	var result []storyItem
 	for _, st := range allStories {
-		branches, err := s.store.GetBranchesByStory(st.WorkID)
+		branches, err := s.getStore(r).GetBranchesByStory(st.WorkID)
 		if err != nil {
 			log.Printf("[stories] get branches for %s: %v", st.WorkID, err)
 		}
@@ -420,13 +474,13 @@ func (s *Server) handleStoryDetail(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	story, err := s.store.GetStory(workID)
+	story, err := s.getStore(r).GetStory(workID)
 	if err != nil {
 		writeError(w, "story not found", 404)
 		return
 	}
 
-	branches, err := s.store.GetBranchesByStory(workID)
+	branches, err := s.getStore(r).GetBranchesByStory(workID)
 	if err != nil {
 		log.Printf("[story-detail] get branches for %s: %v", workID, err)
 	}
@@ -459,17 +513,17 @@ func (s *Server) handleBranches(w http.ResponseWriter, r *http.Request) {
 
 	var allBranches []*model.Branch
 	if workID != "" {
-		allBranches, err = s.store.GetBranchesByStory(workID)
+		allBranches, err = s.getStore(r).GetBranchesByStory(workID)
 		if err != nil {
 			log.Printf("[branches] get by story: %v", err)
 		}
 	} else {
-		allStories, err := s.store.ListStoriesByStatus("")
+		allStories, err := s.getStore(r).ListStoriesByStatus("")
 		if err != nil {
 			log.Printf("[branches] list all stories: %v", err)
 		} else {
 			for _, st := range allStories {
-				branches, err := s.store.GetBranchesByStory(st.WorkID)
+				branches, err := s.getStore(r).GetBranchesByStory(st.WorkID)
 				if err != nil {
 					log.Printf("[branches] get branches for %s: %v", st.WorkID, err)
 					continue
@@ -499,7 +553,7 @@ func (s *Server) handleBranches(w http.ResponseWriter, r *http.Request) {
 	for _, b := range allBranches {
 		title, ok := storyTitleCache[b.StoryWorkID]
 		if !ok {
-			st, err := s.store.GetStory(b.StoryWorkID)
+			st, err := s.getStore(r).GetStory(b.StoryWorkID)
 			if err == nil {
 				title = st.Title
 				storyTitleCache[b.StoryWorkID] = title
@@ -590,7 +644,7 @@ func (s *Server) handleAction(w http.ResponseWriter, r *http.Request) {
 
 	case "trigger":
 		s.hub.BroadcastLog("info", "action", "开始检查分支触发条件...")
-		triggerBranchingServer(r.Context(), s.store, s.monitor, s.generator, s.dispatcher, s.hub)
+		triggerBranchingServer(r.Context(), s.getStore(r), s.monitor, s.generator, s.dispatcher, s.hub)
 		writeJSON(w, map[string]interface{}{"success": true})
 
 	case "generate":
@@ -612,7 +666,7 @@ func (s *Server) handleAction(w http.ResponseWriter, r *http.Request) {
 		}
 		json.NewDecoder(r.Body).Decode(&body)
 		s.hub.BroadcastLog("info", "action", fmt.Sprintf("生成分支: %s (publish=%v, pivot=%d, custom=%v, scene=%v)", workID, publish, pivotIdx, body.CustomPrompt != "", body.Scene != ""))
-		branches, err := directGenerate(r.Context(), s.store, s.analyzer, s.generator, s.dispatcher, s.stateMgr, workID, publish, pivotIdx, body.CustomPrompt, body.Scene, s.hub)
+		branches, err := directGenerate(r.Context(), s.getStore(r), s.analyzer, s.generator, s.dispatcher, s.stateMgr, workID, publish, pivotIdx, body.CustomPrompt, body.Scene, s.hub)
 		if err != nil {
 			s.hub.BroadcastLog("error", "action", "生成失败: "+err.Error())
 			writeError(w, err.Error(), 400)
@@ -622,7 +676,7 @@ func (s *Server) handleAction(w http.ResponseWriter, r *http.Request) {
 
 	case "scan":
 		s.hub.BroadcastLog("info", "action", "开始扫描互动关键词...")
-		scanInteractionsServer(r.Context(), s.store, s.monitor, s.generator, s.dispatcher, s.hub)
+		scanInteractionsServer(r.Context(), s.getStore(r), s.monitor, s.generator, s.dispatcher, s.hub)
 		writeJSON(w, map[string]interface{}{"success": true})
 
 	case "continue":
@@ -645,7 +699,7 @@ func (s *Server) handleAction(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		s.hub.BroadcastLog("info", "action", fmt.Sprintf("继续生成: %s, prompt: %s", workID, trunc(body.Prompt, 50)))
-		branches, err := continueStory(r.Context(), s.store, s.generator, s.stateMgr, workID, body.Prompt, pivotIdx, s.hub)
+		branches, err := continueStory(r.Context(), s.getStore(r), s.generator, s.stateMgr, workID, body.Prompt, pivotIdx, s.hub)
 		if err != nil {
 			s.hub.BroadcastLog("error", "action", "继续生成失败: "+err.Error())
 			writeError(w, err.Error(), 400)
@@ -672,7 +726,7 @@ func (s *Server) handleAction(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		s.hub.BroadcastLog("info", "action", fmt.Sprintf("继续分支 %d: %s", branchID, trunc(body.Prompt, 50)))
-		newBranches, err := continueBranch(r.Context(), s.store, s.llmClient, s.stateMgr, branchID, body.Prompt, s.hub)
+		newBranches, err := continueBranch(r.Context(), s.getStore(r), s.llmClient, s.stateMgr, branchID, body.Prompt, s.hub)
 		if err != nil {
 			s.hub.BroadcastLog("error", "action", "继续分支失败: "+err.Error())
 			writeError(w, err.Error(), 400)
@@ -949,6 +1003,17 @@ func corsMiddleware(next http.Handler) http.Handler {
 	})
 }
 
+func namespaceMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		ns := r.Header.Get("X-Namespace")
+		if ns == "" {
+			ns = "default"
+		}
+		ctx := context.WithValue(r.Context(), namespaceKey, ns)
+		next.ServeHTTP(w, r.WithContext(ctx))
+	})
+}
+
 func loggingMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		start := time.Now()
@@ -990,7 +1055,7 @@ func maxF(a, b float64) float64 {
 func (s *Server) handleSettings(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodGet:
-		settings, err := s.store.GetSettingsMap()
+		settings, err := s.getStore(r).GetSettingsMap()
 		if err != nil {
 			writeError(w, err.Error(), 500)
 			return
@@ -1010,7 +1075,7 @@ func (s *Server) handleSettings(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		for k, v := range body {
-			if err := s.store.SetSetting(k, v); err != nil {
+			if err := s.getStore(r).SetSetting(k, v); err != nil {
 				writeError(w, "save failed: "+err.Error(), 500)
 				return
 			}
@@ -1436,12 +1501,12 @@ func (s *Server) handlePublishBranches(w http.ResponseWriter, r *http.Request) {
 		writeError(w, "work_id is required", 400)
 		return
 	}
-	branches, err := s.store.GetBranchesByStory(workID)
+	branches, err := s.getStore(r).GetBranchesByStory(workID)
 	if err != nil || len(branches) == 0 {
 		writeError(w, "no branches to publish", 400)
 		return
 	}
-	story, err := s.store.GetStory(workID)
+	story, err := s.getStore(r).GetStory(workID)
 	if err != nil {
 		writeError(w, "story not found", 404)
 		return
@@ -1453,7 +1518,7 @@ func (s *Server) handlePublishBranches(w http.ResponseWriter, r *http.Request) {
 	}
 	for _, b := range branches {
 		b.PinID = pinID
-		s.store.UpdateBranchPinID(b.ID, pinID)
+		s.getStore(r).UpdateBranchPinID(b.ID, pinID)
 	}
 	s.hub.BroadcastLog("success", "publish", fmt.Sprintf("Published %d branches for '%s', pin=%s", len(branches), story.Title, pinID))
 	writeJSON(w, map[string]interface{}{"success": true, "pin_id": pinID})
@@ -1494,17 +1559,17 @@ func (s *Server) handleLogin(w http.ResponseWriter, r *http.Request) {
 		writeError(w, "zhihu_token is required", 400)
 		return
 	}
-	s.store.SetSetting("zhihu_token", body.ZhihuToken)
+	s.getStore(r).SetSetting("zhihu_token", body.ZhihuToken)
 	if body.ZhihuSecret != "" {
-		s.store.SetSetting("zhihu_secret", body.ZhihuSecret)
+		s.getStore(r).SetSetting("zhihu_secret", body.ZhihuSecret)
 	}
 	s.hub.BroadcastLog("success", "auth", "用户已登录")
 	writeJSON(w, map[string]interface{}{"logged_in": true})
 }
 
 func (s *Server) handleLogout(w http.ResponseWriter, r *http.Request) {
-	s.store.SetSetting("zhihu_token", "")
-	s.store.SetSetting("zhihu_secret", "")
+	s.getStore(r).SetSetting("zhihu_token", "")
+	s.getStore(r).SetSetting("zhihu_secret", "")
 	writeJSON(w, map[string]interface{}{"logged_in": false})
 }
 
@@ -1514,7 +1579,7 @@ func (s *Server) handleOAuthAuthorize(w http.ResponseWriter, r *http.Request) {
 	appID := r.URL.Query().Get("app_id")
 	if appID == "" {
 		// Try stored setting
-		if v, err := s.store.GetSetting("oauth_app_id"); err == nil {
+		if v, err := s.getStore(r).GetSetting("oauth_app_id"); err == nil {
 			appID = v
 		}
 	}
@@ -1535,12 +1600,12 @@ func (s *Server) handleOAuthCallback(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	appID, err := s.store.GetSetting("oauth_app_id")
+	appID, err := s.getStore(r).GetSetting("oauth_app_id")
 	if err != nil {
 		writeError(w, "oauth app_id not configured: "+err.Error(), 400)
 		return
 	}
-	appKey, err := s.store.GetSetting("oauth_app_key")
+	appKey, err := s.getStore(r).GetSetting("oauth_app_key")
 	if err != nil {
 		writeError(w, "oauth app_key not configured: "+err.Error(), 400)
 		return
@@ -1584,7 +1649,7 @@ func (s *Server) handleOAuthCallback(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Store the access token
-	s.store.SetSetting("oauth_access_token", tokenResp.AccessToken)
+	s.getStore(r).SetSetting("oauth_access_token", tokenResp.AccessToken)
 	s.hub.BroadcastLog("success", "oauth", "OAuth login successful")
 
 	// Redirect back to main page with success
@@ -1592,7 +1657,7 @@ func (s *Server) handleOAuthCallback(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) handleOAuthUser(w http.ResponseWriter, r *http.Request) {
-	token, err := s.store.GetSetting("oauth_access_token")
+	token, err := s.getStore(r).GetSetting("oauth_access_token")
 	if err != nil || token == "" {
 		writeError(w, "not logged in", 401)
 		return
@@ -1619,6 +1684,6 @@ func (s *Server) handleOAuthUser(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) handleOAuthLogout(w http.ResponseWriter, r *http.Request) {
-	s.store.SetSetting("oauth_access_token", "")
+	s.getStore(r).SetSetting("oauth_access_token", "")
 	writeJSON(w, map[string]interface{}{"logged_out": true})
 }

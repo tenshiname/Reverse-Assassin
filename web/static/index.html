@@ -1,189 +1,3022 @@
-<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>反转刺客</title>
-<script src="https://cdn.jsdelivr.net/npm/vue@3/dist/vue.global.prod.js"></script>
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, max-age=0">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<title>反转刺客 | Reverse Assassin</title>
+<script src="/vue.min.js"></script>
 <style>
-:root{--blue:#006dff;--blue-h:#0052cc;--blue-l:#e8f4ff;--bg:#f6f7f9;--white:#fff;--hover:#f4f5f7;--text:#121212;--t2:#555;--t3:#999;--border:#e8e8e8;--border2:#f0f0f0;--green:#1a8a3c;--green-bg:#edfaf2;--red:#d93838;--red-bg:#fef6f6;--amber:#e68a00;--amber-bg:#fffaf0;--purple:#6c3fd6;--r:12px;--rs:8px;--ff:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif}
-*{box-sizing:border-box;margin:0;padding:0}html{font-size:16px}body{font-family:var(--ff);background:var(--bg);color:var(--text);line-height:1.6;-webkit-font-smoothing:antialiased}
-::-webkit-scrollbar{width:4px}::-webkit-scrollbar-thumb{background:#d0d0d0;border-radius:2px}
-.app{display:flex;min-height:100vh}
-.sidebar{width:250px;background:var(--white);border-right:1px solid var(--border);position:fixed;top:0;left:0;bottom:0;z-index:100;display:flex;flex-direction:column;padding:0 20px}
-.sb-brand{padding:18px 8px 18px;display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--border2)}
-.sb-brand img{width:80px;height:80px;border-radius:12px;object-fit:cover}
-.sb-brand .t{font-size:18px;font-weight:700;color:var(--text)}.sb-brand .s{font-size:11px;color:var(--t3)}
-.sb-nav{flex:1;display:flex;flex-direction:column;gap:2px;padding:8px 0}
-.sb-div{font-size:10px;font-weight:600;color:var(--t3);padding:18px 6px 8px;letter-spacing:.5px}
-.nav-item{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:8px;cursor:pointer;color:var(--t2);font-size:14.5px;border:none;background:none;width:100%;text-align:left;transition:all .15s}
-.nav-item .ico{font-size:20px;width:24px;text-align:center;flex-shrink:0}
-.nav-item:hover{background:var(--hover);color:var(--text)}.nav-item.active{background:var(--blue-l);color:var(--blue);font-weight:600}
-.nav-item .n-badge{margin-left:auto;background:var(--bg);color:var(--t3);font-size:10px;padding:2px 8px;border-radius:10px}.nav-item.active .n-badge{background:rgba(0,109,255,.1);color:var(--blue)}
-.sb-footer{padding:14px 6px;border-top:1px solid var(--border2);font-size:10px;color:var(--t3);text-align:center}
-.main{margin-left:250px;flex:1;padding:44px 64px}
-.topbar{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:26px}
-.topbar h2{font-size:28px;font-weight:700;color:var(--text)}.topbar .sub{font-size:14px;color:var(--t3);margin-top:4px}.topbar .sub b{color:var(--blue);font-weight:600}
-.btn{padding:8px 20px;border:none;border-radius:20px;cursor:pointer;font-size:13.5px;font-weight:500;display:inline-flex;align-items:center;gap:5px;font-family:var(--ff);transition:all .15s;white-space:nowrap}.btn:disabled{opacity:.35;cursor:not-allowed}.btn-p{background:var(--blue);color:#fff}.btn-p:hover:not(:disabled){background:var(--blue-h)}.btn-s{background:var(--white);color:var(--t2);border:1px solid var(--border)}.btn-s:hover:not(:disabled){background:var(--hover);color:var(--text)}.btn-sm{padding:5px 14px;font-size:12px}.btn-xs{padding:3px 10px;font-size:11px}.btn-lg{padding:12px 32px;font-size:15px}
-.toggle{display:inline-flex;align-items:center;gap:6px;cursor:pointer;font-size:12px;color:var(--t2);user-select:none}.toggle-track{width:34px;height:20px;background:#d0d0d0;border-radius:10px;position:relative;transition:all .2s}.toggle.on .toggle-track{background:var(--blue)}.toggle-thumb{position:absolute;top:2px;left:2px;width:16px;height:16px;background:#fff;border-radius:50%;transition:all .2s;box-shadow:0 1px 2px rgba(0,0,0,.1)}.toggle.on .toggle-thumb{left:16px}
-.spinner-sm{display:inline-block;width:13px;height:13px;border:2px solid rgba(255,255,255,.3);border-top:2px solid #fff;border-radius:50%;animation:spin .6s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}
-.agent-strip{display:flex;align-items:center;gap:12px;margin-bottom:20px;padding:10px 18px;background:var(--white);border:1px solid var(--border);border-radius:var(--r);font-size:13px;color:var(--t3)}.agent-strip .dot{width:7px;height:7px;border-radius:50%}.agent-strip .dot.on{background:var(--green)}.agent-strip .dot.off{background:#d0d0d0}.agent-strip strong{color:var(--text);font-weight:600}.pull-right{margin-left:auto}
-.story-card{background:var(--white);border:1px solid var(--border);border-radius:var(--r);padding:28px 32px;margin-bottom:14px;transition:all .15s;position:relative}.story-card:hover{border-color:var(--blue);box-shadow:0 2px 12px rgba(0,109,255,.06)}.sc-head{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:6px}.sc-title{font-size:18px;font-weight:650;color:var(--text);letter-spacing:-.1px;line-height:1.5}.sc-meta{display:flex;align-items:center;gap:10px;font-size:12px;color:var(--t3);margin-bottom:8px;flex-wrap:wrap}.sc-status{font-size:10.5px;font-weight:550;padding:2px 10px;border-radius:12px;flex-shrink:0}.sc-status.pending{background:var(--bg);color:var(--t3)}.sc-status.analyzed{background:var(--blue-l);color:var(--blue)}.sc-status.branched{background:rgba(108,63,214,.08);color:var(--purple)}.sc-status.blocked{background:var(--red-bg);color:var(--red)}.sc-class{padding:2px 8px;border-radius:10px;font-size:10px;font-weight:550;margin-left:4px}.sc-class.fiction{background:var(--green-bg);color:var(--green)}.sc-class.real_history{background:var(--amber-bg);color:var(--amber)}.sc-class.real_modern{background:var(--red-bg);color:var(--red)}.sc-summary{font-size:14.5px;color:var(--t2);line-height:1.85;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;margin-bottom:14px}
-.chip{display:inline-block;padding:3px 10px;border-radius:12px;font-size:11px;font-weight:500}.chip.blue{background:var(--blue-l);color:var(--blue)}.chip.green{background:var(--green-bg);color:var(--green)}.chip.amber{background:var(--amber-bg);color:var(--amber)}.chip.gray{background:var(--bg);color:var(--t3)}
-.ivo{position:fixed;inset:0;background:var(--bg);z-index:999;display:flex;flex-direction:column}.ivo-bar{height:52px;border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 24px;justify-content:space-between;background:var(--white)}.ivo-bar b{font-size:15px;color:var(--text)}.ivo-body{flex:1;display:flex;overflow:hidden}.ivo-panel{flex:1;overflow-y:auto;padding:32px 40px;border-right:1px solid var(--border2)}.ivo-panel:last-child{border-right:none}.ivo-label{font-size:10px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:16px}.ivo-orig{font-size:14.5px;line-height:2;white-space:pre-wrap;color:var(--text)}.ivo-analysis{margin-top:18px;padding:16px;background:var(--blue-l);border-radius:var(--r);font-size:13px;line-height:1.8}.ivo-branch{background:var(--white);border:1px solid var(--border);border-radius:var(--r);padding:16px 20px;margin-bottom:12px}.ivo-branch textarea{width:100%;min-height:80px;border:1px solid var(--border);border-radius:var(--rs);padding:12px;font-size:13.5px;line-height:1.8;font-family:var(--ff);resize:vertical;background:var(--bg);outline:none;margin-top:6px;color:var(--text)}.ivo-branch textarea:focus{border-color:var(--blue)}
-.toasts{position:fixed;top:18px;right:18px;z-index:9999;display:flex;flex-direction:column;gap:6px}.toast{padding:10px 18px;border-radius:8px;font-size:13px;font-weight:500;box-shadow:0 4px 16px rgba(0,0,0,.08);animation:slideIn .25s ease}.toast-ok{background:var(--green-bg);border:1px solid rgba(26,138,60,.15);color:var(--green)}.toast-err{background:var(--red-bg);border:1px solid rgba(217,56,56,.15);color:var(--red)}.toast-info{background:var(--blue-l);border:1px solid rgba(0,109,255,.1);color:var(--blue)}@keyframes slideIn{from{transform:translateX(120%);opacity:0}to{transform:translateX(0);opacity:1}}
-.login-overlay{position:fixed;inset:0;background:rgba(0,0,0,.35);backdrop-filter:blur(4px);z-index:2000;display:flex;align-items:center;justify-content:center}.login-card{background:var(--white);border-radius:16px;padding:40px;width:100%;max-width:420px;text-align:center;box-shadow:0 12px 48px rgba(0,0,0,.1)}.login-card img{width:100px;height:100px;border-radius:16px;margin-bottom:16px}.login-card h2{font-size:22px;margin-bottom:4px}.login-card .desc{font-size:13px;color:var(--t3);margin-bottom:24px;line-height:1.7}.login-card .desc a{color:var(--blue)}
-.br-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px}.br-card{background:var(--white);border:1px solid var(--border);border-radius:var(--r);padding:18px 22px;cursor:pointer;transition:all .15s}.br-card:hover{border-color:var(--blue)}.ring-post{background:var(--white);border:1px solid var(--border);border-radius:var(--r);padding:18px 24px;margin-bottom:10px}.rp-top{display:flex;align-items:center;gap:8px;margin-bottom:8px}.rp-avatar{width:28px;height:28px;border-radius:14px;background:linear-gradient(135deg,var(--blue),#4da3ff);display:flex;align-items:center;justify-content:center;color:#fff;font-size:12px;font-weight:600}.rp-author{font-size:13px;font-weight:600;color:var(--text)}.rp-time{font-size:11px;color:var(--t3);margin-left:auto}.rp-content{font-size:13.5px;line-height:1.8;color:var(--t2)}.log-box{background:var(--white);border:1px solid var(--border);border-radius:var(--r);padding:12px 16px;max-height:280px;overflow-y:auto;font-family:monospace;font-size:11.5px;line-height:1.7}.cfg-card{background:var(--white);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;max-width:520px}.cfg-head{padding:14px 20px;border-bottom:1px solid var(--border);font-size:14px;font-weight:650}.cfg-body{padding:18px 20px}.fg{margin-bottom:14px}.fl{display:block;font-size:12px;font-weight:600;color:var(--t2);margin-bottom:4px}.fi{width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:var(--rs);font-size:13px;outline:none;background:var(--bg)}.fi:focus{border-color:var(--blue)}.fh{font-size:10px;color:var(--t3);margin-top:2px}.empty{text-align:center;padding:60px 20px;color:var(--t3)}.hamburger{display:none}
-@media(max-width:768px){.sidebar{transform:translateX(-100%)}.sidebar.open{transform:translateX(0)}.main{margin-left:0;max-width:100%;padding:16px}.hamburger{display:block;position:fixed;top:10px;left:10px;z-index:200;padding:6px 12px}.ivo-body{flex-direction:column}}
-.err-banner{display:flex;align-items:center;gap:8px;padding:10px 16px;background:var(--red-bg);border:1px solid rgba(217,56,56,.15);border-radius:var(--rs);margin-bottom:14px;font-size:13px;color:var(--red)}.err-banner button{margin-left:auto;background:var(--red);color:#fff;border:none;padding:4px 12px;border-radius:12px;cursor:pointer;font-size:11px;font-family:var(--ff)}.loading-page{text-align:center;padding:80px 20px;color:var(--t3)}.loading-page .spin{display:inline-block;width:24px;height:24px;border:3px solid var(--border);border-top:3px solid var(--blue);border-radius:50%;animation:spin .6s linear infinite;margin-bottom:12px}
-.char-card{background:var(--white);border:1px solid var(--border);border-radius:var(--r);padding:14px 16px;margin-bottom:10px}.char-card .cn{font-size:15px;font-weight:650;color:var(--text)}.char-card .cr{font-size:11px;color:var(--t3);margin-bottom:6px}.char-card .cd{font-size:12px;color:var(--t2);line-height:1.7}.char-card .cd b{color:var(--text);font-weight:600}.pivot-option{display:flex;align-items:flex-start;gap:8px;padding:8px 12px;margin:4px 0;background:var(--white);border:2px solid var(--border);border-radius:var(--rs);cursor:pointer;font-size:12px;transition:all .15s}.pivot-option:hover{border-color:var(--blue)}.pivot-option.sel{border-color:var(--blue);background:var(--blue-l)}.pivot-option input{display:none}.ivo-tabs{display:flex;gap:0;margin-bottom:16px}.ivo-tab{padding:6px 16px;font-size:11px;font-weight:600;cursor:pointer;border:none;background:none;color:var(--t3);border-bottom:2px solid transparent;font-family:var(--ff)}.ivo-tab.active{color:var(--blue);border-bottom-color:var(--blue)}.custom-input{width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:var(--rs);font-size:13px;font-family:var(--ff);margin-bottom:10px;resize:vertical;min-height:48px;outline:none}.custom-input:focus{border-color:var(--blue)}
-.wl-canvas{position:relative;min-height:500px;overflow:auto;padding:20px 0}.wl-node-card{position:absolute;background:var(--white);border:2px solid var(--border);border-radius:10px;padding:10px 14px;min-width:160px;max-width:220px;cursor:pointer;transition:all .2s;font-size:12px;z-index:2;box-shadow:0 1px 4px rgba(0,0,0,.04)}.wl-node-card:hover{border-color:var(--blue);box-shadow:0 4px 16px rgba(0,109,255,.12);z-index:10;transform:translateY(-2px)}.wl-node-card.root{border-color:var(--blue);border-width:3px;min-width:200px}.wl-node-card.selected{border-color:var(--purple);box-shadow:0 0 0 3px rgba(108,63,214,.15)}.wl-nc-tag{display:inline-block;font-size:9px;font-weight:700;padding:1px 6px;border-radius:8px;margin-bottom:4px}.wl-nc-title{font-weight:650;color:var(--text);font-size:13px;line-height:1.3;margin-bottom:2px}.wl-nc-summary{font-size:10px;color:var(--t3);line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}.wl-nc-actions{display:flex;gap:3px;margin-top:6px;padding-top:6px;border-top:1px solid var(--border2)}.wl-nc-actions button{font-size:9px;padding:2px 8px}.wl-svg{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;pointer-events:none}.wl-svg line,.wl-svg path{stroke:#c0c0c0;stroke-width:2;fill:none}.wl-svg path.root-line{stroke:var(--blue);stroke-width:2.5}.wl-legend{display:flex;gap:16px;margin-bottom:16px;font-size:11px;color:var(--t3)}.wl-legend span{display:flex;align-items:center;gap:4px}.wl-legend .dot{width:8px;height:8px;border-radius:50%}
-</style></head><body>
-<div id="app"><div class="toasts"><div v-for="t in toasts" :key="t.id" :class="'toast toast-'+t.type">{{ t.msg }}</div></div>
+[v-cloak]{display:none}
+.app-loader{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#f6f8fc;z-index:9999}
+.app-loader .pulse{width:36px;height:36px;border-radius:50%;background:#056de8;animation:loadpulse 1.2s ease-in-out infinite}
+@keyframes loadpulse{0%,100%{transform:scale(.6);opacity:.4}50%{transform:scale(1);opacity:1}}
+</style>
+<style>
+:root{
+  color-scheme:light;
+  --bg:#f6f8fc;
+  --bg-soft:#eef3fb;
+  --panel:#ffffff;
+  --panel-2:#f8fbff;
+  --panel-3:#edf4ff;
+  --line:#e6edf7;
+  --line-strong:#d4e0f0;
+  --text:#1f2d3d;
+  --muted:#5f6f82;
+  --muted-2:#8b9bb0;
+  --brand:#056de8;
+  --brand-2:#1381ff;
+  --brand-3:#d9ebff;
+  --ok:#12b76a;
+  --warn:#f79009;
+  --danger:#f04438;
+  --violet:#7a5af8;
+  --shadow:0 24px 60px rgba(15,72,145,.12);
+  --shadow-soft:0 10px 28px rgba(15,72,145,.08);
+  --radius-xl:28px;
+  --radius-lg:22px;
+  --radius-md:16px;
+  --radius-sm:12px;
+  --font:'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;
+}
+*{box-sizing:border-box}
+html{font-size:16px;scroll-behavior:smooth}
+body{
+  margin:0;
+  font-family:var(--font);
+  color:var(--text);
+  background:
+    linear-gradient(180deg, rgba(217,235,255,.7), rgba(246,248,252,0) 240px),
+    linear-gradient(180deg, #f7f9fc 0%, #f3f7fb 100%);
+  min-height:100vh;
+  -webkit-font-smoothing:antialiased;
+}
+body::before{
+  content:"";
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+  background-image:
+    linear-gradient(rgba(5,109,232,.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(5,109,232,.03) 1px, transparent 1px);
+  background-size:96px 96px;
+  mask-image:linear-gradient(180deg, rgba(0,0,0,.25), transparent 65%);
+  opacity:.6;
+}
+a{color:inherit;text-decoration:none}
+button,input,textarea,select{font:inherit}
+button{cursor:pointer}
+::-webkit-scrollbar{width:8px;height:8px}
+::-webkit-scrollbar-thumb{background:rgba(5,109,232,.18);border-radius:999px}
+::-webkit-scrollbar-track{background:transparent}
 
-<div v-if="!loggedIn" class="login-overlay"><div class="login-card"><img src="/logo.png" alt="Logo"><h2>反转刺客</h2><div class="desc">使用知乎 OAuth 授权登录<br><span style="font-size:11px;">安全可靠，跳转知乎官方授权页面</span></div><button class="btn btn-p btn-lg" @click="oauthLogin">登录知乎账号</button><div style="margin-top:16px;display:flex;gap:10px;justify-content:center;"><button class="btn btn-s" @click="skipLogin">跳过，进入演示模式</button></div><div v-if="loginMsg" style="margin-top:10px;font-size:12px;color:var(--red);">{{ loginMsg }}</div></div></div>
+.app-shell{min-height:100vh;position:relative}
+.orb{
+  position:fixed;
+  border-radius:50%;
+  filter:blur(72px);
+  opacity:.55;
+  pointer-events:none;
+  animation:float 14s ease-in-out infinite;
+}
+.orb.a{width:240px;height:240px;top:20px;left:-60px;background:rgba(33,128,255,.12)}
+.orb.b{width:200px;height:200px;right:-20px;top:180px;background:rgba(5,109,232,.09);animation-delay:-4s}
+.orb.c{width:180px;height:180px;left:48%;bottom:-40px;background:rgba(33,128,255,.08);animation-delay:-8s}
+@keyframes float{
+  0%,100%{transform:translate3d(0,0,0)}
+  50%{transform:translate3d(0,-18px,0)}
+}
 
-<div v-if="ivo" class="ivo"><div class="ivo-bar"><div><b>{{ ivoStory?.title }}</b></div><div style="display:flex;align-items:center;gap:10px;"><button v-if="ivoBranches.length>0 && !ivoPublished" class="btn btn-p btn-sm" @click="publishBranches" :disabled="acting">发布到圈子</button><span v-if="ivoPublished" class="chip green">已发布</span><button class="btn btn-p" @click="genBranches" :disabled="acting"><span v-if="acting" class="spinner-sm"></span>{{ acting?'生成中...':'生成平行支线' }}</button><button class="btn btn-s" @click="ivo=null">关闭</button></div></div><div class="ivo-body"><div class="ivo-panel" style="flex:.7;"><div class="ivo-label">原文</div><div class="ivo-orig">{{ ivoStory?.content }}</div><div v-if="ivoStory?.analysis_result" class="ivo-analysis"><b>分类:</b> {{ classLabel((ivoStory.analysis_result||{}).classification) }} &middot; <b>世界观:</b> {{ ivoStory.analysis_result.worldview }}<br><b>人物:</b> {{ (ivoStory.analysis_result.characters||[]).join(' / ') }}<div style="margin-top:8px;"><b>选择枢纽点 (分支起点):</b></div><div v-for="(p,i) in ivoStory.analysis_result.pivot_points" :key="i" :class="'pivot-option'+(selPivot===i?' sel':'')" @click="selPivot=i"><input type="radio"><div><b>枢纽 {{i+1}}:</b> {{ p.scene }} <span style="color:var(--t3);">遗憾 {{(p.regret_weight*100).toFixed(0)}}% 难度 {{(p.logic_difficulty*100).toFixed(0)}}%</span><br><span style="font-size:10px;color:var(--t3);">{{ p.branch_potential }}</span></div></div><div style="margin-top:12px;padding:12px;background:#fff;border-radius:var(--r);border:2px dashed var(--blue);"><b style="font-size:13px;color:var(--blue);">自由分支 — 从任意场景开始</b><p style="font-size:11px;color:var(--t3);margin:4px 0;">不依赖预设枢纽点，完全由你指定分支起点和走向</p><textarea v-model="freeScene" class="custom-input" placeholder="从哪个场景开始分支？例如：秦始皇在登月前夜做了一个噩梦..." style="margin-top:6px;"></textarea><textarea v-model="freeDirection" class="custom-input" placeholder="希望故事走向？例如：他梦到月球上有一座秦朝风格的城市..." style="margin-bottom:0;"></textarea><button class="btn btn-xs" style="background:var(--blue);color:#fff;margin-top:6px;" @click="genFreeBranch" :disabled="acting||!freeScene">从自由场景生成分支</button></div><div style="margin-top:10px;"><b style="font-size:12px;">自定义分支方向 (可选):</b><textarea v-model="customPrompt" class="custom-input" placeholder="输入你想要的故事发展方向...例如：如果主角选择了另一条路..."></textarea></div></div></div><div class="ivo-panel" style="flex:1.3;"><div class="ivo-tabs"><button :class="'ivo-tab'+(ivoTab==='branches'?' active':'')" @click="ivoTab='branches'">平行宇宙</button><button :class="'ivo-tab'+(ivoTab==='chars'?' active':'')" @click="ivoTab='chars';loadIvoState()">角色状态</button></div><div v-if="ivoTab==='branches'"><div v-if="ivoBranches.length===0" style="text-align:center;padding:40px;color:var(--t3);">点击「生成平行支线」开始</div><div v-for="b in ivoBranches" :key="b.id" class="ivo-branch"><div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;"><span :class="'chip '+(b.unlocked?'green':'blue')">{{ b.unlocked?'已解锁':'待解锁' }}</span><span style="font-size:11px;color:var(--blue);">「{{ b.keyword }}」</span><span style="flex:1;"></span><button class="btn btn-xs" style="background:var(--purple);color:#fff;font-size:10px;" @click="startContinueBranch(b)" :disabled="acting">继续推进</button></div><div style="font-size:14px;font-weight:650;margin-bottom:4px;">{{ b.tag }} &middot; {{ b.title }}</div><textarea v-model="b.preview" placeholder="预告片段..."></textarea><textarea v-model="b.full_story" placeholder="完整正文..." style="min-height:160px;"></textarea><div v-if="contBranch===b.id" style="margin-top:8px;padding:8px;background:var(--bg);border-radius:var(--rs);"><textarea v-model="contPrompt" class="custom-input" placeholder="输入推进方向...例如：李斯决定背叛秦始皇" style="min-height:36px;"></textarea><div style="display:flex;gap:6px;margin-top:4px;"><button class="btn btn-p btn-xs" @click="doContinueBranch(b)" :disabled="acting||!contPrompt">生成</button><button class="btn btn-s btn-xs" @click="contBranch=-1;contPrompt=''">取消</button></div></div></div></div><div v-if="ivoTab==='chars'"><div v-if="charsLoading" class="loading-page" style="padding:40px;"><div class="spin"></div></div><div v-else-if="ivoChars.length===0" style="text-align:center;padding:40px;color:var(--t3);">生成分支后将自动记录角色状态</div><div v-for="c in ivoChars" :key="c.name" class="char-card"><div class="cn">{{ c.name }} <span class="chip" :class="c.role==='protagonist'?'blue':c.role==='antagonist'?'amber':'gray'">{{ c.role }}</span> <span style="font-size:10px;color:var(--t3);">{{ c.emotion }}</span></div><div class="cr">{{ c.arc_summary || c.goal }}</div><div class="cd"><b>目标:</b> {{ c.goal || '未知' }} &middot; <b>位置:</b> {{ c.location || '未知' }} &middot; <b>状态:</b> {{ c.status }}<br v-if="c.memories&&c.memories.length"><template v-if="c.memories&&c.memories.length"><b>关键记忆:</b><span v-for="(m,mi) in c.memories" :key="mi" style="display:block;padding-left:8px;">{{mi+1}}. {{ m }}</span></template></div></div><div v-if="ivoTimeline.length" style="margin-top:20px;"><div class="ivo-label">事件时间线</div><div v-for="e in ivoTimeline" :key="e.id" style="padding:6px 10px;margin:3px 0;font-size:11px;background:var(--white);border-radius:var(--rs);border-left:3px solid var(--blue);"><b>[R{{e.round}}.{{e.sequence}}]</b> <span :style="'color:'+(e.type==='branch'?'var(--purple)':'var(--t2)')">{{ e.scene }}</span> <span v-if="e.outcome" style="color:var(--green);">→ {{ e.outcome }}</span></div></div></div></div></div></div>
+.layout{
+  position:relative;
+  z-index:1;
+  display:grid;
+  grid-template-columns:290px minmax(0,1fr);
+  min-height:100vh;
+}
+.sidebar{
+  position:sticky;
+  top:0;
+  height:100vh;
+  padding:28px 18px 22px;
+  background:linear-gradient(180deg, rgba(247,250,255,.94), rgba(243,247,251,.92));
+  border-right:1px solid var(--line);
+  backdrop-filter:blur(18px);
+}
+.side-panel{
+  height:100%;
+  padding:18px;
+  border:1px solid var(--line);
+  border-radius:30px;
+  background:linear-gradient(180deg, #ffffff, #f9fbff);
+  box-shadow:0 8px 30px rgba(15,72,145,.06);
+  display:flex;
+  flex-direction:column;
+  gap:18px;
+}
+.brand{
+  display:flex;
+  align-items:center;
+  gap:14px;
+  padding:10px;
+}
+.brand-mark{
+  width:58px;
+  height:58px;
+  border-radius:18px;
+  overflow:hidden;
+  position:relative;
+  box-shadow:0 14px 24px rgba(5,109,232,.14);
+  flex-shrink:0;
+}
+.brand-mark::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  border-radius:inherit;
+  box-shadow:inset 0 0 0 1px rgba(5,109,232,.08);
+}
+.brand-mark img{width:100%;height:100%;object-fit:cover;display:block}
+.brand-copy h1{
+  margin:0;
+  font-size:1.1rem;
+  line-height:1.1;
+  letter-spacing:.02em;
+}
+.brand-copy p{
+  margin:6px 0 0;
+  color:var(--muted);
+  font-size:.78rem;
+}
+.nav-section-title{
+  padding:0 12px;
+  color:var(--muted-2);
+  font-size:.72rem;
+  text-transform:uppercase;
+  letter-spacing:.18em;
+}
+.nav-list{display:grid;gap:8px}
+.nav-item{
+  width:100%;
+  border:none;
+  border-radius:18px;
+  color:var(--muted);
+  background:transparent;
+  padding:12px 14px;
+  display:flex;
+  align-items:center;
+  gap:12px;
+  transition:transform .2s ease, background .2s ease, color .2s ease, border-color .2s ease;
+  border:1px solid transparent;
+}
+.nav-item:hover{
+  color:var(--text);
+  background:#f4f8ff;
+  border-color:#d9e8fb;
+  transform:translateY(-1px);
+}
+.nav-item.active{
+  color:var(--brand);
+  background:#edf5ff;
+  border-color:#cfe3fb;
+  box-shadow:none;
+}
+.nav-icon{
+  width:36px;
+  height:36px;
+  border-radius:12px;
+  display:grid;
+  place-items:center;
+  background:#f5f8fd;
+  border:1px solid #edf1f7;
+  font-size:1rem;
+  flex-shrink:0;
+}
+.nav-item.active .nav-icon{
+  background:#dfeeff;
+  border-color:#d2e5ff;
+}
+.nav-label{font-size:.95rem;font-weight:600}
+.nav-badge{
+  margin-left:auto;
+  min-width:28px;
+  padding:4px 8px;
+  text-align:center;
+  border-radius:999px;
+  color:var(--brand);
+  background:#eff6ff;
+  font-size:.72rem;
+}
+.nav-item.active .nav-badge{background:#dcecff}
 
-<button class="hamburger btn btn-s" @click="sidebarOpen=!sidebarOpen">☰</button>
-<div :class="['sidebar', sidebarOpen?'open':'']"><div class="sb-brand"><img src="/logo.png" alt="Logo"><div><div class="t">反转刺客</div><div class="s">Reverse Assassin</div></div></div><nav class="sb-nav" @click="sidebarOpen=false"><div class="sb-div">内容</div><button :class="['nav-item', page==='stories'?'active':'']" @click="page='stories'"><span class="ico">📚</span>故事广场<span class="n-badge" v-if="stats.total_stories">{{ stats.total_stories }}</span></button><button :class="['nav-item', page==='ring'?'active':'']" @click="page='ring';loadRing()"><span class="ico">💬</span>圈子广场</button><button :class="['nav-item', page==='branches'?'active':'']" @click="page='branches'"><span class="ico">🌿</span>平行宇宙<span class="n-badge" v-if="stats.total_branches">{{ stats.total_branches }}</span></button><button :class="['nav-item', page==='worldline'?'active':'']" @click="page='worldline';loadWorldlines()"><span class="ico">🌐</span>世界线<span class="n-badge" v-if="wlStories.length">{{ wlStories.length }}</span></button><div class="sb-div">系统</div><button :class="['nav-item', page==='control'?'active':'']" @click="page='control'"><span class="ico">⚙️</span>引擎控制</button><button :class="['nav-item', page==='config'?'active':'']" @click="page='config'"><span class="ico">🔑</span>设置</button></nav>
-<div style="padding:8px 6px;margin-top:8px;display:flex;align-items:center;gap:6px;font-size:11px;color:var(--t3);"><span v-if="oauthUser" style="color:var(--green);">●</span><span v-else>○</span> <span style="flex:1;">{{ oauthUser?oauthUser.fullname||oauthUser.uid:'未登录' }}</span><button class="btn btn-xs" @click="oauthUser?doOAuthLogout():loggedIn=false">{{ oauthUser?'退出':'登录' }}</button></div><div class="sb-footer">每一个意难平的结局<br>都是新宇宙的起点</div></div>
+.side-status{
+  margin-top:auto;
+  padding:14px;
+  border-radius:22px;
+  background:#f7faff;
+  border:1px solid var(--line);
+}
+.status-pill{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  padding:7px 12px;
+  border-radius:999px;
+  background:#eef5ff;
+  color:var(--muted);
+  font-size:.8rem;
+}
+.dot{
+  width:8px;
+  height:8px;
+  border-radius:50%;
+  background:#90a3b8;
+  box-shadow:0 0 0 6px rgba(144,163,184,.12);
+}
+.dot.live{
+  background:var(--ok);
+  box-shadow:0 0 0 6px rgba(18,183,106,.12);
+}
+.account-row{
+  margin-top:14px;
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+.account-meta{flex:1;min-width:0}
+.account-meta strong{display:block;font-size:.9rem}
+.account-meta span{display:block;font-size:.75rem;color:var(--muted)}
 
-<div class="main" @click="sidebarOpen=false">
-<div v-if="pageLoading" class="loading-page"><div class="spin"></div><p style="margin-top:10px;">加载中...</p></div>
-<div v-if="page==='stories'"><div class="topbar"><div><h2>故事广场</h2><div class="sub">从<b>知乎黑客松</b>发现故事 · 按需解析 · 按需生成平行宇宙</div></div><div style="display:flex;align-items:center;gap:12px;"><label class="toggle" :class="demoMode?'on':''" @click="toggleDemo"><span class="toggle-track"><span class="toggle-thumb"></span></span>Demo 模式</label><button class="btn btn-p" @click="doAction('discover')" :disabled="acting">抓取知乎故事</button></div></div><div v-if="storiesError" class="err-banner">⚠️ {{ storiesError }} <button @click="retry">重试</button></div>
-<div class="agent-strip"><span :class="'dot '+(stats.agent_running?'on':'off')"></span>Agent <strong>{{ stats.agent_running?'运行中':'待机' }}</strong> &middot; 已抓取 <strong>{{ stats.total_stories||0 }}</strong> 篇 &middot; 已解析 <strong>{{ stats.analyzed_stories||0 }}</strong> 篇<span class="pull-right"><button v-if="!stats.agent_running" class="btn btn-s btn-sm" @click="ctrlAgent('start')">启动</button><button v-if="stats.agent_running" class="btn btn-s btn-sm" @click="ctrlAgent('stop')">停止</button></span></div><div style="display:flex;gap:0;margin-bottom:16px;"><button :class="storyTab==='mine'?'btn btn-p btn-sm':'btn btn-s btn-sm'" @click="storyTab='mine'" style="border-radius:8px 8px 0 0;">我的故事</button><button :class="storyTab==='discover'?'btn btn-p btn-sm':'btn btn-s btn-sm'" @click="storyTab='discover'" style="border-radius:8px 8px 0 0;">发现广场</button></div><div v-if="filteredStories.length===0" class="empty"><p>点击「抓取知乎故事」从知乎获取内容</p></div><div v-for="s in filteredStories" :key="s.work_id" class="story-card"><div v-if="demoMode && storyTab==='discover'" style="position:absolute;top:8px;right:14px;background:var(--red-bg);color:var(--red);font-size:10px;font-weight:600;padding:2px 8px;border-radius:10px;z-index:2;">路演沙盒</div><div class="sc-head"><div class="sc-title">{{ s.title }}</div><span :class="'sc-status '+s.status">{{ statusLabel(s.status) }}</span></div><div class="sc-meta">{{ s.author || '佚名' }} &middot; {{ fmtTime(s.created_at) }}<span class="sc-class" :class="(s.analysis_result||{}).classification" v-if="(s.analysis_result||{}).classification">{{ classLabel((s.analysis_result||{}).classification) }}</span></div><div class="sc-summary">{{ s.analysis_result?.worldview || s.content?.slice(0,180) || '点击「解析」按钮进行 AI 解构' }}</div><div style="display:flex;align-items:center;gap:6px;"><template v-if="(s._branches||[]).length"><span v-for="b in s._branches" :key="b.id" :class="'chip '+(b.unlocked?'green':'amber')">{{ b.tag }} {{ b.title?.slice(0,8) }}</span></template><button v-if="s.status==='pending'" class="btn btn-p btn-xs" @click="analyzeOne(s.work_id)" :disabled="acting">🧠 解析</button><button v-else-if="s.status==='analyzed'" class="btn btn-p btn-xs" @click="openIvo(s)">生成支线</button><span v-else-if="s.status==='blocked'" class="chip gray">近现代史 · 已拦截</span></div></div></div>
+.main{
+  min-width:0;
+  padding:24px 28px 48px;
+}
+.mobile-bar{display:none}
 
-<div v-if="page==='ring'"><div class="topbar"><div><h2>圈子广场</h2><div class="sub">黑客松脑洞补给站 · 实时动态</div></div><button class="btn btn-s btn-sm" @click="loadRing">刷新</button></div><div v-if="ringLoading" class="loading-page" style="padding:40px;"><div class="spin"></div></div>
-<div v-else-if="ringError" class="err-banner">⚠️ {{ ringError }} <button @click="loadRing">重试</button></div>
-<div v-else-if="ringContents.length===0" class="empty"><p>暂无内容</p></div><div v-for="rc in ringContents" :key="rc.pin_id" class="ring-post"><div class="rp-top"><div class="rp-avatar">{{ (rc.author_name||'?')[0] }}</div><span class="rp-author">{{ rc.author_name }}</span><span class="rp-time">{{ fmtTime(rc.publish_time) }}</span></div><div class="rp-content">{{ stripHtml(rc.content)?.slice(0,300) }}</div></div></div>
+.hero{
+  position:relative;
+  overflow:hidden;
+  padding:28px;
+  border-radius:28px;
+  border:1px solid #dbe7f5;
+  background:
+    linear-gradient(135deg, #fafdff 0%, #eef6ff 62%, #ffffff 100%);
+  box-shadow:var(--shadow-soft);
+}
+.hero::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  border-radius:inherit;
+  border:1px solid rgba(255,255,255,.42);
+  pointer-events:none;
+}
+.hero-top{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:18px;
+}
+.hero-copy{
+  max-width:820px;
+}
+.eyebrow{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  padding:8px 14px;
+  border-radius:999px;
+  color:var(--brand);
+  background:#edf5ff;
+  border:1px solid #d8e9ff;
+  font-size:.8rem;
+  letter-spacing:.04em;
+}
+.hero h2{
+  margin:18px 0 12px;
+  font-size:clamp(2.2rem, 4vw, 4rem);
+  line-height:1;
+  letter-spacing:-.04em;
+}
+.hero p{
+  margin:0;
+  color:var(--muted);
+  font-size:1rem;
+  line-height:1.8;
+  max-width:760px;
+}
+.hero-actions{
+  margin-top:26px;
+  display:flex;
+  gap:12px;
+  flex-wrap:wrap;
+}
+.hero-grid{
+  margin-top:28px;
+  display:grid;
+  grid-template-columns:repeat(4, minmax(0,1fr));
+  gap:14px;
+}
+.metric-card,.card,.panel{
+  border-radius:24px;
+  border:1px solid #e4edf8;
+  background:#ffffff;
+}
+.metric-card{
+  padding:18px;
+  min-height:132px;
+  position:relative;
+  overflow:hidden;
+}
+.metric-card::before{
+  content:"";
+  position:absolute;
+  width:96px;
+  height:96px;
+  right:-20px;
+  top:-20px;
+  border-radius:50%;
+  background:radial-gradient(circle, rgba(5,109,232,.12), transparent 72%);
+}
+.metric-label{
+  color:var(--muted);
+  font-size:.82rem;
+}
+.metric-value{
+  margin-top:20px;
+  font-size:2rem;
+  font-weight:700;
+  letter-spacing:-.04em;
+}
+.metric-sub{
+  margin-top:8px;
+  color:var(--muted-2);
+  font-size:.82rem;
+}
 
-<div v-if="page==='branches'"><div class="topbar"><div><h2>平行宇宙</h2><div class="sub">所有已生成的分支线</div></div></div><div v-if="branchesError" class="err-banner">⚠️ {{ branchesError }} <button @click="retry">重试</button></div>
-<div v-else-if="branches.length===0" class="empty"><p>暂无分支</p></div><div class="br-grid"><div v-for="b in branches" :key="b.id" class="br-card" @click="openBranchStory(b)"><span :class="'chip '+(b.unlocked?'green':'amber')" style="margin-bottom:8px;">{{ b.unlocked?'已解锁':'待解锁' }}</span><div style="font-size:14px;font-weight:650;">{{ b.tag }} &middot; {{ b.title }}</div><div style="font-size:12.5px;color:var(--t2);margin:5px 0;">{{ b.preview?.slice(0,80) }}...</div><div style="font-size:11px;color:var(--blue);">「{{ b.keyword }}」解锁</div></div></div></div>
+.section{
+  margin-top:22px;
+}
+.section-head{
+  display:flex;
+  align-items:flex-end;
+  justify-content:space-between;
+  gap:12px;
+  margin-bottom:14px;
+}
+.section-head h3{
+  margin:0;
+  font-size:1.25rem;
+  letter-spacing:-.02em;
+}
+.section-head p{
+  margin:4px 0 0;
+  color:var(--muted);
+  font-size:.92rem;
+}
+.section-tools{
+  display:flex;
+  gap:10px;
+  align-items:center;
+  flex-wrap:wrap;
+}
+.surface{
+  border-radius:24px;
+  padding:20px;
+  border:1px solid #e4edf8;
+  background:#ffffff;
+  box-shadow:var(--shadow-soft);
+}
+.kpi-row{
+  display:grid;
+  grid-template-columns:repeat(3, minmax(0,1fr));
+  gap:14px;
+}
+.signal-card{
+  padding:18px;
+  border-radius:22px;
+  border:1px solid #e9f0f8;
+  background:#f9fbff;
+}
+.signal-card b{
+  display:block;
+  font-size:1.1rem;
+  margin-bottom:6px;
+}
+.signal-card span{color:var(--muted);font-size:.84rem}
 
-<div v-if="page==='worldline'"><div class="topbar"><div><h2>世界线</h2><div class="sub">树形分支图 — 从故事原点延伸的所有平行世界</div></div><div style="display:flex;gap:8px;"><select v-model="wlStoryFilter" @change="loadWorldlineTree" style="padding:6px 10px;border:1px solid var(--border);border-radius:8px;font-size:12px;font-family:var(--ff);"><option value="">选择故事...</option><option v-for="s in wlStories" :value="s.story_work_id">{{ s.story_title }}</option></select><button class="btn btn-s btn-sm" @click="loadWorldlines">刷新</button></div></div><div v-if="!wlTreeData" class="empty"><p>选择一个故事查看世界线树，或先生成分支</p></div><div v-if="wlTreeData" class="wl-legend"><span><span class="dot" style="background:var(--blue);"></span> 故事原点</span><span><span class="dot" style="background:var(--green);"></span> 治愈/反转</span><span><span class="dot" style="background:var(--amber);"></span> 黑化/阴谋</span><span><span class="dot" style="background:var(--purple);"></span> 史诗/其他</span></div><div v-if="wlTreeData" class="wl-canvas" :style="{height:wlCanvasHeight+'px'}" ref="wlCanvas"><svg class="wl-svg" v-html="wlSvgLines"></svg><div v-for="n in wlLayoutNodes" :key="n.id" class="wl-node-card" :class="{root:n.depth===0,selected:wlSelectedNode===n.id}" :style="{left:n.x+'%',top:n.y+'px',transform:'translate(-50%,0)'}" @click="wlSelectedNode=wlSelectedNode===n.id?-1:n.id"><span class="wl-nc-tag" :style="'background:'+tagColor(n.tag)">{{ n.tag }}</span><div class="wl-nc-title">{{ n.node_title }}</div><div class="wl-nc-summary">{{ n.timeline_summary }}</div><div v-if="wlSelectedNode===n.id" class="wl-nc-actions"><button class="btn btn-xs btn-p" @click.stop="openWlNodeStory(n)">查看内容</button><button v-if="n.branch_id>0" class="btn btn-xs" style="background:var(--purple);color:#fff;" @click.stop="continueFromWlNode(n)">继续推进</button></div></div></div></div>
+.btn{
+  appearance:none;
+  border:none;
+  border-radius:16px;
+  padding:11px 16px;
+  color:var(--text);
+  background:#ffffff;
+  border:1px solid #d8e4f2;
+  transition:transform .18s ease, box-shadow .18s ease, background .18s ease, border-color .18s ease, opacity .18s ease;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:10px;
+  font-weight:600;
+  min-height:44px;
+}
+.btn:hover:not(:disabled){
+  transform:translateY(-1px) scale(1.01);
+  background:#f5f9ff;
+  border-color:#c9dbf2;
+}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn-primary{
+  color:#fff;
+  background:linear-gradient(180deg, #1772f6, #056de8);
+  border-color:#0567da;
+  box-shadow:0 10px 20px rgba(5,109,232,.18);
+}
+.btn-primary:hover:not(:disabled){
+  background:linear-gradient(180deg, #2a7dfa, #1171ef);
+}
+.btn-ghost{
+  background:#f7faff;
+}
+.btn-danger{
+  background:#fff1f2;
+  color:var(--danger);
+  border-color:#ffd5d8;
+}
+.btn-xs{padding:8px 12px;min-height:34px;border-radius:12px;font-size:.82rem}
+.btn-sm{padding:9px 14px;min-height:38px;border-radius:14px;font-size:.88rem}
+.btn-lg{padding:14px 20px;min-height:52px;border-radius:18px}
 
-<div v-if="page==='control'"><div class="topbar"><div><h2>引擎控制</h2><div class="sub">手动操作与实时日志</div></div><div><button v-if="!stats.agent_running" class="btn btn-p btn-sm" @click="ctrlAgent('start')">启动 Agent</button><button v-if="stats.agent_running" class="btn btn-s btn-sm" @click="ctrlAgent('stop')">停止 Agent</button></div></div><div style="display:flex;gap:8px;margin-bottom:14px;"><button class="btn btn-s btn-sm" @click="doAction('discover')">抓取故事</button><button class="btn btn-s btn-sm" @click="doAction('analyze')">批量解析</button><button class="btn btn-s btn-sm" @click="doAction('trigger')">触发分支</button></div><div class="log-box"><div v-for="(l,i) in logLines" :key="i" style="padding:1px 0;display:flex;gap:8px;font-size:11px;"><span style="color:var(--t3);min-width:50px;">{{ l.ts }}</span><span style="color:var(--blue);min-width:36px;font-weight:600;">{{ l.module }}</span><span style="color:var(--t2);">{{ l.msg }}</span></div></div></div>
+.toggle{
+  display:inline-flex;
+  align-items:center;
+  gap:10px;
+  padding:6px 10px;
+  border-radius:999px;
+  color:var(--muted);
+  background:#f6faff;
+  border:1px solid #dae7f6;
+  user-select:none;
+}
+.toggle-track{
+  width:42px;
+  height:24px;
+  border-radius:999px;
+  position:relative;
+  background:#d8e4f2;
+}
+.toggle-thumb{
+  position:absolute;
+  top:3px;
+  left:3px;
+  width:18px;
+  height:18px;
+  border-radius:50%;
+  background:#fff;
+  transition:transform .2s ease;
+}
+.toggle.on .toggle-track{background:linear-gradient(135deg, #2a7dfa, #0b6ce8)}
+.toggle.on .toggle-thumb{transform:translateX(18px)}
 
-<div v-if="page==='config'"><div class="topbar"><div><h2>设置</h2><div class="sub">OAuth 授权 & LLM 接口配置</div></div></div>
-<div class="cfg-card" style="margin-bottom:20px;"><div class="cfg-head">知乎 OAuth <span class="chip green" style="margin-left:8px;font-size:10px;" v-if="oauthUser">已授权</span></div><div class="cfg-body"><div class="fg"><label class="fl">App ID</label><input v-model="oauthForm.app_id" class="fi" placeholder="黑客松项目 App ID"></div><div class="fg"><label class="fl">App Key</label><input v-model="oauthForm.app_key" class="fi" placeholder="黑客松项目 App Key"></div><button class="btn btn-p btn-sm" @click="saveOAuth" :disabled="saving">保存 OAuth 配置</button><div class="fh">创建知乎黑客松项目后自动生成，用于 OAuth 授权登录</div></div></div>
+.story-switch{
+  display:inline-flex;
+  padding:5px;
+  gap:6px;
+  border-radius:18px;
+  background:#f6faff;
+  border:1px solid #dce8f5;
+}
+.story-switch .btn.active{
+  color:#fff;
+  background:linear-gradient(180deg, #1772f6, #056de8);
+  border-color:transparent;
+}
 
-<div class="cfg-card"><div class="cfg-head">LLM API <span class="chip green" style="margin-left:8px;font-size:10px;" v-if="llmConfigured">已连接</span></div><div class="cfg-body"><div class="fg"><label class="fl">API Key</label><div style="display:flex;gap:6px;"><input :type="showKey?'text':'password'" v-model="llmForm.api_key" class="fi" placeholder="sk-..."><button class="btn btn-s btn-sm" @click="showKey=!showKey">{{ showKey?'隐藏':'显示' }}</button></div></div><div class="fg"><label class="fl">Base URL</label><input v-model="llmForm.base_url" class="fi" placeholder="https://api.deepseek.com"></div><div class="fg"><label class="fl">模型名称</label><input v-model="llmForm.model" class="fi" placeholder="deepseek-chat"></div><button class="btn btn-p" @click="saveLLM" :disabled="saving" style="width:100%;justify-content:center;">{{ saving?'保存中...':'保存配置' }}</button><div v-if="saveMsg" style="margin-top:8px;font-size:12px;text-align:center;color:var(--green);">{{ saveMsg }}</div></div></div>
-	
-<div class="cfg-card" style="margin-top:20px;">
-	<div class="cfg-head">知乎 API <span class="chip green" style="margin-left:8px;font-size:10px;" v-if="zhihuConfigured">已配置</span><span class="chip" style="margin-left:8px;background:var(--amber-bg);color:var(--amber);font-size:10px;" v-else>未配置</span></div>
-	<div class="cfg-body">
-	<div class="fg"><label class="fl">User Token (app_key)</label><input v-model="zhihuForm.token" class="fi" placeholder="知乎用户 token（个人主页 people/ 后面的内容）"></div>
-	<div class="fg"><label class="fl">App Secret (应用密钥)</label><input v-model="zhihuForm.secret" class="fi" placeholder="知乎提供的应用密钥"></div>
-	<button class="btn btn-p btn-sm" @click="saveZhihu" :disabled="saving">保存知乎配置</button>
-	<div class="fh">用于调用知乎开放 API。Demo 模式下可不填，仍可浏览界面</div>
-	</div></div>
+.story-list,.stack{display:grid;gap:14px}
+.story-card{
+  position:relative;
+  overflow:hidden;
+  padding:22px;
+  border-radius:18px;
+  border:1px solid #e5edf7;
+  background:#ffffff;
+  transition:transform .22s ease, border-color .22s ease, box-shadow .22s ease;
+}
+.story-card:hover{
+  transform:translateY(-3px);
+  border-color:#cfe1f6;
+  box-shadow:0 12px 28px rgba(15,72,145,.12);
+}
+.story-card::before{
+  content:"";
+  position:absolute;
+  inset:auto auto 0 0;
+  width:100%;
+  height:1px;
+  background:linear-gradient(90deg, rgba(5,109,232,.15), transparent 80%);
+}
+.story-head{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:14px;
+}
+.story-title{
+  margin:0;
+  font-size:1.2rem;
+  letter-spacing:-.02em;
+  line-height:1.4;
+}
+.meta{
+  margin-top:8px;
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px 12px;
+  color:var(--muted);
+  font-size:.84rem;
+}
+.story-summary{
+  margin:14px 0 18px;
+  color:#425466;
+  line-height:1.8;
+  font-size:.96rem;
+}
+.chip-row{
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+}
+.chip{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  min-height:28px;
+  padding:0 12px;
+  border-radius:999px;
+  font-size:.78rem;
+  color:#49637f;
+  background:#f5f8fc;
+  border:1px solid #e2eaf4;
+}
+.chip.blue{background:#edf5ff;border-color:#d7e8ff;color:var(--brand)}
+.chip.green{background:#ecfdf3;border-color:#ccefdc;color:var(--ok)}
+.chip.amber{background:#fffaeb;border-color:#f9e3b0;color:#b54708}
+.chip.gray{background:#f3f6fa;border-color:#e3eaf2;color:#7a8797}
+.status-chip.pending{background:#f3f6fa;color:#6b7785}
+.status-chip.analyzed{background:#edf5ff;color:var(--brand)}
+.status-chip.branched{background:#f4f0ff;color:var(--violet)}
+.status-chip.blocked{background:#fff1f2;color:var(--danger)}
+.class-chip.fiction{background:#ecfdf3;color:var(--ok)}
+.class-chip.real_history{background:#fffaeb;color:#b54708}
+.class-chip.real_modern{background:#fff1f2;color:var(--danger)}
+
+.story-actions{
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px;
+  align-items:center;
+  justify-content:space-between;
+}
+.story-actions-left{
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+}
+
+.grid-two{
+  display:grid;
+  grid-template-columns:minmax(0,1.4fr) minmax(320px,.9fr);
+  gap:18px;
+}
+.aside-column{display:grid;gap:18px}
+.story-shell{
+  display:grid;
+  grid-template-columns:minmax(0,1.35fr) minmax(320px,.95fr);
+  gap:18px;
+}
+.feed-layout{
+  display:grid;
+  grid-template-columns:minmax(0,1.3fr) minmax(280px,.78fr);
+  gap:18px;
+}
+.feed-column,.side-feed{display:grid;gap:14px}
+.page-banner{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:16px;
+  padding:22px 24px;
+  border-radius:20px;
+  border:1px solid #deebf7;
+  background:linear-gradient(180deg, #ffffff, #f6faff);
+  box-shadow:var(--shadow-soft);
+}
+.page-banner.compact{padding:18px 22px}
+.page-banner h3{
+  margin:0;
+  font-size:1.35rem;
+}
+.page-banner p{
+  margin:6px 0 0;
+  color:var(--muted);
+  line-height:1.7;
+}
+.banner-stats{
+  display:flex;
+  gap:12px;
+  flex-wrap:wrap;
+}
+.mini-stat{
+  min-width:118px;
+  padding:14px 16px;
+  border-radius:16px;
+  border:1px solid #e5eef9;
+  background:#ffffff;
+  text-align:left;
+}
+.mini-stat b{
+  display:block;
+  font-size:1.3rem;
+  color:var(--brand);
+}
+.mini-stat span{
+  display:block;
+  margin-top:4px;
+  font-size:.82rem;
+  color:var(--muted);
+}
+.panel-list{
+  display:grid;
+  gap:12px;
+}
+.plain-panel{
+  padding:18px 20px;
+  border-radius:18px;
+  border:1px solid #e5edf7;
+  background:#ffffff;
+}
+.plain-panel h4{
+  margin:0 0 8px;
+  font-size:1rem;
+}
+.plain-panel p{
+  margin:0;
+  color:var(--muted);
+  line-height:1.75;
+  font-size:.92rem;
+}
+.list-surface{
+  padding:0;
+  border:none;
+  background:transparent;
+  box-shadow:none;
+}
+.story-board{
+  display:grid;
+  gap:14px;
+}
+.story-kpis{
+  display:grid;
+  grid-template-columns:repeat(3, minmax(0,1fr));
+  gap:12px;
+}
+.story-kpi{
+  padding:16px 18px;
+  border-radius:18px;
+  background:#ffffff;
+  border:1px solid #e5edf7;
+}
+.story-kpi b{
+  display:block;
+  font-size:1.45rem;
+  color:var(--brand);
+}
+.story-kpi span{
+  display:block;
+  margin-top:6px;
+  color:var(--muted);
+  font-size:.84rem;
+}
+.control-layout{
+  display:grid;
+  grid-template-columns:minmax(0,340px) minmax(0,1fr) minmax(280px,.8fr);
+  gap:18px;
+}
+.action-stack{
+  display:grid;
+  gap:12px;
+}
+.action-card{
+  padding:18px;
+  border-radius:18px;
+  border:1px solid #e3ecf7;
+  background:#ffffff;
+}
+.action-card h4{
+  margin:0 0 8px;
+}
+.action-card p{
+  margin:0 0 14px;
+  color:var(--muted);
+  line-height:1.7;
+  font-size:.9rem;
+}
+.config-layout{
+  display:grid;
+  grid-template-columns:minmax(260px,.72fr) minmax(0,1.28fr);
+  gap:18px;
+}
+.settings-intro{
+  padding:22px;
+  border-radius:20px;
+  border:1px solid #dce9f7;
+  background:linear-gradient(180deg, #ffffff, #f5f9ff);
+}
+.settings-intro h3{
+  margin:0 0 8px;
+}
+.settings-intro p{
+  margin:0;
+  color:var(--muted);
+  line-height:1.8;
+}
+.branches-head{
+  display:flex;
+  align-items:flex-end;
+  justify-content:space-between;
+  gap:14px;
+  padding-bottom:4px;
+}
+.branches-stream{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(280px,1fr));
+  gap:14px;
+}
+.ring-stream{
+  display:grid;
+  gap:12px;
+}
+.worldline-shell{
+  display:grid;
+  gap:16px;
+}
+
+.ring-post,.br-card,.cfg-card,.char-card,.ivo-branch,.worldline-card{
+  border-radius:18px;
+  border:1px solid #e5edf7;
+  background:#ffffff;
+}
+.ring-post,.br-card,.cfg-card,.char-card,.ivo-branch,.worldline-card{padding:20px}
+.br-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px}
+.br-card{
+  transition:transform .2s ease,border-color .2s ease,box-shadow .2s ease;
+}
+.br-card:hover{
+  transform:translateY(-2px);
+  border-color:#cfe1f6;
+  box-shadow:0 12px 24px rgba(15,72,145,.1);
+}
+.rp-top{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  margin-bottom:12px;
+}
+.rp-avatar{
+  width:38px;
+  height:38px;
+  border-radius:14px;
+  display:grid;
+  place-items:center;
+  font-weight:700;
+  color:#fff;
+  background:linear-gradient(180deg, #2a7dfa, #056de8);
+  box-shadow:0 10px 20px rgba(5,109,232,.15);
+}
+.rp-author{font-weight:600}
+.rp-time{margin-left:auto;color:var(--muted);font-size:.82rem}
+.rp-content{
+  color:#3c4a5b;
+  line-height:1.8;
+  font-size:.94rem;
+}
+
+.cfg-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(320px,1fr));
+  gap:18px;
+}
+.cfg-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  margin-bottom:18px;
+}
+.cfg-head h4{margin:0;font-size:1rem}
+.fg{display:grid;gap:8px;margin-bottom:16px}
+.fl{color:#dce7ff;font-size:.85rem}
+.fl{color:#314255;font-size:.85rem}
+.fh{color:var(--muted-2);font-size:.8rem;line-height:1.7}
+.fi,.custom-input,.select{
+  width:100%;
+  border-radius:16px;
+  border:1px solid #d9e5f3;
+  background:#ffffff;
+  color:var(--text);
+  padding:13px 14px;
+  outline:none;
+  transition:border-color .18s ease, box-shadow .18s ease, background .18s ease;
+}
+.fi:focus,.custom-input:focus,.select:focus{
+  border-color:#8ebfff;
+  box-shadow:0 0 0 4px rgba(5,109,232,.08);
+}
+.custom-input{min-height:86px;resize:vertical}
+.field-inline{display:flex;gap:10px}
+
+.log-box{
+  border-radius:18px;
+  border:1px solid #deebf7;
+  background:#f8fbff;
+  padding:12px;
+  max-height:420px;
+  overflow:auto;
+  font-family:Consolas, monospace;
+}
+.log-line{
+  display:grid;
+  grid-template-columns:66px 84px 1fr;
+  gap:10px;
+  padding:8px 10px;
+  border-radius:14px;
+  color:#4d5f72;
+  font-size:.8rem;
+}
+.log-line:nth-child(odd){background:#ffffff}
+
+.empty,.loading-page{
+  padding:56px 24px;
+  text-align:center;
+  color:var(--muted);
+}
+.empty strong,.loading-page strong{display:block;color:var(--text);font-size:1.02rem;margin-bottom:8px}
+.skeleton{
+  position:relative;
+  overflow:hidden;
+  border-radius:18px;
+  height:116px;
+  border:1px solid #e5edf7;
+  background:#f4f8fd;
+}
+.skeleton::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  transform:translateX(-100%);
+  background:linear-gradient(90deg, transparent, rgba(5,109,232,.08), transparent);
+  animation:shimmer 1.2s infinite;
+}
+@keyframes shimmer{100%{transform:translateX(100%)}}
+
+.toasts{
+  position:fixed;
+  top:22px;
+  right:22px;
+  display:grid;
+  gap:10px;
+  z-index:2000;
+}
+.toast{
+  min-width:260px;
+  padding:14px 16px;
+  border-radius:18px;
+  border:1px solid #dbe8f7;
+  backdrop-filter:blur(18px);
+  background:#ffffff;
+  color:var(--text);
+  box-shadow:var(--shadow-soft);
+  animation:slideIn .22s ease;
+}
+.toast-ok{border-color:#cdeedc}
+.toast-err{border-color:#ffd0d5}
+.toast-info{border-color:#d9e8ff}
+@keyframes slideIn{
+  from{opacity:0;transform:translateY(-8px) scale(.98)}
+  to{opacity:1;transform:translateY(0) scale(1)}
+}
+
+.err-banner{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  padding:14px 16px;
+  border-radius:18px;
+  border:1px solid #ffd3d7;
+  background:#fff4f5;
+  color:#c4322a;
+}
+.err-banner button{margin-left:auto}
+
+.login-overlay,.ivo{
+  position:fixed;
+  inset:0;
+  z-index:1500;
+}
+.login-overlay{
+  display:grid;
+  place-items:center;
+  padding:24px;
+  background:rgba(230,239,250,.72);
+  backdrop-filter:blur(18px);
+}
+.login-card{
+  width:min(520px,100%);
+  padding:34px;
+  border-radius:32px;
+  border:1px solid #d9e6f5;
+  background:linear-gradient(180deg, #ffffff, #f5f9ff);
+  box-shadow:var(--shadow);
+  text-align:left;
+}
+.login-card img{
+  width:84px;
+  height:84px;
+  border-radius:24px;
+  display:block;
+  margin-bottom:18px;
+}
+.login-card h2{
+  margin:0;
+  font-size:2rem;
+  letter-spacing:-.03em;
+}
+.login-card .desc{
+  margin:12px 0 24px;
+  color:var(--muted);
+  line-height:1.8;
+}
+.login-actions{display:flex;gap:10px;flex-wrap:wrap}
+
+.ivo{
+  display:flex;
+  flex-direction:column;
+  background:rgba(236,243,252,.88);
+  backdrop-filter:blur(18px);
+}
+.ivo-shell{
+  display:flex;
+  flex-direction:column;
+  min-height:100%;
+  padding:18px;
+}
+.ivo-bar{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  padding:18px 22px;
+  border-radius:28px 28px 20px 20px;
+  border:1px solid #d9e6f5;
+  background:#ffffff;
+}
+.ivo-title{
+  min-width:0;
+}
+.ivo-title b{
+  display:block;
+  font-size:1.05rem;
+  line-height:1.4;
+}
+.ivo-title span{
+  color:var(--muted);
+  font-size:.82rem;
+}
+.ivo-actions{
+  display:flex;
+  gap:10px;
+  align-items:center;
+  flex-wrap:wrap;
+  justify-content:flex-end;
+}
+.ivo-body{
+  flex:1;
+  min-height:0;
+  display:grid;
+  grid-template-columns:minmax(360px,.85fr) minmax(0,1.2fr);
+  gap:16px;
+  margin-top:16px;
+}
+.ivo-panel{
+  min-height:0;
+  overflow:auto;
+  padding:22px;
+  border-radius:24px;
+  border:1px solid #dfe9f6;
+  background:#ffffff;
+}
+.ivo-label{
+  font-size:.75rem;
+  color:var(--muted-2);
+  text-transform:uppercase;
+  letter-spacing:.16em;
+  margin-bottom:14px;
+}
+.ivo-orig{
+  white-space:pre-wrap;
+  line-height:1.95;
+  color:#314255;
+}
+.ivo-analysis{
+  margin-top:18px;
+  padding:18px;
+  border-radius:20px;
+  border:1px solid #d8e9ff;
+  background:#f3f8ff;
+}
+.pivot-option{
+  margin-top:10px;
+  display:flex;
+  gap:10px;
+  padding:14px;
+  border-radius:18px;
+  border:1px solid #e3ecf7;
+  background:#fafcff;
+  cursor:pointer;
+  transition:border-color .18s ease, transform .18s ease, background .18s ease;
+}
+.pivot-option:hover{
+  transform:translateY(-1px);
+  border-color:rgba(125,211,252,.22);
+}
+.pivot-option.sel{
+  border-color:#b7d6fb;
+  background:#edf5ff;
+}
+.pivot-option input{display:none}
+.ivo-tabs{
+  display:inline-flex;
+  gap:6px;
+  padding:6px;
+  border-radius:18px;
+  background:#f5f9ff;
+  border:1px solid #dce8f6;
+  margin-bottom:16px;
+}
+.ivo-tab{
+  border:none;
+  border-radius:14px;
+  padding:10px 16px;
+  background:transparent;
+  color:var(--muted);
+  font-weight:600;
+}
+.ivo-tab.active{
+  color:#fff;
+  background:linear-gradient(180deg, #1772f6, #056de8);
+}
+.ivo-branch textarea{margin-top:10px}
+.ivo-tree-shell{
+  display:grid;
+  gap:14px;
+}
+.ivo-tree-panel{
+  padding:16px;
+  border-radius:18px;
+  border:1px solid #e2ebf7;
+  background:#f8fbff;
+}
+.ivo-tree-canvas{
+  min-height:380px;
+  max-height:440px;
+}
+.ivo-detail-card{
+  padding:18px;
+  border-radius:18px;
+  border:1px solid #e5edf7;
+  background:#ffffff;
+}
+.ivo-detail-card h4{
+  margin:0 0 8px;
+  font-size:1.08rem;
+}
+.ivo-detail-meta{
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+  margin-bottom:12px;
+}
+.ivo-detail-body{
+  display:grid;
+  gap:12px;
+}
+.ivo-detail-body .custom-input{
+  min-height:140px;
+}
+.ivo-empty-card{
+  padding:24px 18px;
+  border-radius:16px;
+  border:1px dashed #cfe0f6;
+  background:#f9fbff;
+  color:var(--muted);
+  text-align:center;
+}
+
+.worldline-panel{
+  padding:18px;
+  border-radius:18px;
+  border:1px solid #e0eaf6;
+  background:#ffffff;
+}
+.wl-toolbar{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:10px;
+  margin-bottom:14px;
+  flex-wrap:wrap;
+}
+.wl-legend{
+  display:flex;
+  gap:14px;
+  flex-wrap:wrap;
+  color:var(--muted);
+  font-size:.8rem;
+  margin-bottom:16px;
+}
+.wl-legend span{display:inline-flex;align-items:center;gap:6px}
+.wl-canvas{
+  position:relative;
+  min-height:520px;
+  overflow:hidden;
+  padding:0;
+  border-radius:18px;
+  background:
+    linear-gradient(rgba(5,109,232,.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(5,109,232,.04) 1px, transparent 1px),
+    #f8fbff;
+  background-size:80px 80px;
+  border:1px solid #e2ebf7;
+  user-select:none;
+  cursor:grab;
+}
+.wl-canvas.dragging{cursor:grabbing}
+.wl-viewport{
+  position:absolute;
+  top:0;
+  left:0;
+  transform-origin:0 0;
+  will-change:transform;
+}
+.wl-svg{
+  position:absolute;
+  top:0;
+  left:0;
+  pointer-events:none;
+}
+.wl-svg path{
+  stroke:rgba(95,111,130,.35);
+  stroke-width:2.2;
+  fill:none;
+}
+.wl-svg path.root-line{stroke:rgba(5,109,232,.56)}
+.wl-node-card{
+  position:absolute;
+  width:240px;
+  min-width:240px;
+  max-width:240px;
+  padding:14px;
+  border-radius:18px;
+  border:1px solid #dfe9f6;
+  background:#ffffff;
+  box-shadow:0 8px 18px rgba(15,72,145,.08);
+  transition:border-color .18s ease, box-shadow .18s ease;
+}
+.wl-node-card:hover{
+  border-color:#c9ddf5;
+  box-shadow:0 12px 20px rgba(15,72,145,.12);
+}
+.wl-node-card.root{border-color:#a9cdfc}
+.wl-node-card.selected{
+  border-color:#c8bcff;
+  box-shadow:0 0 0 1px rgba(122,90,248,.18), 0 12px 24px rgba(15,72,145,.1);
+}
+.wl-toolbar-meta{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  flex-wrap:wrap;
+}
+.zoom-chip{
+  min-width:66px;
+  justify-content:center;
+}
+.wl-nc-tag{
+  display:inline-flex;
+  padding:4px 8px;
+  border-radius:999px;
+  color:#27415b;
+  font-size:.72rem;
+  margin-bottom:8px;
+}
+.wl-nc-title{
+  font-weight:700;
+  line-height:1.4;
+  margin-bottom:6px;
+}
+.wl-nc-summary{
+  color:var(--muted);
+  line-height:1.5;
+  font-size:.8rem;
+  min-height:0;
+  display:-webkit-box;
+  -webkit-line-clamp:3;
+  -webkit-box-orient:vertical;
+  overflow:hidden;
+}
+.wl-nc-actions{
+  display:flex;
+  gap:8px;
+  margin-top:12px;
+  padding-top:12px;
+  border-top:1px solid rgba(255,255,255,.06);
+}
+
+.hamburger{
+  display:none;
+  width:44px;
+  height:44px;
+  border-radius:14px;
+  border:1px solid #dae6f4;
+  background:#ffffff;
+  color:var(--text);
+}
+.spinner-sm,.spin{
+  display:inline-block;
+  border-radius:50%;
+  border-style:solid;
+  animation:spin .7s linear infinite;
+}
+.spinner-sm{
+  width:14px;
+  height:14px;
+  border-width:2px;
+  border-color:rgba(5,109,232,.18);
+  border-top-color:#056de8;
+}
+.spin{
+  width:24px;
+  height:24px;
+  border-width:3px;
+  border-color:#d8e5f5;
+  border-top-color:var(--brand);
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+[data-reveal]{opacity:0;transform:translateY(12px);transition:opacity .5s ease,transform .5s ease}
+[data-reveal].show{opacity:1;transform:translateY(0)}
+
+@media (max-width:1180px){
+  .hero-grid{grid-template-columns:repeat(2, minmax(0,1fr))}
+  .grid-two,.story-shell,.feed-layout,.control-layout,.config-layout{grid-template-columns:1fr}
+  .ivo-body{grid-template-columns:1fr}
+}
+@media (max-width:980px){
+  .layout{grid-template-columns:1fr}
+  .sidebar{
+    position:fixed;
+    inset:0 auto 0 0;
+    width:min(320px, 86vw);
+    transform:translateX(-105%);
+    transition:transform .22s ease;
+    z-index:1100;
+  }
+  .sidebar.open{transform:translateX(0)}
+  .main{padding:16px 16px 34px}
+  .mobile-bar{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    margin-bottom:16px;
+  }
+  .hamburger{display:grid;place-items:center}
+  .hero{padding:22px}
+}
+@media (max-width:720px){
+  .hero-top,.section-head,.wl-toolbar,.ivo-bar{flex-direction:column;align-items:flex-start}
+  .hero-grid,.kpi-row,.cfg-grid,.story-kpis,.branches-stream{grid-template-columns:1fr}
+  .story-actions{align-items:flex-start}
+  .toasts{left:16px;right:16px}
+  .toast{min-width:unset}
+  .ivo-shell{padding:10px}
+  .ivo-bar,.ivo-panel{padding:16px}
+}
+</style>
+</head>
+<body>
+<div id="app-loading"><div style="text-align:center;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%)"><div class="pulse" style="margin:0 auto 20px"></div><div style="font-size:15px;font-weight:600;color:#1f2d3d;margin-bottom:4px">反转刺客</div><div id="load-tip" style="font-size:12px;color:#8b9bb0">正在准备你的故事宇宙...</div></div></div>
+
+<div class="app-loader" id="app-loader"><div style="text-align:center;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%)"><div class="pulse" style="margin:0 auto 16px"></div><div style="font-size:14px;color:#8b9bb0">反转刺客</div></div></div>
+<div id="app" class="app-shell" v-cloak>
+  <div class="orb a"></div>
+  <div class="orb b"></div>
+  <div class="orb c"></div>
+
+  <div class="toasts">
+    <div v-for="t in toasts" :key="t.id" :class="'toast toast-' + t.type">{{ t.msg }}</div>
+  </div>
+
+  <div v-if="!loggedIn" class="login-overlay">
+    <div class="login-card" data-reveal>
+      <img src="/logo.png" alt="Logo">
+      <div class="eyebrow">AI Native Story Engine</div>
+      <h2>反转刺客</h2>
+      <div class="desc">
+        从知乎故事抓取、AI 解析、支线生成到世界线演化，整套内容流水线集中在一个界面里。
+        使用知乎 OAuth 登录，或直接进入路演演示模式。
+      </div>
+      <div class="login-actions">
+        <button class="btn btn-primary btn-lg" @click="oauthLogin">登录知乎账号</button>
+        <button class="btn btn-ghost btn-lg" @click="skipLogin">跳过，进入 Demo</button>
+      </div>
+      <div v-if="loginMsg" style="margin-top:14px;color:#ffd5dc;">{{ loginMsg }}</div>
+    </div>
+  </div>
+
+  <div v-if="ivo" class="ivo">
+    <div class="ivo-shell">
+      <div class="ivo-bar">
+        <div class="ivo-title">
+          <b>{{ ivoStory?.title }}</b>
+          <span>原始故事、支线生成与角色状态在同一工作台内联动</span>
+        </div>
+        <div class="ivo-actions">
+          <span v-if="ivoPublished" class="chip green">已发布到圈子</span>
+          <button v-if="ivoBranches.length > 0 && !ivoPublished" class="btn btn-ghost btn-sm" @click="publishBranches" :disabled="acting">发布到圈子</button>
+          <button class="btn btn-primary btn-sm" @click="genBranches" :disabled="acting">
+            <span v-if="acting" class="spinner-sm"></span>
+            {{ acting ? '生成中...' : '生成平行支线' }}
+          </button>
+          <button class="btn btn-ghost btn-sm" @click="ivo = null">关闭</button>
+        </div>
+      </div>
+
+      <div class="ivo-body">
+        <div class="ivo-panel">
+          <div class="ivo-label">Original Story</div>
+          <div class="ivo-orig">{{ ivoStory?.content }}</div>
+
+          <div v-if="ivoStory?.analysis_result" class="ivo-analysis">
+            <div><b>分类：</b>{{ classLabel((ivoStory.analysis_result || {}).classification) }}</div>
+            <div style="margin-top:8px;"><b>世界观：</b>{{ ivoStory.analysis_result.worldview }}</div>
+            <div style="margin-top:8px;"><b>角色：</b>{{ (ivoStory.analysis_result.characters || []).join(' / ') }}</div>
+
+            <div style="margin-top:14px;">
+              <b>选择转折点</b>
+            </div>
+            <div
+              v-for="(p, i) in ivoStory.analysis_result.pivot_points"
+              :key="i"
+              :class="'pivot-option' + (selPivot === i ? ' sel' : '')"
+              @click="selPivot = i"
+            >
+              <input type="radio">
+              <div>
+                <div><b>转折点 {{ i + 1 }}</b> · {{ p.scene }}</div>
+                <div style="margin-top:6px;color:var(--muted);font-size:.84rem;">
+                  遗憾值 {{ (p.regret_weight * 100).toFixed(0) }}% · 逻辑难度 {{ (p.logic_difficulty * 100).toFixed(0) }}%
+                </div>
+                <div style="margin-top:4px;color:var(--muted-2);font-size:.8rem;">{{ p.branch_potential }}</div>
+              </div>
+            </div>
+
+            <div class="cfg-card" style="margin-top:16px;">
+              <div class="cfg-head">
+                <h4>自由分支</h4>
+                <span class="chip blue">Agent Prompt</span>
+              </div>
+              <div class="fg">
+                <label class="fl">从哪个场景开始改写</label>
+                <textarea v-model="freeScene" class="custom-input" placeholder="例如：秦始皇在登基前夜做了一个预知未来的梦"></textarea>
+              </div>
+              <div class="fg">
+                <label class="fl">希望故事如何偏转</label>
+                <textarea v-model="freeDirection" class="custom-input" placeholder="例如：梦境把他引向一个月球上的秦制文明"></textarea>
+              </div>
+              <button class="btn btn-primary btn-sm" @click="genFreeBranch" :disabled="acting || !freeScene">生成自由支线</button>
+            </div>
+
+            <div style="margin-top:14px;">
+              <label class="fl">自定义分支方向</label>
+              <textarea v-model="customPrompt" class="custom-input" placeholder="例如：如果主角在这一刻选择原谅而不是复仇，会进入怎样的世界线？"></textarea>
+            </div>
+          </div>
+        </div>
+
+        <div class="ivo-panel">
+          <div class="ivo-tabs">
+            <button :class="'ivo-tab' + (ivoTab === 'worldline' ? ' active' : '')" @click="ivoTab = 'worldline'; loadIvoWorldline()">世界线导图</button>
+            <button :class="'ivo-tab' + (ivoTab === 'chars' ? ' active' : '')" @click="ivoTab = 'chars'; loadIvoState()">角色状态</button>
+          </div>
+
+          <div v-if="ivoTab === 'worldline'" class="ivo-tree-shell">
+            <div v-if="ivoBranches.length === 0" class="ivo-empty-card">
+              <strong style="display:block;color:var(--text);margin-bottom:8px;">还没有生成支线</strong>
+              点击上方按钮，让 Agent 从故事转折点开始演化新的宇宙。
+            </div>
+
+            <template v-else>
+              <div class="ivo-tree-panel">
+                <div class="ivo-label">Worldline Map</div>
+                <div class="wl-legend" style="margin-bottom:12px;">
+                  <span><span class="dot live" style="width:7px;height:7px;box-shadow:none;background:var(--brand);"></span>故事原点</span>
+                  <span><span class="dot live" style="width:7px;height:7px;box-shadow:none;background:var(--ok);"></span>治愈 / 反转</span>
+                  <span><span class="dot live" style="width:7px;height:7px;box-shadow:none;background:var(--warn);"></span>黑化 / 阴谋</span>
+                  <span><span class="dot live" style="width:7px;height:7px;box-shadow:none;background:var(--violet);"></span>史诗 / 其他</span>
+                </div>
+                <div
+                  class="wl-canvas ivo-tree-canvas"
+                  :class="{ dragging: ivoWlDrag.dragging }"
+                  :style="{ height: ivoWlCanvasHeight + 'px' }"
+                  @wheel.prevent="handleCanvasWheel($event, 'ivo')"
+                  @mousedown="startCanvasDrag($event, 'ivo')"
+                >
+                  <div
+                    class="wl-viewport"
+                    :style="viewportStyle('ivo')"
+                  >
+                    <svg class="wl-svg" :width="ivoWlViewport.width" :height="ivoWlViewport.height" v-html="ivoWlSvgLines"></svg>
+                    <div
+                      v-for="n in ivoWlLayoutNodes"
+                      :key="n.id"
+                      class="wl-node-card"
+                      :class="{ root: n.depth === 0, selected: ivoSelectedNodeId === n.id }"
+                      :style="{ left: n.x + 'px', top: n.y + 'px', transform: 'translate(-50%,0)' }"
+                      @click.stop="selectIvoNode(n)"
+                    >
+                      <span class="wl-nc-tag" :style="'background:' + tagColor(n.tag)">{{ n.tag }}</span>
+                      <div class="wl-nc-title">{{ n.node_title }}</div>
+                      <div class="wl-nc-summary">{{ n.timeline_summary }}</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div v-if="selectedIvoBranch" class="ivo-detail-card">
+                <div class="ivo-detail-meta">
+                  <span :class="'chip ' + (selectedIvoBranch.unlocked ? 'green' : 'blue')">{{ selectedIvoBranch.unlocked ? '已解锁' : '待解锁' }}</span>
+                  <span class="chip blue">{{ selectedIvoBranch.keyword }}</span>
+                  <span class="chip gray">{{ selectedIvoBranch.tag }}</span>
+                </div>
+                <h4>{{ selectedIvoBranch.title }}</h4>
+                <div class="ivo-detail-body">
+                  <textarea v-model="selectedIvoBranch.preview" class="custom-input" placeholder="预告片段"></textarea>
+                  <textarea v-model="selectedIvoBranch.full_story" class="custom-input" style="min-height:220px;" placeholder="完整正文"></textarea>
+                </div>
+                <div class="cfg-card" style="margin-top:12px;">
+                  <div class="fg" style="margin-bottom:10px;">
+                    <label class="fl">继续推进方向</label>
+                    <textarea v-model="contPrompt" class="custom-input" placeholder="例如：主角决定背叛皇帝，故事进入一条更黑暗的政治支线"></textarea>
+                  </div>
+                  <div class="section-tools">
+                    <button class="btn btn-primary btn-xs" @click="doContinueBranch(selectedIvoBranch)" :disabled="acting || !contPrompt">在此基础上继续推进</button>
+                    <button class="btn btn-ghost btn-xs" @click="contBranch = -1; contPrompt = ''">清空</button>
+                  </div>
+                </div>
+              </div>
+
+              <div v-else class="ivo-empty-card">
+                先点击世界线中的一个节点，再查看对应平行宇宙内容并继续推进。
+              </div>
+            </template>
+          </div>
+
+          <div v-if="ivoTab === 'chars'">
+            <div v-if="charsLoading" class="loading-page">
+              <div class="spin"></div>
+            </div>
+            <div v-else-if="ivoChars.length === 0" class="empty">
+              <strong>暂无角色状态</strong>
+              先生成支线，角色目标、情绪和事件时间线会自动沉淀下来。
+            </div>
+            <div v-else>
+              <div v-for="c in ivoChars" :key="c.name" class="char-card">
+                <div class="chip-row" style="margin-bottom:10px;">
+                  <span class="chip blue">{{ c.name }}</span>
+                  <span :class="'chip ' + (c.role === 'protagonist' ? 'blue' : c.role === 'antagonist' ? 'amber' : 'gray')">{{ c.role }}</span>
+                  <span class="chip gray">{{ c.emotion }}</span>
+                </div>
+                <div style="color:#d8e1f5;line-height:1.8;">
+                  <div><b>目标：</b>{{ c.goal || '未知' }}</div>
+                  <div><b>位置：</b>{{ c.location || '未知' }}</div>
+                  <div><b>状态：</b>{{ c.status || '未知' }}</div>
+                  <div v-if="c.arc_summary" style="margin-top:8px;"><b>弧线：</b>{{ c.arc_summary }}</div>
+                  <div v-if="c.memories && c.memories.length" style="margin-top:8px;">
+                    <b>关键记忆：</b>
+                    <div v-for="(m, mi) in c.memories" :key="mi" style="margin-top:4px;color:var(--muted);">{{ mi + 1 }}. {{ m }}</div>
+                  </div>
+                </div>
+              </div>
+
+              <div v-if="ivoTimeline.length" class="surface" style="margin-top:16px;">
+                <div class="ivo-label">Timeline</div>
+                <div v-for="e in ivoTimeline" :key="e.id" class="signal-card" style="margin-bottom:10px;">
+                  <b>[R{{ e.round }}.{{ e.sequence }}] {{ e.scene }}</b>
+                  <span>{{ e.outcome || '事件推进中' }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="layout">
+    <aside :class="['sidebar', sidebarOpen ? 'open' : '']">
+      <div class="side-panel">
+        <div class="brand">
+          <div class="brand-mark"><img src="/logo.png" alt="Logo"></div>
+          <div class="brand-copy">
+            <h1>反转刺客</h1>
+            <p>Reverse Assassin</p>
+          </div>
+        </div>
+
+        <div class="nav-section-title">Workspace</div>
+        <div class="nav-list" @click="sidebarOpen = false">
+          <button :class="['nav-item', page === 'stories' ? 'active' : '']" @click="setPage('stories')">
+            <span class="nav-icon">✦</span>
+            <span class="nav-label">故事广场</span>
+            <span class="nav-badge" v-if="stats.total_stories">{{ stats.total_stories }}</span>
+          </button>
+          <button :class="['nav-item', page === 'ring' ? 'active' : '']" @click="setPage('ring')">
+            <span class="nav-icon">◎</span>
+            <span class="nav-label">圈子广场</span>
+          </button>
+          <button :class="['nav-item', page === 'branches' ? 'active' : '']" @click="setPage('branches')">
+            <span class="nav-icon">≋</span>
+            <span class="nav-label">平行宇宙</span>
+            <span class="nav-badge" v-if="stats.total_branches">{{ stats.total_branches }}</span>
+          </button>
+          <button :class="['nav-item', page === 'worldline' ? 'active' : '']" @click="setPage('worldline')">
+            <span class="nav-icon">⌁</span>
+            <span class="nav-label">世界线</span>
+            <span class="nav-badge" v-if="wlStories.length">{{ wlStories.length }}</span>
+          </button>
+        </div>
+
+        <div class="nav-section-title">Ops</div>
+        <div class="nav-list" @click="sidebarOpen = false">
+          <button :class="['nav-item', page === 'control' ? 'active' : '']" @click="setPage('control')">
+            <span class="nav-icon">◌</span>
+            <span class="nav-label">引擎控制</span>
+          </button>
+          <button :class="['nav-item', page === 'config' ? 'active' : '']" @click="setPage('config')">
+            <span class="nav-icon">▣</span>
+            <span class="nav-label">设置</span>
+          </button>
+        </div>
+
+        <div class="side-status">
+          <div class="status-pill">
+            <span :class="['dot', stats.agent_running ? 'live' : '']"></span>
+            {{ stats.agent_running ? 'Agent 运行中' : 'Agent 待机中' }}
+          </div>
+          <div class="account-row">
+            <div class="account-meta">
+              <strong>{{ oauthUser ? (oauthUser.fullname || oauthUser.uid) : '未登录' }}</strong>
+              <span>{{ oauthUser ? '知乎 OAuth 已连接' : '可切换到演示模式' }}</span>
+            </div>
+            <button class="btn btn-ghost btn-xs" @click="oauthUser ? doOAuthLogout() : (loggedIn = false)">{{ oauthUser ? '退出' : '登录' }}</button>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <main class="main" @click="sidebarOpen = false">
+      <div class="mobile-bar">
+        <button class="hamburger" @click.stop="sidebarOpen = !sidebarOpen">☰</button>
+        <div class="eyebrow">Reverse Assassin</div>
+      </div>
+
+      <section class="hero" data-reveal>
+        <div class="hero-top">
+          <div class="hero-copy">
+            <div class="eyebrow">Narrative Intelligence · Agentic Workflow</div>
+            <h2>把知乎故事，演化成可运营的平行宇宙内容系统。</h2>
+            <p>
+              从抓取、解析、支线生成到世界线推进，这不是一个传统后台，而是一个面向内容 AI 产品的操作台。
+              所有动作都围绕故事智能展开：发现可分叉节点、生成新宇宙、沉淀角色状态，并把结果发布回社区。
+            </p>
+            <div class="hero-actions">
+              <button class="btn btn-primary btn-lg" @click="setPage('stories'); doAction('discover')" :disabled="acting">
+                <span v-if="acting" class="spinner-sm"></span>
+                立即抓取故事
+              </button>
+              <button class="btn btn-ghost btn-lg" @click="setPage('worldline')">查看世界线图谱</button>
+              <label class="toggle" :class="demoMode ? 'on' : ''" @click="toggleDemo">
+                <span class="toggle-track"><span class="toggle-thumb"></span></span>
+                Demo 模式
+              </label>
+            </div>
+          </div>
+          <div class="surface" style="min-width:min(320px,100%);max-width:360px;">
+            <div class="ivo-label">Engine Summary</div>
+            <div class="stack">
+              <div class="signal-card">
+                <b>{{ stats.total_stories || 0 }}</b>
+                <span>累计抓取故事</span>
+              </div>
+              <div class="signal-card">
+                <b>{{ stats.total_branches || 0 }}</b>
+                <span>已生成支线宇宙</span>
+              </div>
+              <div class="signal-card">
+                <b>{{ stats.unlocked_branches || 0 }}</b>
+                <span>已解锁可继续推进的分支</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="hero-grid">
+          <div class="metric-card">
+            <div class="metric-label">分析完成率</div>
+            <div class="metric-value">{{ completionRate }}%</div>
+            <div class="metric-sub">已解析 {{ stats.analyzed_stories || 0 }} / {{ stats.total_stories || 0 }}</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-label">活跃创作势能</div>
+            <div class="metric-value">{{ stats.active_pins || 0 }}</div>
+            <div class="metric-sub">已发布到圈子的动态分支</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-label">内容安全拦截</div>
+            <div class="metric-value">{{ blockedCount }}</div>
+            <div class="metric-sub">近现代史内容会被自动拦截</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-label">AI 配置状态</div>
+            <div class="metric-value">{{ llmConfigured ? 'Ready' : 'Pending' }}</div>
+            <div class="metric-sub">{{ llmConfigured ? 'LLM 接口已接入' : '请先完成模型配置' }}</div>
+          </div>
+        </div>
+      </section>
+
+      <div v-if="pageLoading" class="section" data-reveal>
+        <div class="surface">
+          <div class="section-head">
+            <div>
+              <h3>加载中</h3>
+              <p>正在同步故事、分支和状态数据。</p>
+            </div>
+          </div>
+          <div class="stack">
+            <div class="skeleton"></div>
+            <div class="skeleton"></div>
+            <div class="skeleton"></div>
+          </div>
+        </div>
+      </div>
+
+      <template v-if="!pageLoading">
+        <section v-if="page === 'stories'" class="section story-shell" data-reveal>
+          <div class="story-board">
+            <div class="page-banner">
+              <div>
+                <h3>故事广场</h3>
+                <p>像知乎内容页一样把重点放在阅读与筛选，不再用同一种大卡片把整个页面撑满。</p>
+              </div>
+              <div class="banner-stats">
+                <div class="mini-stat">
+                  <b>{{ stats.total_stories || 0 }}</b>
+                  <span>故事样本</span>
+                </div>
+                <div class="mini-stat">
+                  <b>{{ stats.analyzed_stories || 0 }}</b>
+                  <span>已解析</span>
+                </div>
+                <div class="mini-stat">
+                  <b>{{ stats.total_branches || 0 }}</b>
+                  <span>分支资产</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="story-kpis">
+              <div class="story-kpi">
+                <b>{{ completionRate }}%</b>
+                <span>分析完成率</span>
+              </div>
+              <div class="story-kpi">
+                <b>{{ blockedCount }}</b>
+                <span>安全拦截数</span>
+              </div>
+              <div class="story-kpi">
+                <b>{{ stats.unlocked_branches || 0 }}</b>
+                <span>可继续推进</span>
+              </div>
+            </div>
+
+            <div class="surface">
+              <div class="section-head">
+                <div>
+                  <h3>故事列表</h3>
+                  <p>从左到右先看标题与摘要，再决定是否进入支线工作台。</p>
+                </div>
+                <div class="section-tools">
+                  <div class="story-switch">
+                    <button :class="['btn btn-xs', storyTab === 'mine' ? 'active' : '']" @click="storyTab = 'mine'">我的故事</button>
+                    <button :class="['btn btn-xs', storyTab === 'discover' ? 'active' : '']" @click="storyTab = 'discover'">发现广场</button>
+                  </div>
+                  <button class="btn btn-primary btn-sm" @click="doAction('discover')" :disabled="acting">抓取知乎故事</button>
+                </div>
+              </div>
+
+              <div v-if="storiesError" class="err-banner">
+                {{ storiesError }}
+                <button class="btn btn-danger btn-xs" @click="retry">重试</button>
+              </div>
+
+              <div v-if="filteredStories.length === 0" class="empty">
+                <strong>还没有故事样本</strong>
+                点击右上角按钮，从知乎抓取故事并进入分析流程。
+              </div>
+
+              <div v-else class="story-list">
+                <article v-for="s in filteredStories" :key="s.work_id" class="story-card">
+                  <div v-if="demoMode && storyTab === 'discover'" class="chip amber" style="position:absolute;top:16px;right:16px;">路演沙盒</div>
+                  <div class="story-head">
+                    <div>
+                      <h4 class="story-title">{{ s.title }}</h4>
+                      <div class="meta">
+                        <span>{{ s.author || '佚名' }}</span>
+                        <span>{{ fmtTime(s.created_at) }}</span>
+                        <span v-if="(s.analysis_result || {}).classification" :class="'chip class-chip ' + (s.analysis_result || {}).classification">
+                          {{ classLabel((s.analysis_result || {}).classification) }}
+                        </span>
+                      </div>
+                    </div>
+                    <span :class="'chip status-chip ' + s.status">{{ statusLabel(s.status) }}</span>
+                  </div>
+
+                  <div class="story-summary">
+                    {{ s.analysis_result?.worldview || s.content?.slice(0, 180) || '点击解析按钮，让 AI 抽取世界观、角色和分支枢纽。' }}
+                  </div>
+
+                  <div class="story-actions">
+                    <div class="story-actions-left">
+                      <template v-if="(s._branches || []).length">
+                        <span v-for="b in s._branches" :key="b.id" :class="'chip ' + (b.unlocked ? 'green' : 'amber')">{{ b.tag }} {{ b.title?.slice(0, 10) }}</span>
+                      </template>
+                    </div>
+                    <div class="section-tools">
+                      <button v-if="s.status === 'pending'" class="btn btn-primary btn-xs" @click="analyzeOne(s.work_id)" :disabled="acting">AI 解析</button>
+                      <button v-else-if="s.status === 'analyzed'" class="btn btn-primary btn-xs" @click="openIvo(s)">生成支线</button>
+                      <button v-else-if="s.status === 'branched'" class="btn btn-ghost btn-xs" @click="openIvo(s)">打开工作台</button>
+                      <span v-else-if="s.status === 'blocked'" class="chip gray">近现代史 · 已拦截</span>
+                    </div>
+                  </div>
+                </article>
+              </div>
+            </div>
+          </div>
+
+          <div class="aside-column">
+            <div class="plain-panel">
+              <h4>Agent 状态</h4>
+              <p>这一列保留轻量摘要，不再用大面积装饰卡片抢主内容。</p>
+            </div>
+            <div class="panel-list">
+              <div class="signal-card">
+                <b>{{ stats.agent_running ? '运行中' : '待机中' }}</b>
+                <span>执行器状态</span>
+              </div>
+              <div class="signal-card">
+                <b>{{ stats.pending_stories || 0 }}</b>
+                <span>待解析故事</span>
+              </div>
+              <div class="signal-card">
+                <b>{{ stats.branched_stories || 0 }}</b>
+                <span>已形成世界线</span>
+              </div>
+            </div>
+            <div class="section-tools">
+              <button v-if="!stats.agent_running" class="btn btn-ghost btn-sm" @click="ctrlAgent('start')">启动 Agent</button>
+              <button v-if="stats.agent_running" class="btn btn-danger btn-sm" @click="ctrlAgent('stop')">停止 Agent</button>
+              <button class="btn btn-ghost btn-sm" @click="doAction('analyze')">批量解析</button>
+            </div>
+            <div class="plain-panel">
+              <h4>叙事引擎说明</h4>
+              <p>系统会先抓取故事，再识别可安全分支题材，最后生成支线并沉淀角色状态。</p>
+            </div>
+          </div>
+        </section>
+
+        <section v-if="page === 'ring'" class="section feed-layout" data-reveal>
+          <div class="feed-column">
+            <div class="page-banner compact">
+              <div>
+                <h3>圈子广场</h3>
+                <p>用轻量流式阅读布局展示社区反馈，更接近知乎的信息流而不是控制台卡片墙。</p>
+              </div>
+              <div class="section-tools">
+                <button class="btn btn-ghost btn-sm" @click="loadRing">刷新内容</button>
+              </div>
+            </div>
+
+            <div v-if="ringLoading" class="loading-page"><div class="spin"></div></div>
+            <div v-else-if="ringError" class="err-banner">
+              {{ ringError }}
+              <button class="btn btn-danger btn-xs" @click="loadRing">重试</button>
+            </div>
+            <div v-else-if="ringContents.length === 0" class="empty">
+              <strong>暂无圈子内容</strong>
+              当支线发布到圈子后，这里会出现故事扩散的动态反馈。
+            </div>
+            <div v-else class="ring-stream">
+              <article v-for="rc in ringContents" :key="rc.pin_id" class="ring-post">
+                <div class="rp-top">
+                  <div class="rp-avatar">{{ (rc.author_name || '?')[0] }}</div>
+                  <span class="rp-author">{{ rc.author_name }}</span>
+                  <span class="rp-time">{{ fmtTime(rc.publish_time) }}</span>
+                </div>
+                <div class="rp-content">{{ stripHtml(rc.content)?.slice(0, 300) }}</div>
+              </article>
+            </div>
+          </div>
+
+          <div class="side-feed">
+            <div class="plain-panel">
+              <h4>内容回流</h4>
+              <p>这里强调“支线发布后会回流到社区”，适合作为路演时的闭环说明。</p>
+            </div>
+            <div class="signal-card">
+              <b>{{ ringContents.length }}</b>
+              <span>当前圈子条目</span>
+            </div>
+            <div class="signal-card">
+              <b>{{ stats.active_pins || 0 }}</b>
+              <span>活跃发布数</span>
+            </div>
+          </div>
+        </section>
+
+        <section v-if="page === 'branches'" class="section" data-reveal>
+          <div class="page-banner compact" style="margin-bottom:16px;">
+            <div>
+              <h3>平行宇宙</h3>
+              <p>这里改成内容资产库视角，先看总体规模，再往下翻分支卡片。</p>
+            </div>
+            <div class="banner-stats">
+              <div class="mini-stat">
+                <b>{{ branches.length }}</b>
+                <span>分支总数</span>
+              </div>
+              <div class="mini-stat">
+                <b>{{ stats.unlocked_branches || 0 }}</b>
+                <span>已解锁</span>
+              </div>
+            </div>
+          </div>
+
+          <div v-if="branchesError" class="err-banner">
+            {{ branchesError }}
+            <button class="btn btn-danger btn-xs" @click="retry">重试</button>
+          </div>
+          <div v-else-if="branches.length === 0" class="empty">
+            <strong>还没有分支</strong>
+            先在故事广场中解析故事，再打开工作台生成平行宇宙。
+          </div>
+          <div v-else class="branches-stream">
+            <article v-for="b in branches" :key="b.id" class="br-card" @click="openBranchStory(b)">
+              <div class="chip-row">
+                <span :class="'chip ' + (b.unlocked ? 'green' : 'amber')">{{ b.unlocked ? '已解锁' : '待解锁' }}</span>
+                <span class="chip blue">{{ b.keyword }}</span>
+              </div>
+              <h4 style="margin:14px 0 8px;font-size:1.05rem;">{{ b.tag }} · {{ b.title }}</h4>
+              <div style="color:#425466;line-height:1.8;">{{ b.preview?.slice(0, 100) }}...</div>
+            </article>
+          </div>
+        </section>
+
+        <section v-if="page === 'worldline'" class="section worldline-shell" data-reveal>
+          <div class="page-banner compact">
+            <div>
+              <h3>世界线</h3>
+              <p>这个页面保留图谱主导的视觉重心，不再套额外大卡片，让世界线本身成为主角。</p>
+            </div>
+            <div class="section-tools">
+              <select v-model="wlStoryFilter" @change="loadWorldlineTree" class="select" style="min-width:240px;">
+                <option value="">选择故事...</option>
+                <option v-for="s in wlStories" :value="s.story_work_id">{{ s.story_title }}</option>
+              </select>
+              <button class="btn btn-ghost btn-sm" @click="loadWorldlines">刷新</button>
+              <div class="wl-toolbar-meta">
+                <span class="chip gray zoom-chip">{{ Math.round(wlTransform.scale * 100) }}%</span>
+                <button class="btn btn-ghost btn-xs" @click="resetCanvasTransform('main')">重置视图</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="worldline-panel">
+            <div v-if="!wlTreeData" class="empty">
+              <strong>暂无世界线树</strong>
+              选择一个已解析故事，或先生成分支后再查看世界线图谱。
+            </div>
+
+            <template v-if="wlTreeData">
+              <div class="wl-legend">
+                <span><span class="dot live" style="width:7px;height:7px;box-shadow:none;background:var(--brand);"></span>故事原点</span>
+                <span><span class="dot live" style="width:7px;height:7px;box-shadow:none;background:var(--ok);"></span>治愈 / 反转</span>
+                <span><span class="dot live" style="width:7px;height:7px;box-shadow:none;background:var(--warn);"></span>黑化 / 阴谋</span>
+                <span><span class="dot live" style="width:7px;height:7px;box-shadow:none;background:var(--violet);"></span>史诗 / 其他</span>
+              </div>
+
+              <div
+                class="wl-canvas"
+                :class="{ dragging: wlDrag.dragging }"
+                :style="{ height: wlCanvasHeight + 'px' }"
+                ref="wlCanvas"
+                @wheel.prevent="handleCanvasWheel($event, 'main')"
+                @mousedown="startCanvasDrag($event, 'main')"
+              >
+                <div
+                  class="wl-viewport"
+                  :style="viewportStyle('main')"
+                >
+                  <svg class="wl-svg" :width="wlViewport.width" :height="wlViewport.height" v-html="wlSvgLines"></svg>
+                  <div
+                    v-for="n in wlLayoutNodes"
+                    :key="n.id"
+                    class="wl-node-card"
+                    :class="{ root: n.depth === 0, selected: wlSelectedNode === n.id }"
+                    :style="{ left: n.x + 'px', top: n.y + 'px', transform: 'translate(-50%,0)' }"
+                    @click.stop="wlSelectedNode = wlSelectedNode === n.id ? -1 : n.id"
+                  >
+                    <span class="wl-nc-tag" :style="'background:' + tagColor(n.tag)">{{ n.tag }}</span>
+                    <div class="wl-nc-title">{{ n.node_title }}</div>
+                    <div class="wl-nc-summary">{{ n.timeline_summary }}</div>
+                    <div v-if="wlSelectedNode === n.id" class="wl-nc-actions">
+                      <button class="btn btn-primary btn-xs" @click.stop="openWlNodeStory(n)">查看内容</button>
+                      <button v-if="n.branch_id > 0" class="btn btn-ghost btn-xs" @click.stop="continueFromWlNode(n)">继续推进</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </template>
+          </div>
+        </section>
+
+        <section v-if="page === 'control'" class="section control-layout" data-reveal>
+          <div class="action-stack">
+            <div class="action-card">
+              <h4>引擎控制</h4>
+              <p>这一栏是动作面板，和中间的日志区分开，不再共用同一张大卡片。</p>
+              <div class="section-tools">
+                <button v-if="!stats.agent_running" class="btn btn-primary btn-sm" @click="ctrlAgent('start')">启动 Agent</button>
+                <button v-else class="btn btn-danger btn-sm" @click="ctrlAgent('stop')">停止 Agent</button>
+              </div>
+            </div>
+            <div class="action-card">
+              <h4>快速动作</h4>
+              <p>适合现场手动触发抓取、解析和分支生成。</p>
+              <div class="action-stack">
+                <button class="btn btn-ghost btn-sm" @click="doAction('discover')">抓取故事</button>
+                <button class="btn btn-ghost btn-sm" @click="doAction('analyze')">批量解析</button>
+                <button class="btn btn-ghost btn-sm" @click="doAction('trigger')">触发分支</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="surface">
+            <div class="section-head">
+              <div>
+                <h3>实时日志</h3>
+                <p>中间主区只保留日志流，让信息密度和阅读效率更清晰。</p>
+              </div>
+            </div>
+            <div class="log-box">
+              <div v-for="(l, i) in logLines" :key="i" class="log-line">
+                <span>{{ l.ts }}</span>
+                <span style="color:var(--brand);font-weight:700;">{{ l.module }}</span>
+                <span>{{ l.msg }}</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="panel-list">
+            <div class="plain-panel">
+              <h4>流水线概览</h4>
+              <p>右侧显示摘要指标，不再与日志共用一个大容器。</p>
+            </div>
+            <div class="signal-card">
+              <b>{{ stats.total_stories || 0 }}</b>
+              <span>输入样本总量</span>
+            </div>
+            <div class="signal-card">
+              <b>{{ stats.analyzed_stories || 0 }}</b>
+              <span>AI 已解析故事</span>
+            </div>
+            <div class="signal-card">
+              <b>{{ stats.total_branches || 0 }}</b>
+              <span>已沉淀内容资产</span>
+            </div>
+          </div>
+        </section>
+
+        <section v-if="page === 'config'" class="section config-layout" data-reveal>
+          <div class="settings-intro">
+            <h3>设置</h3>
+            <p>把说明区和表单区拆开，视觉上更接近知乎创作后台的轻量信息布局，而不是一整页大盒子。</p>
+            <div class="panel-list" style="margin-top:18px;">
+              <div class="signal-card">
+                <b>{{ oauthUser ? '已授权' : '未授权' }}</b>
+                <span>知乎 OAuth 状态</span>
+              </div>
+              <div class="signal-card">
+                <b>{{ llmConfigured ? '已连接' : '待配置' }}</b>
+                <span>LLM API 状态</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="cfg-grid">
+            <div class="cfg-card">
+              <div class="cfg-head">
+                <h4>知乎 OAuth</h4>
+                <span v-if="oauthUser" class="chip green">已授权</span>
+              </div>
+              <div class="fg">
+                <label class="fl">App ID</label>
+                <input v-model="oauthForm.app_id" class="fi" placeholder="黑客松项目 App ID">
+              </div>
+              <div class="fg">
+                <label class="fl">App Key</label>
+                <input v-model="oauthForm.app_key" class="fi" placeholder="黑客松项目 App Key">
+              </div>
+              <button class="btn btn-primary btn-sm" @click="saveOAuth" :disabled="saving">保存 OAuth 配置</button>
+              <div class="fh">创建知乎黑客松项目后自动生成，用于 OAuth 授权登录。</div>
+            </div>
+
+            <div class="cfg-card">
+              <div class="cfg-head">
+                <h4>LLM API</h4>
+                <span v-if="llmConfigured" class="chip green">已连接</span>
+              </div>
+              <div class="fg">
+                <label class="fl">API Key</label>
+                <div class="field-inline">
+                  <input :type="showKey ? 'text' : 'password'" v-model="llmForm.api_key" class="fi" placeholder="sk-...">
+                  <button class="btn btn-ghost btn-sm" @click="showKey = !showKey">{{ showKey ? '隐藏' : '显示' }}</button>
+                </div>
+              </div>
+              <div class="fg">
+                <label class="fl">Base URL</label>
+                <input v-model="llmForm.base_url" class="fi" placeholder="https://api.deepseek.com">
+              </div>
+              <div class="fg">
+                <label class="fl">模型名称</label>
+                <input v-model="llmForm.model" class="fi" placeholder="deepseek-chat">
+              </div>
+              <button class="btn btn-primary" @click="saveLLM" :disabled="saving" style="width:100%;">{{ saving ? '保存中...' : '保存配置' }}</button>
+              <div v-if="saveMsg" style="margin-top:10px;color:var(--ok);">{{ saveMsg }}</div>
+            </div>
+          </div>
+        </section>
+      </template>
+    </main>
+  </div>
 </div>
 
 <script>
-const{createApp,ref,computed,onMounted,onUnmounted}=Vue;createApp({setup(){
-	const NS=localStorage.getItem('ra_ns')||(localStorage.setItem('ra_ns',(crypto.randomUUID?crypto.randomUUID():'ns_'+Date.now()+'_'+Math.random().toString(36).slice(2))),localStorage.getItem('ra_ns'));
-const A='/api',page=ref('stories'),sidebarOpen=ref(false),acting=ref(false);
-const loggedIn=ref(false),oauthUser=ref(null),loginMsg=ref('');
-const stats=ref({}),config=ref({}),settings=ref({});
-const llmForm=ref({api_key:'',base_url:'',model:''}),showKey=ref(false),saving=ref(false),saveMsg=ref('');
-const oauthForm=ref({app_id:'',app_key:''});
-	const zhihuForm=ref({token:'',secret:''});
-const llmConfigured=computed(()=>!!settings.value.llm_api_key_masked||!!llmForm.value.api_key);
-	const zhihuConfigured=computed(()=>!!config.value.zhihu_configured||!!oauthForm.value.app_key||!!stats.value.llm_configured);
-const toasts=ref([]);let tid=0;const toast=(m,t='info')=>{const id=++tid;toasts.value.push({id,msg:m,type:t});setTimeout(()=>{toasts.value=toasts.value.filter(x=>x.id!==id)},3500)};
-const stories=ref([]),branches=ref([]),ringContents=ref([]);
-	const pageLoading=ref(true),storiesError=ref(''),branchesError=ref(''),ringError=ref(''),ringLoading=ref(false);
-const ivo=ref(null),ivoStory=ref(null),ivoBranches=ref([]),ivoPublished=ref(false),ivoTab=ref('branches'),ivoChars=ref([]),ivoTimeline=ref([]),charsLoading=ref(false),selPivot=ref(-1),customPrompt=ref(''),contBranch=ref(-1),contPrompt=ref(''),freeScene=ref(''),freeDirection=ref('');
-const demoMode=ref(true),storyTab=ref('mine');const logLines=ref([]);
-	const wlStories=ref([]),wlExpanded=ref(-1);
-const addLog=(m,msg)=>{const ts=new Date().toTimeString().slice(0,8);logLines.value.unshift({ts,module:m,msg});if(logLines.value.length>80)logLines.value.length=80};
-const api=async(p,o)=>{o=o||{};o.headers=o.headers||{};o.headers['X-Namespace']=NS;try{const r=await fetch(A+p,o);const j=await r.json();return j}catch(e){return{status:1,msg:''+e.message}}};
-const ls=async()=>{const j=await api('/status');if(j.status===0)stats.value=j.data;else storiesError.value=j.msg||'获取状态失败'};
-const lc=async()=>{const j=await api('/config');if(j.status===0)config.value=j.data};
-const lset=async()=>{const j=await api('/settings');if(j.status===0){settings.value=j.data||{};if(!llmForm.value.base_url)llmForm.value.base_url=settings.value.llm_base_url||'';if(!llmForm.value.model)llmForm.value.model=settings.value.llm_model||'';if(!oauthForm.value.app_id)oauthForm.value.app_id=settings.value.oauth_app_id||'';if(!oauthForm.value.app_key)oauthForm.value.app_key=settings.value.oauth_app_key||'';loggedIn.value=!!(j.data||{}).oauth_access_token}};
-const loadS=async()=>{storiesError.value='';const j=await api('/stories?page_size=200');if(j.status===0){stories.value=(j.data.items||[]).map(s=>({...s,_branches:[]}));for(const s of stories.value){const b=await api('/branches?story_id='+s.work_id+'&page_size=50');if(b.status===0)s._branches=b.data.items||[]}}else{storiesError.value=j.msg||'加载故事失败'}};
-const loadB=async()=>{branchesError.value='';const j=await api('/branches?page_size=200');if(j.status===0)branches.value=j.data.items||[];else branchesError.value=j.msg||'加载分支失败'};
-const loadRing=async()=>{ringLoading.value=true;ringError.value='';ringContents.value=[];const j=await api('/ring');if(j.status===0)ringContents.value=j.data?.contents||[];else ringError.value=j.msg||'加载圈子失败';ringLoading.value=false};
-const rf=async()=>{pageLoading.value=true;await Promise.all([ls(),loadS(),loadB()]);pageLoading.value=false};
-const retry=()=>{rf()};
-	const loadOAuthUser=async()=>{const j=await api('/oauth/user');if(j.status===0)oauthUser.value=j.data};
-const oauthLogin=async()=>{let appId=oauthForm.value.app_id;if(!appId){appId="48-37-14-56"}await api('/settings',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({oauth_app_id:appId,oauth_app_key:oauthForm.value.app_key})});const j=await api('/oauth/authorize?app_id='+appId);if(j.status===0&&j.data.auth_url)window.location.href=j.data.auth_url;else toast('获取授权链接失败','err')};
-const skipLogin=()=>{loggedIn.value=true;toast('演示模式','info')};
-const doOAuthLogout=async()=>{await api('/oauth/logout',{method:'POST'});oauthUser.value=null;loggedIn.value=false;toast('已退出','info')};
-const saveOAuth=async()=>{const b={};if(oauthForm.value.app_id)b.oauth_app_id=oauthForm.value.app_id;if(oauthForm.value.app_key)b.oauth_app_key=oauthForm.value.app_key;await api('/settings',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(b)});toast('OAuth 配置已保存','ok')};
-const doAction=async(n)=>{acting.value=true;const j=await api('/action/'+n,{method:'POST'});toast(j.status===0?'完成':(j.msg||'失败'),j.status===0?'ok':'err');acting.value=false;await rf()};
-const analyzeOne=async(wid)=>{acting.value=true;const j=await api('/action/analyze_one?work_id='+wid,{method:'POST'});toast(j.status===0?'解析完成':(j.msg||'解析失败'),j.status===0?'ok':'err');acting.value=false;await rf()};
-const ctrlAgent=async(a)=>{const j=await api('/action/agent?action='+a,{method:'POST'});toast(j.status===0?'ok':j.msg,j.status===0?'ok':'err');await ls()};
-const saveZhihu=async()=>{const b={};if(zhihuForm.value.token)b.zhihu_token=zhihuForm.value.token;if(zhihuForm.value.secret)b.zhihu_secret=zhihuForm.value.secret;const j=await api('/settings',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(b)});toast(j.status===0?'知乎配置已保存':('保存失败: '+(j.msg||'')),j.status===0?'ok':'err');if(j.status===0){zhihuForm.value.token='';zhihuForm.value.secret='';await lset();await lc()}};
-	const saveLLM=async()=>{saving.value=true;const b={};if(llmForm.value.api_key)b.llm_api_key=llmForm.value.api_key;if(llmForm.value.base_url)b.llm_base_url=llmForm.value.base_url;if(llmForm.value.model)b.llm_model=llmForm.value.model;const j=await api('/settings',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(b)});saveMsg.value=j.status===0?'已保存':'保存失败';if(j.status===0){llmForm.value.api_key='';await lset();await lc()}saving.value=false;setTimeout(()=>{saveMsg.value=''},4000)};
-const openIvo=async(s)=>{const j=await api('/stories/'+s.work_id);if(j.status===0){ivoStory.value=j.data.story;ivoBranches.value=j.data.branches||[];ivoPublished.value=(j.data.branches||[]).some(b=>b.pin_id);ivo.value=true}};
-const genBranches=async()=>{if(!ivoStory.value?.work_id)return;acting.value=true;const w=ivoStory.value.work_id;let url='/action/generate?work_id='+w+'&publish=false';if(selPivot.value>=0)url+='&pivot_index='+selPivot.value;const body=customPrompt.value?{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({custom_prompt:customPrompt.value})}:{method:'POST'};const j=await api(url,body);toast(j.status===0?('生成了 '+j.data.branches+' 条支线'):(j.msg||'失败'),j.status===0?'ok':'err');const r=await api('/stories/'+w);if(r.status===0){ivoStory.value=r.data.story;ivoBranches.value=r.data.branches||[]}acting.value=false;customPrompt.value='';selPivot.value=-1;await rf()};
-const genFreeBranch=async()=>{if(!ivoStory.value?.work_id||!freeScene.value)return;acting.value=true;const w=ivoStory.value.work_id;const body={method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({scene:freeScene.value,custom_prompt:freeDirection.value||freeScene.value})};const j=await api('/action/generate?work_id='+w+'&publish=false',body);toast(j.status===0?('生成了 '+j.data.branches+' 条分支'):(j.msg||'失败'),j.status===0?'ok':'err');if(j.status===0){const r=await api('/stories/'+w);if(r.status===0){ivoStory.value=r.data.story;ivoBranches.value=r.data.branches||[]}}acting.value=false;freeScene.value='';freeDirection.value='';await rf()};
-	const startContinueBranch=(b)=>{contBranch.value=b.id;contPrompt.value=''};
-	const doContinueBranch=async(b)=>{if(!contPrompt.value){toast('请先输入推进方向','err');return};acting.value=true;const j=await api('/action/continue_branch?branch_id='+b.id,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({prompt:contPrompt.value})});toast(j.status===0?('生成了 '+j.data.branches+' 条延续分支'):(j.msg||'失败'),j.status===0?'ok':'err');if(j.status===0){const r=await api('/stories/'+b.story_work_id);if(r.status===0){ivoBranches.value=r.data.branches||[]}}acting.value=false;contBranch.value=-1;contPrompt.value='';await rf()};
-	const publishBranches=async()=>{if(!ivoStory.value?.work_id)return;acting.value=true;const j=await api('/action/publish_branches?work_id='+ivoStory.value.work_id,{method:'POST'});toast(j.status===0?'已发布':(j.msg||'失败'),j.status===0?'ok':'err');if(j.status===0)ivoPublished.value=true;acting.value=false};
-const toggleDemo=async()=>{demoMode.value=!demoMode.value;await api('/demo',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({Enabled:demoMode.value})})};
-const loadIvoState=async()=>{if(!ivoStory.value?.work_id)return;charsLoading.value=true;const j=await api('/states/'+ivoStory.value.work_id);if(j.status===0){ivoChars.value=j.data.characters||[];ivoTimeline.value=j.data.timeline||[]}charsLoading.value=false};
-	const openBranchStory=(b)=>{openIvo({work_id:b.story_work_id})};
-const filteredStories=computed(()=>{if(storyTab.value==='mine')return stories.value.filter(s=>s.status!=='blocked');return demoMode.value?stories.value:[]});
-const classLabel=c=>c==='fiction'?'虚构故事':c==='real_history'?'历史纪实':c==='real_modern'?'近现代史':'';
-const statusLabel=s=>s==='pending'?'待解析':s==='analyzed'?'已解析':s==='branched'?'已分支':s==='blocked'?'已拦截':s;
-const stripHtml=s=>{const d=document.createElement('div');d.innerHTML=s||'';return d.textContent||''};
-let evt=null;const wlTreeData=ref(null),wlLayoutNodes=ref([]),wlSvgLines=ref(''),wlCanvasHeight=ref(600),wlSelectedNode=ref(-1),wlStoryFilter=ref(''),wlCanvas=ref(null);
-	const loadWorldlines=async()=>{const ss=await api('/stories?page_size=50');if(ss.status===0){const results=[];for(const s of ss.data.items||[]){if(s.status==='analyzed'||s.status==='branched'){const j=await api('/worldline/'+s.work_id);if(j.status===0&&(j.data.nodes||[]).length>0)results.push(j.data)}}wlStories.value=results;if(results.length>0&&!wlStoryFilter.value){wlStoryFilter.value=results[0].story_work_id;loadWorldlineTree()}}};
-	const loadWorldlineTree=async()=>{if(!wlStoryFilter.value)return;const j=await api('/worldline/'+wlStoryFilter.value);if(j.status===0&&j.data.nodes.length>0){wlTreeData.value=j.data;layoutTree(j.data.nodes,j.data.edges)}else{wlTreeData.value=null;wlLayoutNodes.value=[];wlSvgLines.value=''}};
-	const layoutTree=(nodes,edges)=>{
-		const children={};edges.forEach(e=>{if(!children[e.from])children[e.from]=[];children[e.from].push(e.to)});
-		const depthNodes={};nodes.forEach(n=>{if(!depthNodes[n.depth])depthNodes[n.depth]=[];depthNodes[n.depth].push(n)});
-		const maxDepth=Math.max(...nodes.map(n=>n.depth),0);
-		const nodeW=200,nodeH=110,hGap=90,vGap=140;
-		const positions={};
-		// Assign y by depth, x by horizontal spread
-		for(let d=0;d<=maxDepth;d++){
-			const levelNodes=depthNodes[d]||[];
-			const totalW=levelNodes.length*nodeW+(levelNodes.length-1)*hGap;
-			const startX=-totalW/2;
-			levelNodes.forEach((n,i)=>{
-				positions[n.id]={x:startX+i*(nodeW+hGap)+nodeW/2,y:d*vGap};
-			});
-		}
-		// Center-align: shift all x so root is at 0
-		const rootNode=nodes.find(n=>n.depth===0);
-		const rootX=rootNode?positions[rootNode.id]?.x||0:0;
-		Object.keys(positions).forEach(id=>{positions[id].x-=rootX});
-		// Find min/max x for canvas sizing
-		const allX=Object.values(positions).map(p=>p.x);
-		const minX=Math.min(...allX),maxX=Math.max(...allX);
-		const canvasW=Math.max(maxX-minX+nodeW+40,800);
-		const canvasH=(maxDepth+1)*vGap+nodeH+40;
-		wlCanvasHeight.value=canvasH;
-		// Convert to percentage positions
-		const layoutNodes=nodes.map(n=>{
-			const p=positions[n.id]||{x:0,y:0};
-			return{...n,x:((p.x-minX+nodeW/2+20)/canvasW*100),y:p.y};
-		});
-		wlLayoutNodes.value=layoutNodes;
-		// Build SVG lines
-		let svg='';
-		const px=(v)=>(v-minX+nodeW/2+20)/canvasW*100;
-		const py=(v)=>(v+nodeH)/canvasH*100;
-		const pyTop=(v)=>v/canvasH*100;
-		edges.forEach(e=>{
-			const from=positions[e.from],to=positions[e.to];
-			if(!from||!to)return;
-			const x1=px(from.x),y1=py(from.y),x2=px(to.x),y2=pyTop(to.y);
-			const midY=(y1+y2)/2;
-			const cls=nodes.find(n=>n.id===e.from)?.depth===0?'root-line':'';
-			svg+=`<path d="M${x1} ${y1} C${x1} ${midY}, ${x2} ${midY}, ${x2} ${y2}" class="${cls}"/>`;
-		});
-		wlSvgLines.value=svg;
-	};
-	const tagColor=(t)=>{
-		if(t==='origin')return'var(--blue-l)';
-		if(t==='黑化线'||t==='阴谋线'||t==='暗涌线'||t==='黑洞线')return'var(--amber-bg)';
-		if(t==='治愈线'||t==='反转线'||t==='日常线')return'var(--green-bg)';
-		return'rgba(108,63,214,.1)';
-	};
-	const openWlNodeStory=async(n)=>{if(n.branch_id>0){const branches=await api('/branches?page_size=200');if(branches.status===0){const b=(branches.data.items||[]).find(x=>x.id===n.branch_id);if(b)openIvo({work_id:b.story_work_id})}}else{openIvo({work_id:n.story_work_id})}};
-	const continueFromWlNode=async(n)=>{if(n.branch_id>0){const branches=await api('/branches?page_size=200');if(branches.status===0){const b=(branches.data.items||[]).find(x=>x.id===n.branch_id);if(b){await openIvo({work_id:b.story_work_id});setTimeout(()=>{contBranch.value=b.id;contPrompt.value='';startContinueBranch(b);toast('请输入推进方向后点击生成','info')},800)}}}else{openIvo({work_id:n.story_work_id})}};
-	const sse=()=>{evt=new EventSource(A+'/events');evt.addEventListener('log',e=>{try{const d=JSON.parse(e.data).data||{};addLog(d.module||'',d.msg||'')}catch(_){}});evt.onerror=()=>{evt.close();setTimeout(sse,5000)}};
-let t;onMounted(async()=>{await lset();await lc();pageLoading.value=true;await rf();loadOAuthUser();sse();t=setInterval(rf,25000);const url=new URL(location.href);if(url.searchParams.get('oauth')==='success'){loggedIn.value=true;loadOAuthUser();toast('授权成功','ok');window.history.replaceState({},'','/')}});onUnmounted(()=>{clearInterval(t);if(evt)evt.close()});
-const fmtTime=ts=>ts?new Date(ts*1000).toLocaleDateString('zh-CN'):'—';
-return{page,sidebarOpen,acting,pageLoading,wlStories,wlTreeData,wlLayoutNodes,wlSvgLines,wlCanvasHeight,wlSelectedNode,wlStoryFilter,wlCanvas,storiesError,branchesError,ringError,ringLoading,loggedIn,oauthUser,loginMsg,oauthForm,zhihuForm,demoMode,storyTab,ivoTab,ivoChars,ivoTimeline,charsLoading,selPivot,customPrompt,stats,config,settings,llmForm,showKey,saving,saveMsg,llmConfigured,zhihuConfigured,toasts,stories,branches,ringContents,ivo,ivoStory,ivoBranches,ivoPublished,logLines,filteredStories,loadRing,retry,loadIvoState,oauthLogin,skipLogin,doOAuthLogout,saveZhihu,saveOAuth,doAction,analyzeOne,ctrlAgent,saveLLM,openIvo,genBranches,genFreeBranch,loadWorldlines,loadWorldlineTree,tagColor,openWlNodeStory,continueFromWlNode,publishBranches,startContinueBranch,doContinueBranch,contBranch,contPrompt,toggleDemo,openBranchStory,rf,classLabel,statusLabel,stripHtml,fmtTime,toast};
-}}).mount('#app');</script></body></html>
+const { createApp, ref, computed, watch, onMounted, onUnmounted, nextTick } = Vue;
+
+createApp({
+  setup() {
+    const A = "/api";
+    const page = ref("stories");
+    const sidebarOpen = ref(false);
+    const acting = ref(false);
+
+    const loggedIn = ref(false);
+    const oauthUser = ref(null);
+    const loginMsg = ref("");
+
+    const stats = ref({});
+    const config = ref({});
+    const settings = ref({});
+
+    const llmForm = ref({ api_key: "", base_url: "", model: "" });
+    const showKey = ref(false);
+    const saving = ref(false);
+    const saveMsg = ref("");
+
+    const oauthForm = ref({ app_id: "", app_key: "" });
+    const zhihuForm = ref({ token: "", secret: "" });
+
+    const llmConfigured = computed(() => !!settings.value.llm_api_key_masked || !!llmForm.value.api_key);
+    const zhihuConfigured = computed(() => !!config.value.zhihu_configured || !!oauthForm.value.app_key || !!stats.value.llm_configured);
+
+    const toasts = ref([]);
+    let tid = 0;
+    const toast = (msg, type = "info") => {
+      const id = ++tid;
+      toasts.value.push({ id, msg, type });
+      setTimeout(() => {
+        toasts.value = toasts.value.filter((x) => x.id !== id);
+      }, 3500);
+    };
+
+    const stories = ref([]);
+    const branches = ref([]);
+    const ringContents = ref([]);
+
+    const pageLoading = ref(true);
+    const storiesError = ref("");
+    const branchesError = ref("");
+    const ringError = ref("");
+    const ringLoading = ref(false);
+
+    const ivo = ref(null);
+    const ivoStory = ref(null);
+    const ivoBranches = ref([]);
+    const ivoPublished = ref(false);
+    const ivoTab = ref("worldline");
+    const ivoChars = ref([]);
+    const ivoTimeline = ref([]);
+    const charsLoading = ref(false);
+    const selPivot = ref(-1);
+    const customPrompt = ref("");
+    const contBranch = ref(-1);
+    const contPrompt = ref("");
+    const freeScene = ref("");
+    const freeDirection = ref("");
+    const ivoWlTreeData = ref(null);
+    const ivoWlLayoutNodes = ref([]);
+    const ivoWlSvgLines = ref("");
+    const ivoWlCanvasHeight = ref(420);
+    const ivoSelectedNodeId = ref(-1);
+    const ivoWlViewport = ref({ width: 900, height: 420 });
+    const ivoWlTransform = ref({ scale: 1, x: 24, y: 24 });
+    const ivoWlDrag = ref({ dragging: false, startX: 0, startY: 0, originX: 0, originY: 0 });
+
+    const demoMode = ref(true);
+    const storyTab = ref("mine");
+    const logLines = ref([]);
+
+    const wlStories = ref([]);
+    const wlTreeData = ref(null);
+    const wlLayoutNodes = ref([]);
+    const wlSvgLines = ref("");
+    const wlCanvasHeight = ref(640);
+    const wlSelectedNode = ref(-1);
+    const wlStoryFilter = ref("");
+    const wlCanvas = ref(null);
+    const wlViewport = ref({ width: 900, height: 640 });
+    const wlTransform = ref({ scale: 1, x: 24, y: 24 });
+    const wlDrag = ref({ dragging: false, startX: 0, startY: 0, originX: 0, originY: 0 });
+
+    const NS = localStorage.getItem('ra_ns') || (() => { const id = (crypto.randomUUID ? crypto.randomUUID() : 'ns_' + Date.now() + '_' + Math.random().toString(36).slice(2)); localStorage.setItem('ra_ns', id); return id; })();
+    const api = async (path, options) => {
+      options = options || {}; options.headers = options.headers || {}; options.headers['X-Namespace'] = NS;
+      try {
+        const resp = await fetch(A + path, options);
+        const data = await resp.json();
+        return data;
+      } catch (e) {
+        return { status: 1, msg: String(e.message || e) };
+      }
+    };
+
+    const addLog = (module, msg) => {
+      const ts = new Date().toTimeString().slice(0, 8);
+      logLines.value.unshift({ ts, module, msg });
+      if (logLines.value.length > 80) logLines.value.length = 80;
+    };
+
+    const setPage = async (target) => {
+      page.value = target;
+      sidebarOpen.value = false;
+      await nextTick();
+      if (target === "ring") await loadRing();
+      if (target === "worldline") await loadWorldlines();
+      revealSections();
+    };
+
+    const viewportStyle = (kind) => {
+      const viewport = kind === "ivo" ? ivoWlViewport.value : wlViewport.value;
+      const transform = kind === "ivo" ? ivoWlTransform.value : wlTransform.value;
+      return {
+        width: viewport.width + "px",
+        height: viewport.height + "px",
+        transform: `translate(${transform.x}px, ${transform.y}px) scale(${transform.scale})`
+      };
+    };
+
+    const resetCanvasTransform = (kind) => {
+      if (kind === "ivo") {
+        ivoWlTransform.value = { scale: 1, x: 24, y: 24 };
+      } else {
+        wlTransform.value = { scale: 1, x: 24, y: 24 };
+      }
+    };
+
+    const startCanvasDrag = (event, kind) => {
+      if (event.button !== 0) return;
+      const drag = kind === "ivo" ? ivoWlDrag.value : wlDrag.value;
+      const transform = kind === "ivo" ? ivoWlTransform.value : wlTransform.value;
+      drag.dragging = true;
+      drag.startX = event.clientX;
+      drag.startY = event.clientY;
+      drag.originX = transform.x;
+      drag.originY = transform.y;
+    };
+
+    const updateCanvasDrag = (event) => {
+      if (wlDrag.value.dragging) {
+        wlTransform.value = {
+          ...wlTransform.value,
+          x: wlDrag.value.originX + (event.clientX - wlDrag.value.startX),
+          y: wlDrag.value.originY + (event.clientY - wlDrag.value.startY)
+        };
+      }
+      if (ivoWlDrag.value.dragging) {
+        ivoWlTransform.value = {
+          ...ivoWlTransform.value,
+          x: ivoWlDrag.value.originX + (event.clientX - ivoWlDrag.value.startX),
+          y: ivoWlDrag.value.originY + (event.clientY - ivoWlDrag.value.startY)
+        };
+      }
+    };
+
+    const stopCanvasDrag = () => {
+      wlDrag.value.dragging = false;
+      ivoWlDrag.value.dragging = false;
+    };
+
+    const handleCanvasWheel = (event, kind) => {
+      const transform = kind === "ivo" ? ivoWlTransform : wlTransform;
+      const nextScale = Math.min(2.4, Math.max(0.45, transform.value.scale + (event.deltaY < 0 ? 0.08 : -0.08)));
+      transform.value = { ...transform.value, scale: Number(nextScale.toFixed(2)) };
+    };
+
+    const estimateNodeHeight = (node) => {
+      const title = (node.node_title || "").trim();
+      const summary = (node.timeline_summary || "").trim();
+      const tag = (node.tag || "").trim();
+      const titleCharsPerLine = 13;
+      const summaryCharsPerLine = 18;
+      const titleLines = Math.max(1, Math.ceil(title.length / titleCharsPerLine));
+      const summaryLines = Math.max(2, Math.min(3, Math.ceil(summary.length / summaryCharsPerLine)));
+      const tagBlock = tag ? 28 : 0;
+      const titleBlock = titleLines * 20;
+      const summaryBlock = summaryLines * 15;
+      const actionReserve = node.branch_id > 0 ? 52 : 0;
+      return 24 + tagBlock + titleBlock + 10 + summaryBlock + actionReserve + 22;
+    };
+
+    const layoutWorldlineTo = (nodes, edges, targetNodes, targetSvg, targetHeight, targetViewport) => {
+      const maxDepth = Math.max(...nodes.map((n) => n.depth), 0);
+      const nodeW = 240;
+      const hGap = 140;
+      const vGap = 110;
+      const sidePad = 80;
+      const topPad = 28;
+      const bottomPad = 52;
+      const positions = {};
+      const nodeHeights = {};
+      const levelHeights = {};
+      const levelY = {};
+      const nodeMap = {};
+      const childrenMap = {};
+      const incoming = {};
+
+      nodes.forEach((n) => {
+        nodeMap[n.id] = n;
+        nodeHeights[n.id] = estimateNodeHeight(n);
+        if (!childrenMap[n.id]) childrenMap[n.id] = [];
+        incoming[n.id] = 0;
+      });
+
+      edges.forEach((e) => {
+        if (!childrenMap[e.from]) childrenMap[e.from] = [];
+        childrenMap[e.from].push(e.to);
+        incoming[e.to] = (incoming[e.to] || 0) + 1;
+      });
+
+      const depthNodes = {};
+      nodes.forEach((n) => {
+        if (!depthNodes[n.depth]) depthNodes[n.depth] = [];
+        depthNodes[n.depth].push(n);
+      });
+
+      for (let d = 0; d <= maxDepth; d++) {
+        const levelNodes = depthNodes[d] || [];
+        levelHeights[d] = Math.max(0, ...levelNodes.map((n) => nodeHeights[n.id] || 0));
+      }
+
+      levelY[0] = topPad;
+      for (let d = 1; d <= maxDepth; d++) {
+        levelY[d] = levelY[d - 1] + levelHeights[d - 1] + vGap;
+      }
+
+      let nextLeafCenter = nodeW / 2;
+      const assignPositions = (nodeID) => {
+        const childIDs = childrenMap[nodeID] || [];
+        if (childIDs.length === 0) {
+          positions[nodeID] = {
+            x: nextLeafCenter,
+            y: levelY[nodeMap[nodeID].depth] || topPad,
+            h: nodeHeights[nodeID]
+          };
+          nextLeafCenter += nodeW + hGap;
+          return positions[nodeID].x;
+        }
+
+        const childCenters = childIDs.map((childID) => assignPositions(childID));
+        const centerX = (childCenters[0] + childCenters[childCenters.length - 1]) / 2;
+        positions[nodeID] = {
+          x: centerX,
+          y: levelY[nodeMap[nodeID].depth] || topPad,
+          h: nodeHeights[nodeID]
+        };
+        return centerX;
+      };
+
+      const rootIDs = nodes
+        .filter((n) => (incoming[n.id] || 0) === 0)
+        .sort((a, b) => a.depth - b.depth || a.id - b.id)
+        .map((n) => n.id);
+
+      rootIDs.forEach((rootID, index) => {
+        assignPositions(rootID);
+        if (index < rootIDs.length - 1) nextLeafCenter += hGap * 1.5;
+      });
+
+      const rootNode = rootIDs.length > 0 ? positions[rootIDs[0]] : null;
+      const rootX = rootNode ? rootNode.x : 0;
+      Object.keys(positions).forEach((id) => {
+        positions[id].x -= rootX;
+      });
+
+      const allX = Object.values(positions).map((p) => p.x);
+      const minX = Math.min(...allX);
+      const maxX = Math.max(...allX);
+      const canvasW = Math.max(maxX - minX + nodeW + sidePad * 2, 1100);
+      const canvasH = (levelY[maxDepth] || topPad) + (levelHeights[maxDepth] || 0) + bottomPad;
+      targetHeight.value = canvasH;
+      targetViewport.value = { width: canvasW, height: canvasH };
+
+      targetNodes.value = nodes.map((n) => {
+        const p = positions[n.id] || { x: 0, y: 0 };
+        return { ...n, x: (p.x - minX + sidePad), y: p.y, height: nodeHeights[n.id] || 0 };
+      });
+
+      const px = (v) => (v - minX + sidePad);
+      const py = (v, h) => (v + h);
+      const pyTop = (v) => v;
+      let svg = "";
+      edges.forEach((e) => {
+        const from = positions[e.from];
+        const to = positions[e.to];
+        if (!from || !to) return;
+        const x1 = px(from.x);
+        const y1 = py(from.y, from.h || 0);
+        const x2 = px(to.x);
+        const y2 = pyTop(to.y);
+        const curvePad = Math.min(72, Math.max(36, (y2 - y1) * 0.32));
+        const c1y = y1 + curvePad;
+        const c2y = y2 - curvePad;
+        const cls = nodes.find((n) => n.id === e.from)?.depth === 0 ? "root-line" : "";
+        svg += `<path d="M${x1} ${y1} C${x1} ${c1y}, ${x2} ${c2y}, ${x2} ${y2}" class="${cls}"/>`;
+      });
+      targetSvg.value = svg;
+    };
+
+    const ls = async () => {
+      const j = await api("/status");
+      if (j.status === 0) stats.value = j.data;
+      else storiesError.value = j.msg || "获取状态失败";
+    };
+
+    const lc = async () => {
+      const j = await api("/config");
+      if (j.status === 0) config.value = j.data;
+    };
+
+    const lset = async () => {
+      const j = await api("/settings");
+      if (j.status === 0) {
+        settings.value = j.data || {};
+        if (!llmForm.value.base_url) llmForm.value.base_url = settings.value.llm_base_url || "";
+        if (!llmForm.value.model) llmForm.value.model = settings.value.llm_model || "";
+        if (!oauthForm.value.app_id) oauthForm.value.app_id = settings.value.oauth_app_id || "";
+        if (!oauthForm.value.app_key) oauthForm.value.app_key = settings.value.oauth_app_key || "";
+        loggedIn.value = !!(j.data || {}).oauth_access_token;
+      }
+    };
+
+    const loadStories = async () => {
+      storiesError.value = "";
+      const j = await api("/stories?page_size=200");
+      if (j.status !== 0) {
+        storiesError.value = j.msg || "加载故事失败";
+        return;
+      }
+      stories.value = (j.data.items || []).map((s) => ({ ...s, _branches: [] }));
+      for (const s of stories.value) {
+        const b = await api("/branches?story_id=" + s.work_id + "&page_size=50");
+        if (b.status === 0) s._branches = b.data.items || [];
+      }
+    };
+
+    const loadBranches = async () => {
+      branchesError.value = "";
+      const j = await api("/branches?page_size=200");
+      if (j.status === 0) branches.value = j.data.items || [];
+      else branchesError.value = j.msg || "加载分支失败";
+    };
+
+    const loadRing = async () => {
+      ringLoading.value = true;
+      ringError.value = "";
+      ringContents.value = [];
+      const j = await api("/ring");
+      if (j.status === 0) ringContents.value = j.data?.contents || [];
+      else ringError.value = j.msg || "加载圈子失败";
+      ringLoading.value = false;
+    };
+
+    const rf = async () => {
+      pageLoading.value = true;
+      await Promise.all([ls(), loadStories(), loadBranches()]);
+      pageLoading.value = false;
+      await nextTick();
+      revealSections();
+    };
+
+    const retry = () => rf();
+
+    const loadOAuthUser = async () => {
+      const j = await api("/oauth/user");
+      if (j.status === 0) oauthUser.value = j.data;
+    };
+
+    const oauthLogin = async () => {
+      // Save OAuth config first, then redirect to backend which knows the correct app_id
+      if (oauthForm.value.app_id) {
+        await api("/settings", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ oauth_app_id: oauthForm.value.app_id, oauth_app_key: oauthForm.value.app_key })
+        });
+      }
+      // Redirect directly - backend handles the correct app_id
+      window.location.href = "/api/oauth/authorize";
+    };
+
+    const skipLogin = () => {
+      loggedIn.value = true;
+      toast("已进入演示模式", "info");
+    };
+
+    const doOAuthLogout = async () => {
+      await api("/oauth/logout", { method: "POST" });
+      oauthUser.value = null;
+      loggedIn.value = false;
+      toast("已退出登录", "info");
+    };
+
+    const saveOAuth = async () => {
+      const payload = {};
+      if (oauthForm.value.app_id) payload.oauth_app_id = oauthForm.value.app_id;
+      if (oauthForm.value.app_key) payload.oauth_app_key = oauthForm.value.app_key;
+      await api("/settings", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+      toast("OAuth 配置已保存", "ok");
+    };
+
+    const saveZhihu = async () => {
+      const payload = {};
+      if (zhihuForm.value.token) payload.zhihu_token = zhihuForm.value.token;
+      if (zhihuForm.value.secret) payload.zhihu_secret = zhihuForm.value.secret;
+      const j = await api("/settings", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+      toast(j.status === 0 ? "知乎配置已保存" : "保存失败: " + (j.msg || ""), j.status === 0 ? "ok" : "err");
+      if (j.status === 0) {
+        zhihuForm.value.token = "";
+        zhihuForm.value.secret = "";
+        await lset();
+        await lc();
+      }
+    };
+
+    const saveLLM = async () => {
+      saving.value = true;
+      const payload = {};
+      if (llmForm.value.api_key) payload.llm_api_key = llmForm.value.api_key;
+      if (llmForm.value.base_url) payload.llm_base_url = llmForm.value.base_url;
+      if (llmForm.value.model) payload.llm_model = llmForm.value.model;
+      const j = await api("/settings", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+      saveMsg.value = j.status === 0 ? "已保存" : "保存失败";
+      if (j.status === 0) {
+        llmForm.value.api_key = "";
+        await lset();
+        await lc();
+      }
+      saving.value = false;
+      setTimeout(() => {
+        saveMsg.value = "";
+      }, 4000);
+    };
+
+    const doAction = async (name) => {
+      acting.value = true;
+      const j = await api("/action/" + name, { method: "POST" });
+      toast(j.status === 0 ? "操作完成" : (j.msg || "操作失败"), j.status === 0 ? "ok" : "err");
+      acting.value = false;
+      await rf();
+    };
+
+    const analyzeOne = async (workID) => {
+      acting.value = true;
+      const j = await api("/action/analyze_one?work_id=" + workID, { method: "POST" });
+      toast(j.status === 0 ? "解析完成" : (j.msg || "解析失败"), j.status === 0 ? "ok" : "err");
+      acting.value = false;
+      await rf();
+    };
+
+    const ctrlAgent = async (action) => {
+      const j = await api("/action/agent?action=" + action, { method: "POST" });
+      toast(j.status === 0 ? "执行成功" : (j.msg || "操作失败"), j.status === 0 ? "ok" : "err");
+      await ls();
+    };
+
+    const openIvo = async (story) => {
+      const j = await api("/stories/" + story.work_id);
+      if (j.status === 0) {
+        ivoStory.value = j.data.story;
+        ivoBranches.value = j.data.branches || [];
+        ivoPublished.value = (j.data.branches || []).some((b) => b.pin_id);
+        ivoTab.value = "worldline";
+        contBranch.value = -1;
+        contPrompt.value = "";
+        ivoSelectedNodeId.value = -1;
+        ivo.value = true;
+        await loadIvoWorldline();
+      }
+    };
+
+    const genBranches = async () => {
+      if (!ivoStory.value?.work_id) return;
+      acting.value = true;
+      const workID = ivoStory.value.work_id;
+      let url = "/action/generate?work_id=" + workID + "&publish=false";
+      if (selPivot.value >= 0) url += "&pivot_index=" + selPivot.value;
+      const body = customPrompt.value
+        ? {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ custom_prompt: customPrompt.value })
+          }
+        : { method: "POST" };
+      const j = await api(url, body);
+      toast(j.status === 0 ? "已生成 " + j.data.branches + " 条支线" : (j.msg || "生成失败"), j.status === 0 ? "ok" : "err");
+      const r = await api("/stories/" + workID);
+      if (r.status === 0) {
+        ivoStory.value = r.data.story;
+        ivoBranches.value = r.data.branches || [];
+      }
+      acting.value = false;
+      customPrompt.value = "";
+      selPivot.value = -1;
+      await loadIvoWorldline();
+      await rf();
+    };
+
+    const genFreeBranch = async () => {
+      if (!ivoStory.value?.work_id || !freeScene.value) return;
+      acting.value = true;
+      const workID = ivoStory.value.work_id;
+      const body = {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          scene: freeScene.value,
+          custom_prompt: freeDirection.value || freeScene.value
+        })
+      };
+      const j = await api("/action/generate?work_id=" + workID + "&publish=false", body);
+      toast(j.status === 0 ? "已生成 " + j.data.branches + " 条自由支线" : (j.msg || "生成失败"), j.status === 0 ? "ok" : "err");
+      if (j.status === 0) {
+        const r = await api("/stories/" + workID);
+        if (r.status === 0) {
+          ivoStory.value = r.data.story;
+          ivoBranches.value = r.data.branches || [];
+        }
+      }
+      acting.value = false;
+      freeScene.value = "";
+      freeDirection.value = "";
+      await loadIvoWorldline();
+      await rf();
+    };
+
+    const startContinueBranch = (branch) => {
+      contBranch.value = branch.id;
+      contPrompt.value = "";
+    };
+
+    const doContinueBranch = async (branch) => {
+      if (!contPrompt.value) {
+        toast("请先输入推进方向", "err");
+        return;
+      }
+      acting.value = true;
+      const j = await api("/action/continue_branch?branch_id=" + branch.id, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ prompt: contPrompt.value })
+      });
+      toast(j.status === 0 ? "已生成 " + j.data.branches + " 条延续分支" : (j.msg || "生成失败"), j.status === 0 ? "ok" : "err");
+      if (j.status === 0) {
+        const r = await api("/stories/" + branch.story_work_id);
+        if (r.status === 0) {
+          ivoBranches.value = r.data.branches || [];
+          ivoStory.value = r.data.story || ivoStory.value;
+        }
+        contBranch.value = branch.id;
+        await loadIvoWorldline(branch.id);
+      }
+      acting.value = false;
+      contPrompt.value = "";
+      await rf();
+    };
+
+    const publishBranches = async () => {
+      if (!ivoStory.value?.work_id) return;
+      acting.value = true;
+      const j = await api("/action/publish_branches?work_id=" + ivoStory.value.work_id, { method: "POST" });
+      toast(j.status === 0 ? "已发布到圈子" : (j.msg || "发布失败"), j.status === 0 ? "ok" : "err");
+      if (j.status === 0) ivoPublished.value = true;
+      acting.value = false;
+    };
+
+    const toggleDemo = async () => {
+      demoMode.value = !demoMode.value;
+      await api("/demo", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ Enabled: demoMode.value })
+      });
+    };
+
+    const loadIvoState = async () => {
+      if (!ivoStory.value?.work_id) return;
+      charsLoading.value = true;
+      const j = await api("/states/" + ivoStory.value.work_id);
+      if (j.status === 0) {
+        ivoChars.value = j.data.characters || [];
+        ivoTimeline.value = j.data.timeline || [];
+      }
+      charsLoading.value = false;
+    };
+
+    const openBranchStory = (branch) => {
+      openIvo({ work_id: branch.story_work_id });
+    };
+
+    const filteredStories = computed(() => {
+      if (storyTab.value === "mine") return stories.value.filter((s) => s.status !== "blocked");
+      return demoMode.value ? stories.value : [];
+    });
+
+    const completionRate = computed(() => {
+      const total = stats.value.total_stories || 0;
+      const analyzed = stats.value.analyzed_stories || 0;
+      return total ? Math.round((analyzed / total) * 100) : 0;
+    });
+
+    const blockedCount = computed(() => stories.value.filter((s) => s.status === "blocked").length);
+
+    const classLabel = (c) => c === "fiction" ? "虚构故事" : c === "real_history" ? "历史纪实" : c === "real_modern" ? "近现代史" : "";
+    const statusLabel = (s) => s === "pending" ? "待解析" : s === "analyzed" ? "已解析" : s === "branched" ? "已分支" : s === "blocked" ? "已拦截" : s;
+    const stripHtml = (s) => {
+      const d = document.createElement("div");
+      d.innerHTML = s || "";
+      return d.textContent || "";
+    };
+    const fmtTime = (ts) => ts ? new Date(ts * 1000).toLocaleDateString("zh-CN") : "—";
+
+    const loadWorldlines = async () => {
+      const ss = await api("/stories?page_size=50");
+      if (ss.status === 0) {
+        const results = [];
+        for (const s of ss.data.items || []) {
+          if (s.status === "analyzed" || s.status === "branched") {
+            const j = await api("/worldline/" + s.work_id);
+            if (j.status === 0 && (j.data.nodes || []).length > 0) results.push(j.data);
+          }
+        }
+        wlStories.value = results;
+        if (results.length > 0 && !wlStoryFilter.value) {
+          wlStoryFilter.value = results[0].story_work_id;
+          loadWorldlineTree();
+        }
+      }
+    };
+
+    const layoutTree = (nodes, edges) => layoutWorldlineTo(nodes, edges, wlLayoutNodes, wlSvgLines, wlCanvasHeight, wlViewport);
+
+    const loadWorldlineTree = async () => {
+      if (!wlStoryFilter.value) return;
+      const j = await api("/worldline/" + wlStoryFilter.value);
+      if (j.status === 0 && j.data.nodes.length > 0) {
+        wlTreeData.value = j.data;
+        layoutTree(j.data.nodes, j.data.edges);
+      } else {
+        wlTreeData.value = null;
+        wlLayoutNodes.value = [];
+        wlSvgLines.value = "";
+      }
+    };
+
+    const selectedIvoBranch = computed(() => {
+      if (contBranch.value > 0) return ivoBranches.value.find((b) => b.id === contBranch.value) || null;
+      const node = ivoWlLayoutNodes.value.find((n) => n.id === ivoSelectedNodeId.value);
+      if (!node || !node.branch_id) return null;
+      return ivoBranches.value.find((b) => b.id === node.branch_id) || null;
+    });
+
+    const selectIvoNode = (node) => {
+      ivoSelectedNodeId.value = ivoSelectedNodeId.value === node.id ? -1 : node.id;
+      if (ivoSelectedNodeId.value === -1) {
+        contBranch.value = -1;
+        contPrompt.value = "";
+        return;
+      }
+      if (node.branch_id > 0) {
+        contBranch.value = node.branch_id;
+        contPrompt.value = "";
+      } else {
+        contBranch.value = -1;
+        contPrompt.value = "";
+      }
+    };
+
+    const loadIvoWorldline = async (preferBranchID = 0) => {
+      if (!ivoStory.value?.work_id) return;
+      const j = await api("/worldline/" + ivoStory.value.work_id);
+      if (j.status === 0 && (j.data.nodes || []).length > 0) {
+        ivoWlTreeData.value = j.data;
+        layoutWorldlineTo(j.data.nodes, j.data.edges, ivoWlLayoutNodes, ivoWlSvgLines, ivoWlCanvasHeight, ivoWlViewport);
+        await nextTick();
+        let nodeToSelect = null;
+        if (preferBranchID > 0) nodeToSelect = (j.data.nodes || []).find((n) => n.branch_id === preferBranchID);
+        if (!nodeToSelect && contBranch.value > 0) nodeToSelect = (j.data.nodes || []).find((n) => n.branch_id === contBranch.value);
+        if (!nodeToSelect && ivoSelectedNodeId.value > 0) nodeToSelect = (j.data.nodes || []).find((n) => n.id === ivoSelectedNodeId.value);
+        if (!nodeToSelect && ivoBranches.value.length > 0) {
+          const latestBranch = ivoBranches.value[ivoBranches.value.length - 1];
+          nodeToSelect = (j.data.nodes || []).find((n) => n.branch_id === latestBranch.id);
+        }
+        if (nodeToSelect) {
+          ivoSelectedNodeId.value = nodeToSelect.id;
+          if (nodeToSelect.branch_id > 0) contBranch.value = nodeToSelect.branch_id;
+        }
+      } else {
+        ivoWlTreeData.value = null;
+        ivoWlLayoutNodes.value = [];
+        ivoWlSvgLines.value = "";
+        ivoSelectedNodeId.value = -1;
+      }
+    };
+
+    const tagColor = (tag) => {
+      if (tag === "origin") return "rgba(56,189,248,.26)";
+      if (["黑化线", "阴谋线", "暗涌线", "黑洞线"].includes(tag)) return "rgba(245,158,11,.24)";
+      if (["治愈线", "反转线", "日常线"].includes(tag)) return "rgba(74,222,128,.24)";
+      return "rgba(167,139,250,.24)";
+    };
+
+    const openWlNodeStory = async (node) => {
+      if (node.branch_id > 0) {
+        const allBranches = await api("/branches?page_size=200");
+        if (allBranches.status === 0) {
+          const branch = (allBranches.data.items || []).find((x) => x.id === node.branch_id);
+          if (branch) openIvo({ work_id: branch.story_work_id });
+        }
+      } else {
+        openIvo({ work_id: node.story_work_id });
+      }
+    };
+
+    const continueFromWlNode = async (node) => {
+      if (node.branch_id > 0) {
+        const allBranches = await api("/branches?page_size=200");
+        if (allBranches.status === 0) {
+          const branch = (allBranches.data.items || []).find((x) => x.id === node.branch_id);
+          if (branch) {
+            await openIvo({ work_id: branch.story_work_id });
+            setTimeout(() => {
+              contBranch.value = branch.id;
+              contPrompt.value = "";
+              startContinueBranch(branch);
+              toast("请输入推进方向后继续生成", "info");
+            }, 500);
+          }
+        }
+      } else {
+        openIvo({ work_id: node.story_work_id });
+      }
+    };
+
+    let evt = null;
+    const sse = () => {
+      evt = new EventSource(A + "/events");
+      evt.addEventListener("log", (e) => {
+        try {
+          const d = JSON.parse(e.data).data || {};
+          addLog(d.module || "", d.msg || "");
+        } catch (_) {}
+      });
+      evt.onerror = () => {
+        evt.close();
+        setTimeout(sse, 5000);
+      };
+    };
+
+    let revealObserver = null;
+    const revealSections = () => {
+      if (!window.IntersectionObserver) return;
+      if (!revealObserver) {
+        revealObserver = new IntersectionObserver((entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) entry.target.classList.add("show");
+          });
+        }, { threshold: 0.12 });
+      }
+      document.querySelectorAll("[data-reveal]").forEach((el) => revealObserver.observe(el));
+    };
+
+    watch(page, async () => {
+      await nextTick();
+      revealSections();
+    });
+
+    let pollTimer = null;
+    onMounted(async () => {
+      await lset();
+      await lc();
+      await rf();
+      document.getElementById("app-loader").style.display = "none";
+      loadOAuthUser();
+      sse();
+      window.addEventListener("mousemove", updateCanvasDrag);
+      window.addEventListener("mouseup", stopCanvasDrag);
+      pollTimer = setInterval(rf, 25000);
+      const url = new URL(location.href);
+      if (url.searchParams.get("oauth") === "success") {
+        loggedIn.value = true;
+        loadOAuthUser();
+        toast("授权成功", "ok");
+        window.history.replaceState({}, "", "/");
+      }
+      revealSections();
+    });
+
+    onUnmounted(() => {
+      clearInterval(pollTimer);
+      if (evt) evt.close();
+      if (revealObserver) revealObserver.disconnect();
+      window.removeEventListener("mousemove", updateCanvasDrag);
+      window.removeEventListener("mouseup", stopCanvasDrag);
+    });
+
+    return {
+      page,
+      sidebarOpen,
+      acting,
+      pageLoading,
+      storiesError,
+      branchesError,
+      ringError,
+      ringLoading,
+      loggedIn,
+      oauthUser,
+      loginMsg,
+      oauthForm,
+      zhihuForm,
+      demoMode,
+      storyTab,
+      ivoTab,
+      ivoChars,
+      ivoTimeline,
+      charsLoading,
+      selPivot,
+      customPrompt,
+      freeScene,
+      freeDirection,
+      stats,
+      config,
+      settings,
+      llmForm,
+      showKey,
+      saving,
+      saveMsg,
+      llmConfigured,
+      zhihuConfigured,
+      toasts,
+      stories,
+      branches,
+      ringContents,
+      ivo,
+      ivoStory,
+      ivoBranches,
+      ivoPublished,
+      logLines,
+      wlStories,
+      wlTreeData,
+      wlLayoutNodes,
+      wlSvgLines,
+      wlCanvasHeight,
+      wlSelectedNode,
+      wlStoryFilter,
+      wlCanvas,
+      wlViewport,
+      wlTransform,
+      wlDrag,
+      ivoWlTreeData,
+      ivoWlLayoutNodes,
+      ivoWlSvgLines,
+      ivoWlCanvasHeight,
+      ivoSelectedNodeId,
+      ivoWlViewport,
+      ivoWlTransform,
+      ivoWlDrag,
+      contBranch,
+      contPrompt,
+      setPage,
+      viewportStyle,
+      resetCanvasTransform,
+      startCanvasDrag,
+      handleCanvasWheel,
+      filteredStories,
+      completionRate,
+      blockedCount,
+      selectedIvoBranch,
+      loadRing,
+      retry,
+      loadIvoState,
+      loadIvoWorldline,
+      oauthLogin,
+      skipLogin,
+      doOAuthLogout,
+      saveZhihu,
+      saveOAuth,
+      doAction,
+      analyzeOne,
+      ctrlAgent,
+      saveLLM,
+      openIvo,
+      genBranches,
+      genFreeBranch,
+      loadWorldlines,
+      loadWorldlineTree,
+      tagColor,
+      selectIvoNode,
+      openWlNodeStory,
+      continueFromWlNode,
+      publishBranches,
+      startContinueBranch,
+      doContinueBranch,
+      toggleDemo,
+      openBranchStory,
+      rf,
+      classLabel,
+      statusLabel,
+      stripHtml,
+      fmtTime,
+      toast
+    };
+  }
+}).mount("#app");
+</script>
+</body>
+</html>

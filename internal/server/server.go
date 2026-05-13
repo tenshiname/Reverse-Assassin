@@ -2,8 +2,10 @@ package server
 
 import (
 	"context"
+	"compress/gzip"
 	"encoding/json"
 	"fmt"
+	"io"
 	"log"
 	"net/http"
 	"net/url"
@@ -140,7 +142,7 @@ func (s *Server) Close() error {
 }
 
 func (s *Server) Handler() http.Handler {
-	return corsMiddleware(s.namespaceMiddleware(loggingMiddleware(s.mux)))
+	return corsMiddleware(gzipMiddleware(s.namespaceMiddleware(loggingMiddleware(s.mux))))
 }
 
 func (s *Server) isRunning() bool {
@@ -154,6 +156,16 @@ func (s *Server) isRunning() bool {
 // ============================================================
 
 func (s *Server) registerRoutes() {
+	staticDir := os.Getenv("STATIC_DIR")
+	if staticDir == "" {
+		staticDir = "web/static"
+	}
+	absDir, err := filepath.Abs(staticDir)
+	if err != nil {
+		log.Printf("filepath.Abs(%s): %v, using staticDir as-is", staticDir, err)
+		absDir = staticDir
+	}
+
 	s.mux.HandleFunc("/api/events", s.hub.SSEHandler)
 	s.mux.HandleFunc("/api/status", s.handleStatus)
 	s.mux.HandleFunc("/api/states/", s.handleState)
@@ -171,20 +183,22 @@ func (s *Server) registerRoutes() {
 	s.mux.HandleFunc("/api/login", s.handleLogin)
 	s.mux.HandleFunc("/api/oauth/authorize", s.handleOAuthAuthorize)
 	s.mux.HandleFunc("/api/oauth/callback", s.handleOAuthCallback)
+	s.mux.HandleFunc("/auth/callback", s.handleOAuthCallback)
+	// /oauth/callback serves the JS bridge page to extract code from fragment
+	s.mux.HandleFunc("/oauth/callback", func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, filepath.Join(absDir, "oauth-callback.html"))
+	})
 	s.mux.HandleFunc("/api/oauth/user", s.handleOAuthUser)
 	s.mux.HandleFunc("/api/oauth/logout", s.handleOAuthLogout)
 	s.mux.HandleFunc("/api/logout", s.handleLogout)
 
-	staticDir := os.Getenv("STATIC_DIR")
-	if staticDir == "" {
-		staticDir = "web/static"
-	}
-	absDir, err := filepath.Abs(staticDir)
-	if err != nil {
-		log.Printf("filepath.Abs(%s): %v, using staticDir as-is", staticDir, err)
-		absDir = staticDir
-	}
-	s.mux.Handle("/", http.FileServer(http.Dir(absDir)))
+	noCacheFS := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Cache-Control", "no-cache, no-store, must-revalidate")
+		w.Header().Set("Pragma", "no-cache")
+		w.Header().Set("Expires", "0")
+		http.FileServer(http.Dir(absDir)).ServeHTTP(w, r)
+	})
+	s.mux.Handle("/", noCacheFS)
 }
 
 // ============================================================
@@ -1022,6 +1036,30 @@ func (s *Server) namespaceMiddleware(next http.Handler) http.Handler {
 	})
 }
 
+func gzipMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if !strings.Contains(r.Header.Get("Accept-Encoding"), "gzip") {
+			next.ServeHTTP(w, r)
+			return
+		}
+		w.Header().Set("Content-Encoding", "gzip")
+		w.Header().Del("Content-Length")
+		gz := gzip.NewWriter(w)
+		defer gz.Close()
+		gzw := &gzipResponseWriter{Writer: gz, ResponseWriter: w}
+		next.ServeHTTP(gzw, r)
+	})
+}
+
+type gzipResponseWriter struct {
+	io.Writer
+	http.ResponseWriter
+}
+
+func (w *gzipResponseWriter) Write(b []byte) (int, error) {
+	return w.Writer.Write(b)
+}
+
 func loggingMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		start := time.Now()
@@ -1584,46 +1622,30 @@ func (s *Server) handleLogout(w http.ResponseWriter, r *http.Request) {
 // OAuth handlers
 
 func (s *Server) handleOAuthAuthorize(w http.ResponseWriter, r *http.Request) {
-	appID := r.URL.Query().Get("app_id")
-	if appID == "" {
-		// Try stored setting
-		if v, err := s.getStore(r).GetSetting("oauth_app_id"); err == nil {
-			appID = v
-		}
-	}
-	if appID == "" {
-		writeError(w, "app_id is required. Set it via POST /api/settings with oauth_app_id", 400)
-		return
-	}
-	redirectURI := fmt.Sprintf("http://%s/api/oauth/callback", r.Host)
 	authURL := fmt.Sprintf("https://openapi.zhihu.com/authorize?redirect_uri=%s&app_id=%s&response_type=code",
-		redirectURI, appID)
-	writeJSON(w, map[string]interface{}{"auth_url": authURL})
+		url.QueryEscape(config.OAuthRedirectURI()), config.OAuthAppID())
+	http.Redirect(w, r, authURL, http.StatusFound)
 }
 
 func (s *Server) handleOAuthCallback(w http.ResponseWriter, r *http.Request) {
 	code := r.URL.Query().Get("code")
 	if code == "" {
+		code = r.URL.Query().Get("authorization_code")
+	}
+	log.Printf("[oauth] received code=%q (len=%d)", code, len(code))
+	if code == "" {
 		writeError(w, "authorization code is required", 400)
 		return
 	}
 
-	appID, err := s.getStore(r).GetSetting("oauth_app_id")
-	if err != nil {
-		writeError(w, "oauth app_id not configured: "+err.Error(), 400)
-		return
-	}
-	appKey, err := s.getStore(r).GetSetting("oauth_app_key")
-	if err != nil {
-		writeError(w, "oauth app_key not configured: "+err.Error(), 400)
-		return
-	}
+	appID := config.OAuthAppID()
+	appKey := config.OAuthAppKey()
 
 	formData := url.Values{
 		"app_id":       {appID},
 		"app_key":      {appKey},
 		"grant_type":   {"authorization_code"},
-		"redirect_uri": {fmt.Sprintf("http://%s/api/oauth/callback", r.Host)},
+		"redirect_uri": {config.OAuthRedirectURI()},
 		"code":         {code},
 	}
 	oauthCtx, oauthCancel := context.WithTimeout(r.Context(), 15*time.Second)
@@ -1634,6 +1656,7 @@ func (s *Server) handleOAuthCallback(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	oauthReq.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	log.Printf("[oauth] exchanging code with app_id=%s redirect_uri=%s", appID, config.OAuthRedirectURI())
 	resp, err := http.DefaultClient.Do(oauthReq)
 	if err != nil {
 		writeError(w, "token exchange failed: "+err.Error(), 500)
@@ -1641,18 +1664,31 @@ func (s *Server) handleOAuthCallback(w http.ResponseWriter, r *http.Request) {
 	}
 	defer resp.Body.Close()
 
+	// Read raw response for debugging
+	respBody, err := io.ReadAll(resp.Body)
+	if err != nil {
+		log.Printf("[oauth] failed to read token response: %v", err)
+		writeError(w, "failed to read token response", 500)
+		return
+	}
+	log.Printf("[oauth] token exchange response: %s", string(respBody))
+
 	var tokenResp struct {
 		AccessToken string `json:"access_token"`
 		TokenType   string `json:"token_type"`
 		ExpiresIn   int64  `json:"expires_in"`
+		Code        int    `json:"code"`
+		Msg         string `json:"msg"`
+		Message     string `json:"message"`
+		Data        string `json:"data"`
 		Error       string `json:"error"`
 	}
-	if err := json.NewDecoder(resp.Body).Decode(&tokenResp); err != nil {
+	if err := json.Unmarshal(respBody, &tokenResp); err != nil {
 		writeError(w, "decode token response: "+err.Error(), 500)
 		return
 	}
-	if tokenResp.Error != "" {
-		writeError(w, "oauth error: "+tokenResp.Error, 400)
+	if tokenResp.AccessToken == "" {
+		writeError(w, "oauth token exchange returned empty token: "+string(respBody), 400)
 		return
 	}
 
@@ -1660,8 +1696,7 @@ func (s *Server) handleOAuthCallback(w http.ResponseWriter, r *http.Request) {
 	s.getStore(r).SetSetting("oauth_access_token", tokenResp.AccessToken)
 	s.hub.BroadcastLog("success", "oauth", "OAuth login successful")
 
-	// Redirect back to main page with success
-	http.Redirect(w, r, "/?oauth=success", http.StatusFound)
+	writeJSON(w, map[string]interface{}{"logged_in": true})
 }
 
 func (s *Server) handleOAuthUser(w http.ResponseWriter, r *http.Request) {

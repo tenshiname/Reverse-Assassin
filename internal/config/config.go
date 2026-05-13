@@ -73,6 +73,34 @@ func AppSecret() string {
 	return ""
 }
 
+// OAuth 回调地址 (必须与知乎开放平台注册的一致)
+func OAuthRedirectURI() string {
+	if p := getProvider(); p != nil {
+		if v, err := p.GetSetting("oauth_redirect_uri"); err == nil && v != "" {
+			return v
+		}
+	}
+	if v := os.Getenv("OAUTH_REDIRECT_URI"); v != "" {
+		return v
+	}
+	return "https://reverse-assassin.serveousercontent.com/oauth/callback"
+}
+
+// OAuth 凭证 — 优先级: DB 存储 > 环境变量 > 默认值
+func OAuthAppID() string {
+	if v := os.Getenv("OAUTH_APP_ID"); v != "" {
+		return v
+	}
+	return "326"
+}
+
+func OAuthAppKey() string {
+	if v := os.Getenv("OAUTH_APP_KEY"); v != "" {
+		return v
+	}
+	return "55bff6ae9a304b17aa721043ffc6b081"
+}
+
 // 可用圈子 ID
 const (
 	RingOpenClaw  = "2001009660925334090" // OpenClaw 人类观察员

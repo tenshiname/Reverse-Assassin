@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head><meta charset="UTF-8"><title>登录中...</title>
+<style>
+body{font-family:-apple-system,'PingFang SC',sans-serif;display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0;background:#f6f8fc}
+.spin{width:32px;height:32px;border:3px solid #e0e8f0;border-top-color:#056de8;border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+p{margin-top:16px;color:#5f6f82;font-size:14px}
+</style></head>
+<body>
+<div style="text-align:center"><div class="spin"></div><p id="msg">正在完成登录...</p></div>
+<script>
+(function(){
+  var params = new URLSearchParams(location.search.substring(1));
+  var code = params.get('code') || params.get('authorization_code');
+  if (!code && location.hash) {
+    params = new URLSearchParams(location.hash.substring(1));
+    code = params.get('code') || params.get('authorization_code');
+  }
+  if (!code) {
+    document.getElementById('msg').textContent = '登录失败：未获取到授权码';
+    return;
+  }
+  // Use AJAX with namespace header (read from localStorage)
+  var ns = localStorage.getItem('ra_ns') || 'default';
+  var xhr = new XMLHttpRequest();
+  xhr.open('GET', '/api/oauth/callback?code=' + encodeURIComponent(code));
+  xhr.setRequestHeader('X-Namespace', ns);
+  xhr.onload = function() {
+    if (xhr.status === 302 || xhr.status === 200) {
+      // Check if it's a redirect
+      var ct = xhr.getResponseHeader('Content-Type') || '';
+      if (ct.includes('json')) {
+        var data = JSON.parse(xhr.responseText);
+        if (data.status === 0) {
+          window.location.href = '/?oauth=success';
+        } else {
+          document.getElementById('msg').textContent = '登录失败: ' + (data.msg || '未知错误');
+        }
+      } else {
+        window.location.href = '/?oauth=success';
+      }
+    } else {
+      document.getElementById('msg').textContent = '登录请求失败，请重试';
+    }
+  };
+  xhr.onerror = function() {
+    document.getElementById('msg').textContent = '网络错误，请重试';
+  };
+  xhr.send();
+})();
+</script>
+</body></html>

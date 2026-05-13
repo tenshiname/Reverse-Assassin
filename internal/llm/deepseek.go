@@ -2,6 +2,7 @@ package llm
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -45,18 +46,12 @@ func NewClient() *Client {
 	}
 }
 
-// key returns the current API key, reading from config each time.
-func (c *Client) key() string { return config.LLMAPIKey() }
-
-// base returns the current base URL, reading from config each time.
-func (c *Client) base() string { return config.LLMBaseURL() }
-
-// model returns the current model name, reading from config each time.
+func (c *Client) key() string   { return config.LLMAPIKey() }
+func (c *Client) base() string  { return config.LLMBaseURL() }
 func (c *Client) model() string { return config.LLMModel() }
 
-// Chat sends a chat request and returns the text response.
-// Config (key/url/model) is read fresh on every call.
-func (c *Client) Chat(systemPrompt, userMessage string) (string, error) {
+// Chat sends a chat request with context support for cancellation/timeout.
+func (c *Client) Chat(ctx context.Context, systemPrompt, userMessage string) (string, error) {
 	req := ChatRequest{
 		Model: c.model(),
 		Messages: []ChatMessage{
@@ -73,7 +68,7 @@ func (c *Client) Chat(systemPrompt, userMessage string) (string, error) {
 	}
 
 	url := strings.TrimRight(c.base(), "/") + "/chat/completions"
-	httpReq, err := http.NewRequest("POST", url, bytes.NewReader(body))
+	httpReq, err := http.NewRequestWithContext(ctx, "POST", url, bytes.NewReader(body))
 	if err != nil {
 		return "", fmt.Errorf("new request: %w", err)
 	}
@@ -110,8 +105,8 @@ func (c *Client) Chat(systemPrompt, userMessage string) (string, error) {
 }
 
 // ChatJSON sends a request and unmarshals the JSON response into target.
-func (c *Client) ChatJSON(systemPrompt, userMessage string, target interface{}) error {
-	text, err := c.Chat(systemPrompt, userMessage)
+func (c *Client) ChatJSON(ctx context.Context, systemPrompt, userMessage string, target interface{}) error {
+	text, err := c.Chat(ctx, systemPrompt, userMessage)
 	if err != nil {
 		return err
 	}

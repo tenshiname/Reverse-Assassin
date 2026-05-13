@@ -24,10 +24,19 @@ func main() {
 	log.Println("🗡️  反转刺客 (Reverse Assassin)")
 
 	if config.LLMAPIKey() == "" {
-		log.Println("⚠️  未设置 LLM_API_KEY 环境变量:")
-		log.Println("   export LLM_API_KEY='your-api-key'")
-		log.Println("   export LLM_BASE_URL='https://api.deepseek.com/v1'  # 可选")
-		log.Println("   export LLM_MODEL='deepseek-chat'                    # 可选")
+		log.Println("⚠️  未配置 LLM API Key:")
+		log.Println("   方式 1: export LLM_API_KEY='your-api-key'")
+		log.Println("   方式 2: 启动后在 Web 设置页配置")
+	}
+	if config.AppKey() == "" {
+		log.Println("⚠️  未配置知乎 API 凭证 (无法调用知乎接口):")
+		log.Println("   方式 1: export ZHIHU_APP_KEY='your-token'")
+		log.Println("   export ZHIHU_APP_SECRET='your-secret'")
+		log.Println("   方式 2: 启动后在 Web 设置页配置 zhihu_token")
+	}
+	if config.LLMAPIKey() == "" || config.AppKey() == "" {
+		log.Println("💡 Demo 模式已默认启用，可通过 Web 界面进行沙盒演示")
+		log.Println("💡 在 Demo 模式下配置 API Key 后即可使用完整功能")
 	}
 
 	switch *mode {

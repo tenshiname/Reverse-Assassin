@@ -29,7 +29,6 @@ func NewClient() *Client {
 	}
 }
 
-// sign 生成 HMAC-SHA256 签名
 func (c *Client) sign(logID, extraInfo string) (timestamp, signature string) {
 	ts := fmt.Sprintf("%d", time.Now().Unix())
 	signStr := fmt.Sprintf("app_key:%s|ts:%s|logid:%s|extra_info:%s",
@@ -40,7 +39,6 @@ func (c *Client) sign(logID, extraInfo string) (timestamp, signature string) {
 	return ts, base64.StdEncoding.EncodeToString(mac.Sum(nil))
 }
 
-// headers 构造请求头
 func (c *Client) headers() map[string]string {
 	logID := fmt.Sprintf("log_%d", time.Now().UnixNano())
 	ts, sig := c.sign(logID, "")
@@ -53,16 +51,17 @@ func (c *Client) headers() map[string]string {
 	}
 }
 
-// doGet 发送 GET 请求
-func (c *Client) doGet(path string, params map[string]string, baseURL string) ([]byte, error) {
-	c.limiter.Wait(context.Background())
+func (c *Client) doGet(ctx context.Context, path string, params map[string]string, baseURL string) ([]byte, error) {
+	if err := c.limiter.Wait(ctx); err != nil {
+		return nil, fmt.Errorf("rate limit wait: %w", err)
+	}
 
 	urlBase := baseURL
 	if urlBase == "" {
 		urlBase = config.ZhihuAPIBase
 	}
 
-	req, err := http.NewRequest("GET", urlBase+path, nil)
+	req, err := http.NewRequestWithContext(ctx, "GET", urlBase+path, nil)
 	if err != nil {
 		return nil, fmt.Errorf("new request: %w", err)
 	}
@@ -86,9 +85,10 @@ func (c *Client) doGet(path string, params map[string]string, baseURL string) ([
 	return io.ReadAll(resp.Body)
 }
 
-// doPost 发送 POST 请求
-func (c *Client) doPost(path string, body interface{}, baseURL string) ([]byte, error) {
-	c.limiter.Wait(context.Background())
+func (c *Client) doPost(ctx context.Context, path string, body interface{}, baseURL string) ([]byte, error) {
+	if err := c.limiter.Wait(ctx); err != nil {
+		return nil, fmt.Errorf("rate limit wait: %w", err)
+	}
 
 	urlBase := baseURL
 	if urlBase == "" {
@@ -100,7 +100,7 @@ func (c *Client) doPost(path string, body interface{}, baseURL string) ([]byte, 
 		return nil, fmt.Errorf("marshal body: %w", err)
 	}
 
-	req, err := http.NewRequest("POST", urlBase+path, bytes.NewReader(bodyBytes))
+	req, err := http.NewRequestWithContext(ctx, "POST", urlBase+path, bytes.NewReader(bodyBytes))
 	if err != nil {
 		return nil, fmt.Errorf("new request: %w", err)
 	}

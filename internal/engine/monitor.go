@@ -1,7 +1,7 @@
 package engine
 
 import (
-	"log"
+	"context"
 	"strings"
 
 	"reverse-assassin/internal/config"
@@ -19,16 +19,12 @@ type Monitor struct {
 }
 
 func NewMonitor(zc *zhihu.Client, lc *llm.Client, s *store.Store) *Monitor {
-	return &Monitor{
-		zhihuClient: zc,
-		llmClient:   lc,
-		store:       s,
-	}
+	return &Monitor{zhihuClient: zc, llmClient: lc, store: s}
 }
 
-// RingPins 从圈子详情中获取最新想法及其评论，存入故事的评论池
-func (m *Monitor) RingPins() ([]model.RingContent, error) {
-	detail, err := m.zhihuClient.GetDefaultRing(20)
+// RingPins 从圈子详情中获取最新想法及其评论
+func (m *Monitor) RingPins(ctx context.Context) ([]model.RingContent, error) {
+	detail, err := m.zhihuClient.GetDefaultRing(ctx, 20)
 	if err != nil {
 		return nil, err
 	}
@@ -36,7 +32,7 @@ func (m *Monitor) RingPins() ([]model.RingContent, error) {
 }
 
 // AnalyzeComments 分析一组评论的情绪
-func (m *Monitor) AnalyzeComments(comments []model.Comment) (*SentimentResult, error) {
+func (m *Monitor) AnalyzeComments(ctx context.Context, comments []model.Comment) (*SentimentResult, error) {
 	if len(comments) == 0 {
 		return &SentimentResult{SentimentScore: 0, ShouldBranch: false}, nil
 	}
@@ -44,7 +40,7 @@ func (m *Monitor) AnalyzeComments(comments []model.Comment) (*SentimentResult, e
 	prompt := llm.BuildSentimentPrompt(comments)
 
 	var result SentimentResult
-	if err := m.llmClient.ChatJSON("", prompt, &result); err != nil {
+	if err := m.llmClient.ChatJSON(ctx, "", prompt, &result); err != nil {
 		return nil, err
 	}
 	return &result, nil
@@ -58,25 +54,18 @@ type SentimentResult struct {
 }
 
 // ShouldTriggerBranch 判断是否应该触发分支生成
-// 使用公式: P_branch = (sentiment * regret_weight) / logic_difficulty
 func ShouldTriggerBranch(sentiment *SentimentResult, pivot model.PivotPoint) bool {
 	if !sentiment.ShouldBranch {
 		return false
 	}
 
-	// 综合评分: LLM 情绪分数 × 枢纽点遗憾权重 / 逻辑难度
 	score := (sentiment.SentimentScore * pivot.RegretWeight) / max(pivot.LogicDifficulty, 0.1)
 	return score >= config.BranchTriggerThreshold
 }
 
-// ============================================================
-// 互动监听 (Step 4: 动态解锁闭环)
-// ============================================================
-
 // ScanPinComments 扫描想法的评论区
-// 如果 keywords 不为空，只返回包含关键词的评论；如果为空，返回所有未处理的评论
-func (m *Monitor) ScanPinComments(pinID string, keywords []string) ([]model.Comment, error) {
-	comments, err := m.zhihuClient.GetCommentList(pinID, "pin", 1, 20)
+func (m *Monitor) ScanPinComments(ctx context.Context, pinID string, keywords []string) ([]model.Comment, error) {
+	comments, err := m.zhihuClient.GetCommentList(ctx, pinID, "pin", 1, 20)
 	if err != nil {
 		return nil, err
 	}
@@ -87,13 +76,11 @@ func (m *Monitor) ScanPinComments(pinID string, keywords []string) ([]model.Comm
 			continue
 		}
 
-		// 无关键词过滤时返回所有未处理评论
 		if len(keywords) == 0 {
 			matched = append(matched, c)
 			continue
 		}
 
-		// 检查是否包含关键词
 		for _, kw := range keywords {
 			if strings.Contains(c.Content, kw) {
 				matched = append(matched, c)
@@ -103,32 +90,6 @@ func (m *Monitor) ScanPinComments(pinID string, keywords []string) ([]model.Comm
 	}
 
 	return matched, nil
-}
-
-// ScanAllActivePins 扫描所有活跃的想法，寻找关键词匹配
-func (m *Monitor) ScanAllActivePins(keywordsMap map[string][]string) (map[string][]model.Comment, error) {
-	pinIDs, err := m.store.ListActivePinIDs()
-	if err != nil {
-		return nil, err
-	}
-
-	results := make(map[string][]model.Comment)
-	for _, pinID := range pinIDs {
-		keywords, ok := keywordsMap[pinID]
-		if !ok {
-			continue
-		}
-		matched, err := m.ScanPinComments(pinID, keywords)
-		if err != nil {
-			log.Printf("[Monitor] 扫描想法 %s 评论失败: %v", pinID, err)
-			continue
-		}
-		if len(matched) > 0 {
-			results[pinID] = matched
-		}
-	}
-
-	return results, nil
 }
 
 func max(a, b float64) float64 {

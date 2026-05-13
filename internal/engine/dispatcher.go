@@ -1,6 +1,7 @@
 package engine
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"strings"
@@ -12,34 +13,30 @@ import (
 	"reverse-assassin/internal/zhihu"
 )
 
-// ReplyTask represents a queued reply operation.
 type ReplyTask struct {
 	CommentID string
 	Content   string
 }
 
-// ReplyTaskQueue is the async reply queue (capacity 1000).
 var ReplyTaskQueue = make(chan ReplyTask, 1000)
 
-// StartReplyWorker launches a rate-limited goroutine that consumes the reply queue.
-// Strictly respects 10 QPS via 100ms ticker.
 func StartReplyWorker(client *zhihu.Client) {
 	go func() {
 		ticker := time.NewTicker(100 * time.Millisecond)
 		defer ticker.Stop()
 		for task := range ReplyTaskQueue {
-			<-ticker.C // rate limit
-			_, err := client.CreateComment(task.CommentID, "comment", task.Content)
-			if err != nil {
+			<-ticker.C
+			ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+			if _, err := client.CreateComment(ctx, task.CommentID, "comment", task.Content); err != nil {
 				log.Printf("[ReplyWorker] reply failed: %v", err)
 			} else {
 				log.Printf("[ReplyWorker] reply sent to comment %s", task.CommentID[:12])
 			}
+			cancel()
 		}
 	}()
 }
 
-// Dispatcher handles branch publishing and interaction replies.
 type Dispatcher struct {
 	zhihuClient *zhihu.Client
 	store       *store.Store
@@ -49,14 +46,13 @@ func NewDispatcher(zc *zhihu.Client, s *store.Store) *Dispatcher {
 	return &Dispatcher{zhihuClient: zc, store: s}
 }
 
-// PostBranch publishes a single branch preview to the ring.
-func (d *Dispatcher) PostBranch(branch *model.Branch, storyTitle string) (string, error) {
+func (d *Dispatcher) PostBranch(ctx context.Context, branch *model.Branch, storyTitle string) (string, error) {
 	content := fmt.Sprintf(
 		"📖 【平行宇宙·%s】\n\n原著《%s》的另一个结局...\n\n%s\n\n---\n💬 在评论区回复关键词「%s」，解锁这条支线的完整剧情。",
 		branch.Tag, storyTitle, branch.Preview, branch.Keyword,
 	)
 	title := fmt.Sprintf("【%s】%s", branch.Tag, branch.Title)
-	pinID, err := d.zhihuClient.PublishPin(config.DefaultRing, content, title, nil)
+	pinID, err := d.zhihuClient.PublishPin(ctx, config.DefaultRing, content, title, nil)
 	if err != nil {
 		return "", fmt.Errorf("publish pin: %w", err)
 	}
@@ -65,14 +61,12 @@ func (d *Dispatcher) PostBranch(branch *model.Branch, storyTitle string) (string
 	return pinID, nil
 }
 
-// UnlockAndReply queues an unlock reply via the async queue instead of calling the API synchronously.
 func (d *Dispatcher) UnlockAndReply(story *model.StoryRecord, branch *model.Branch, comment model.Comment, fullStory string) error {
 	replyContent := fmt.Sprintf(
 		"@%s 🔓 你已解锁【%s·%s】！\n\n%s\n\n---\n⚡ 这是你独家解锁的平行宇宙结局。感谢你的参与！",
 		comment.AuthorName, branch.Tag, branch.Title, fullStory,
 	)
 
-	// Queue reply asynchronously (non-blocking with fallback)
 	select {
 	case ReplyTaskQueue <- ReplyTask{CommentID: comment.CommentID, Content: replyContent}:
 	default:
@@ -98,10 +92,9 @@ func (d *Dispatcher) UnlockAndReply(story *model.StoryRecord, branch *model.Bran
 	return nil
 }
 
-// PublishCombined publishes a combined idea containing multiple branch previews.
-func (d *Dispatcher) PublishCombined(branches []*model.Branch, storyTitle string) (string, error) {
+func (d *Dispatcher) PublishCombined(ctx context.Context, branches []*model.Branch, storyTitle string) (string, error) {
 	content := BuildPinMessage(branches, storyTitle)
-	pinID, err := d.zhihuClient.PublishPin(config.DefaultRing, content, "🌌 平行宇宙分支", nil)
+	pinID, err := d.zhihuClient.PublishPin(ctx, config.DefaultRing, content, "🌌 平行宇宙分支", nil)
 	if err != nil {
 		return "", fmt.Errorf("publish combined pin: %w", err)
 	}
@@ -109,7 +102,6 @@ func (d *Dispatcher) PublishCombined(branches []*model.Branch, storyTitle string
 	return pinID, nil
 }
 
-// BuildPinMessage constructs the combined idea text.
 func BuildPinMessage(branches []*model.Branch, storyTitle string) string {
 	var sb strings.Builder
 	sb.WriteString(fmt.Sprintf("🌌 【平行宇宙分支】《%s》\n\n", storyTitle))

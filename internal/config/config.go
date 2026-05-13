@@ -36,19 +36,29 @@ func SetProvider(p SettingsProvider) {
 	provider = p
 }
 
-// 知乎 API 凭证 — 通过环境变量注入，不硬编码
+// 知乎 API 凭证 — 优先级: DB 存储 > 环境变量 > 默认值
 func AppKey() string {
+	if provider != nil {
+		if v, err := provider.GetSetting("zhihu_token"); err == nil && v != "" {
+			return v
+		}
+	}
 	if v := os.Getenv("ZHIHU_APP_KEY"); v != "" {
 		return v
 	}
-	return "your_zhihu_token"
+	return ""
 }
 
 func AppSecret() string {
+	if provider != nil {
+		if v, err := provider.GetSetting("zhihu_secret"); err == nil && v != "" {
+			return v
+		}
+	}
 	if v := os.Getenv("ZHIHU_APP_SECRET"); v != "" {
 		return v
 	}
-	return "your_app_secret"
+	return ""
 }
 
 // 可用圈子 ID

@@ -1,6 +1,7 @@
 package zhihu
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 
@@ -9,7 +10,7 @@ import (
 )
 
 // GetRingDetail 获取圈子详情和最新内容
-func (c *Client) GetRingDetail(ringID string, pageNum, pageSize int) (*model.RingDetailData, error) {
+func (c *Client) GetRingDetail(ctx context.Context, ringID string, pageNum, pageSize int) (*model.RingDetailData, error) {
 	if pageNum <= 0 {
 		pageNum = 1
 	}
@@ -23,7 +24,7 @@ func (c *Client) GetRingDetail(ringID string, pageNum, pageSize int) (*model.Rin
 		"page_size": fmt.Sprintf("%d", pageSize),
 	}
 
-	body, err := c.doGet("/openapi/ring/detail", params, config.ZhihuAPIBase)
+	body, err := c.doGet(ctx, "/openapi/ring/detail", params, config.ZhihuAPIBase)
 	if err != nil {
 		return nil, err
 	}
@@ -36,8 +37,10 @@ func (c *Client) GetRingDetail(ringID string, pageNum, pageSize int) (*model.Rin
 		return nil, fmt.Errorf("API error: %s", resp.Msg)
 	}
 
-	// 重新解析 data
-	dataBytes, _ := json.Marshal(resp.Data)
+	dataBytes, err := json.Marshal(resp.Data)
+	if err != nil {
+		return nil, fmt.Errorf("marshal ring detail data: %w", err)
+	}
 	var data model.RingDetailData
 	if err := json.Unmarshal(dataBytes, &data); err != nil {
 		return nil, fmt.Errorf("unmarshal data: %w, raw: %s", err, string(body))
@@ -45,7 +48,7 @@ func (c *Client) GetRingDetail(ringID string, pageNum, pageSize int) (*model.Rin
 	return &data, nil
 }
 
-// GetRingDefaultRing 获取默认圈子详情
-func (c *Client) GetDefaultRing(pageSize int) (*model.RingDetailData, error) {
-	return c.GetRingDetail(config.DefaultRing, 1, pageSize)
+// GetDefaultRing 获取默认圈子详情
+func (c *Client) GetDefaultRing(ctx context.Context, pageSize int) (*model.RingDetailData, error) {
+	return c.GetRingDetail(ctx, config.DefaultRing, 1, pageSize)
 }

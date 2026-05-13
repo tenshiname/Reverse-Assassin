@@ -1,6 +1,7 @@
 package zhihu
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 
@@ -9,7 +10,7 @@ import (
 )
 
 // PublishPin 在指定圈子发布想法
-func (c *Client) PublishPin(ringID, content, title string, imageURLs []string) (string, error) {
+func (c *Client) PublishPin(ctx context.Context, ringID, content, title string, imageURLs []string) (string, error) {
 	body := map[string]interface{}{
 		"ring_id": ringID,
 		"content": content,
@@ -21,7 +22,7 @@ func (c *Client) PublishPin(ringID, content, title string, imageURLs []string) (
 		body["image_urls"] = imageURLs
 	}
 
-	respBody, err := c.doPost("/openapi/publish/pin", body, config.ZhihuAPIBase)
+	respBody, err := c.doPost(ctx, "/openapi/publish/pin", body, config.ZhihuAPIBase)
 	if err != nil {
 		return "", err
 	}
@@ -34,7 +35,10 @@ func (c *Client) PublishPin(ringID, content, title string, imageURLs []string) (
 		return "", fmt.Errorf("publish pin failed: %s", resp.Msg)
 	}
 
-	dataBytes, _ := json.Marshal(resp.Data)
+	dataBytes, err := json.Marshal(resp.Data)
+	if err != nil {
+		return "", fmt.Errorf("marshal publish pin data: %w", err)
+	}
 	var data model.PublishPinData
 	if err := json.Unmarshal(dataBytes, &data); err != nil {
 		return "", fmt.Errorf("unmarshal data: %w", err)

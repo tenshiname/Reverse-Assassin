@@ -1,6 +1,7 @@
 package zhihu
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 
@@ -9,9 +10,7 @@ import (
 )
 
 // GetCommentList 获取评论列表
-// contentToken: 想法 ID 或评论 ID
-// contentType: "pin" 或 "comment"
-func (c *Client) GetCommentList(contentToken, contentType string, pageNum, pageSize int) (*model.CommentListData, error) {
+func (c *Client) GetCommentList(ctx context.Context, contentToken, contentType string, pageNum, pageSize int) (*model.CommentListData, error) {
 	if pageNum <= 0 {
 		pageNum = 1
 	}
@@ -26,7 +25,7 @@ func (c *Client) GetCommentList(contentToken, contentType string, pageNum, pageS
 		"page_size":     fmt.Sprintf("%d", pageSize),
 	}
 
-	respBody, err := c.doGet("/openapi/comment/list", params, config.ZhihuAPIBase)
+	respBody, err := c.doGet(ctx, "/openapi/comment/list", params, config.ZhihuAPIBase)
 	if err != nil {
 		return nil, err
 	}
@@ -39,7 +38,10 @@ func (c *Client) GetCommentList(contentToken, contentType string, pageNum, pageS
 		return nil, fmt.Errorf("get comments failed: %s", resp.Msg)
 	}
 
-	dataBytes, _ := json.Marshal(resp.Data)
+	dataBytes, err := json.Marshal(resp.Data)
+	if err != nil {
+		return nil, fmt.Errorf("marshal comment list data: %w", err)
+	}
 	var data model.CommentListData
 	if err := json.Unmarshal(dataBytes, &data); err != nil {
 		return nil, fmt.Errorf("unmarshal data: %w, raw: %s", err, string(respBody))
@@ -48,20 +50,18 @@ func (c *Client) GetCommentList(contentToken, contentType string, pageNum, pageS
 }
 
 // CreateComment 创建评论
-// contentType: "pin"(对想法发评论) 或 "comment"(回复评论)
-func (c *Client) CreateComment(contentToken, contentType, content string) (string, error) {
+func (c *Client) CreateComment(ctx context.Context, contentToken, contentType, content string) (string, error) {
 	body := map[string]string{
 		"content_token": contentToken,
 		"content_type":  contentType,
 		"content":       content,
 	}
 
-	respBody, err := c.doPost("/openapi/comment/create", body, config.ZhihuAPIBase)
+	respBody, err := c.doPost(ctx, "/openapi/comment/create", body, config.ZhihuAPIBase)
 	if err != nil {
 		return "", err
 	}
 
-	// 此接口响应字段名是 "code" 而非 "status"
 	var raw struct {
 		Code int    `json:"code"`
 		Msg  string `json:"msg"`
@@ -80,12 +80,12 @@ func (c *Client) CreateComment(contentToken, contentType, content string) (strin
 }
 
 // DeleteComment 删除评论
-func (c *Client) DeleteComment(commentID string) error {
+func (c *Client) DeleteComment(ctx context.Context, commentID string) error {
 	body := map[string]string{
 		"comment_id": commentID,
 	}
 
-	respBody, err := c.doPost("/openapi/comment/delete", body, config.ZhihuAPIBase)
+	respBody, err := c.doPost(ctx, "/openapi/comment/delete", body, config.ZhihuAPIBase)
 	if err != nil {
 		return err
 	}
@@ -101,8 +101,7 @@ func (c *Client) DeleteComment(commentID string) error {
 }
 
 // Like 点赞/取消点赞
-// contentType: "pin" 或 "comment", actionValue: 1=点赞, 0=取消
-func (c *Client) Like(contentType, contentToken string, actionValue int) error {
+func (c *Client) Like(ctx context.Context, contentType, contentToken string, actionValue int) error {
 	body := map[string]interface{}{
 		"content_token": contentToken,
 		"content_type":  contentType,
@@ -110,7 +109,7 @@ func (c *Client) Like(contentType, contentToken string, actionValue int) error {
 		"action_value":  actionValue,
 	}
 
-	respBody, err := c.doPost("/openapi/reaction", body, config.ZhihuAPIBase)
+	respBody, err := c.doPost(ctx, "/openapi/reaction", body, config.ZhihuAPIBase)
 	if err != nil {
 		return err
 	}

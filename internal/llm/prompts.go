@@ -161,6 +161,86 @@ func BuildGeneratePromptWithStyle(story *model.StoryRecord, pivot model.PivotPoi
 	)
 }
 
+// BuildGeneratePromptWithState adds narrative state context to the generation prompt.
+func BuildGeneratePromptWithState(story *model.StoryRecord, pivot model.PivotPoint, styleSummary, stateContext string) string {
+	chars := strings.Join(story.AnalysisResult.Characters, ", ")
+	base := fmt.Sprintf(GeneratePromptWithStyle,
+		story.Title,
+		story.AnalysisResult.Worldview,
+		chars,
+		pivot.Scene,
+		pivot.BranchPotential,
+		styleSummary,
+	)
+	if stateContext != "" {
+		base += "\n\n" + stateContext + "\n**重要**: 上面是之前轮次积累的角色状态和时间线。你在生成新分支时，必须保持角色性格、关系、记忆的一致性。如果当前状态中有活跃的情节线，请自然地延续或解决它们。"
+	}
+	return base
+}
+
+// ============================================================
+// System Prompt: 延续生成器 (用于 /api/action/continue)
+// ============================================================
+const ContinuePrompt = `你是一个创意无限的平行宇宙叙事引擎。用户给了一个追问，你需要基于当前故事状态生成延续剧情。
+
+## 原始故事
+标题: %s
+世界观: %s
+核心人物: %s
+
+## 用户追问
+%s
+
+## 当前枢纽点
+场景: %s
+分支可能性: %s
+
+## 原作者的写作风格（必须严格遵循）
+%s
+
+%s
+
+## 任务
+基于用户追问和当前故事状态，生成 1-3 条延续的平行剧情支线。必须保持角色性格、关系、记忆的一致性。
+
+1. 每条支线包含:
+   - tag: 支线标签 (黑化线/反转线/治愈线/悬疑线/史诗线/日常线)
+   - title: 支线标题(15字以内)
+   - preview: 预告片段(150-200字)
+   - full_story: 完整支线内容(500-800字)
+   - keyword: 解锁关键词(2-4个字的简短中文词)
+
+2. 支线应该展示追问引发的不同可能性
+
+## 输出格式
+严格JSON:
+{
+  "branches": [
+    {
+      "tag": "...",
+      "title": "...",
+      "preview": "...",
+      "full_story": "...",
+      "keyword": "..."
+    }
+  ]
+}`
+
+// BuildContinuePrompt builds the continuation prompt with full state context.
+func BuildContinuePrompt(story *model.StoryRecord, pivot model.PivotPoint, styleSummary, stateContext, userPrompt string) string {
+	chars := strings.Join(story.AnalysisResult.Characters, ", ")
+	return fmt.Sprintf(ContinuePrompt,
+		story.Title,
+		story.AnalysisResult.Worldview,
+		chars,
+		userPrompt,
+		pivot.Scene,
+		pivot.BranchPotential,
+		styleSummary,
+		stateContext,
+	)
+}
+
 // ============================================================
 // System Prompt: 平行宇宙生成器 (legacy - without style)
 // ============================================================

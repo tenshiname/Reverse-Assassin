@@ -234,38 +234,24 @@ func (s *Store) StoryExists(workID string) bool {
 }
 
 func (s *Store) ListStoriesByStatus(status model.StoryStatus) ([]*model.StoryRecord, error) {
-	var rows *sql.Rows
-	var err error
-	if status == "" {
-		rows, err = s.db.Query(
-			`SELECT work_id, title, author, content, status, analysis_result, created_at, updated_at
-			 FROM stories ORDER BY created_at DESC`,
-		)
-	} else {
-		rows, err = s.db.Query(
-			`SELECT work_id, title, author, content, status, analysis_result, created_at, updated_at
-			 FROM stories WHERE status = ? ORDER BY created_at DESC`, string(status),
-		)
+	query := `SELECT work_id, title, author, content, status, analysis_result, created_at, updated_at FROM stories`
+	args := []interface{}{}
+	if status != "" {
+		query += " WHERE status = ?"
+		args = append(args, string(status))
 	}
-	if err != nil {
-		return nil, err
-	}
+	query += " ORDER BY created_at DESC"
+	rows, err := s.db.Query(query, args...)
+	if err != nil { return nil, err }
 	defer rows.Close()
 
 	var results []*model.StoryRecord
 	for rows.Next() {
 		var r model.StoryRecord
-		var analysisJSON string
-		if err := rows.Scan(&r.WorkID, &r.Title, &r.Author, &r.Content, &r.Status, &analysisJSON, &r.CreatedAt, &r.UpdatedAt); err != nil {
-			continue
-		}
+		var arJSON string
+		if err := rows.Scan(&r.WorkID, &r.Title, &r.Author, &r.Content, &r.Status, &arJSON, &r.CreatedAt, &r.UpdatedAt); err != nil { continue }
 		r.Status = model.StoryStatus(r.Status)
-		if analysisJSON != "" {
-			var ar model.AnalysisResult
-			if json.Unmarshal([]byte(analysisJSON), &ar) == nil {
-				r.AnalysisResult = &ar
-			}
-		}
+		if arJSON != "" { json.Unmarshal([]byte(arJSON), &r.AnalysisResult) }
 		results = append(results, &r)
 	}
 	return results, rows.Err()
@@ -295,23 +281,14 @@ func (s *Store) UpdateBranchPinID(branchID int64, pinID string) error {
 }
 
 func (s *Store) GetBranchesByStory(workID string) ([]*model.Branch, error) {
-	rows, err := s.db.Query(
-		`SELECT id, story_work_id, pivot_index, tag, title, preview, full_story, pin_id, keyword, unlocked, created_at
-		 FROM branches WHERE story_work_id = ? ORDER BY id`, workID,
-	)
-	if err != nil {
-		return nil, err
-	}
+	rows, err := s.db.Query(`SELECT id, story_work_id, pivot_index, tag, title, preview, full_story, pin_id, keyword, unlocked, created_at FROM branches WHERE story_work_id = ? ORDER BY id`, workID)
+	if err != nil { return nil, err }
 	defer rows.Close()
-
 	var branches []*model.Branch
 	for rows.Next() {
 		var b model.Branch
 		var unlocked int
-		if err := rows.Scan(&b.ID, &b.StoryWorkID, &b.PivotIndex, &b.Tag, &b.Title,
-			&b.Preview, &b.FullStory, &b.PinID, &b.Keyword, &unlocked, &b.CreatedAt); err != nil {
-			continue
-		}
+		if err := rows.Scan(&b.ID, &b.StoryWorkID, &b.PivotIndex, &b.Tag, &b.Title, &b.Preview, &b.FullStory, &b.PinID, &b.Keyword, &unlocked, &b.CreatedAt); err != nil { continue }
 		b.Unlocked = unlocked == 1
 		branches = append(branches, &b)
 	}

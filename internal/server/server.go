@@ -206,53 +206,29 @@ func (s *Server) registerRoutes() {
 // ============================================================
 
 func (s *Server) handleStatus(w http.ResponseWriter, r *http.Request) {
-	allStories, err := s.getStore(r).ListStoriesByStatus("")
-	if err != nil {
-		log.Printf("[status] list stories: %v", err)
-	}
-	pending, err := s.getStore(r).ListStoriesByStatus(model.StatusPending)
-	if err != nil {
-		log.Printf("[status] list pending: %v", err)
-	}
-	analyzed, err := s.getStore(r).ListStoriesByStatus(model.StatusAnalyzed)
-	if err != nil {
-		log.Printf("[status] list analyzed: %v", err)
-	}
-	branched, err := s.getStore(r).ListStoriesByStatus(model.StatusBranched)
-	if err != nil {
-		log.Printf("[status] list branched: %v", err)
-	}
-	activePins, err := s.getStore(r).ListActivePinIDs()
-	if err != nil {
-		log.Printf("[status] list active pins: %v", err)
-	}
-
-	branchCount := 0
-	unlockedCount := 0
-	for _, st := range allStories {
-		branches, err := s.getStore(r).GetBranchesByStory(st.WorkID)
-		if err != nil {
-			log.Printf("[status] get branches for %s: %v", st.WorkID, err)
-			continue
+	st := s.getStore(r)
+	allStories, err := st.ListStoriesByStatus("")
+	if err != nil { log.Printf("[status] list stories: %v", err) }
+	var pending, analyzed, branched, branchCount, unlocked int
+	for _, story := range allStories {
+		switch story.Status {
+		case model.StatusPending: pending++
+		case model.StatusAnalyzed: analyzed++
+		case model.StatusBranched: branched++
 		}
+		branches, err := st.GetBranchesByStory(story.WorkID)
+		if err != nil { continue }
 		branchCount += len(branches)
-		for _, b := range branches {
-			if b.Unlocked {
-				unlockedCount++
-			}
-		}
+		for _, b := range branches { if b.Unlocked { unlocked++ } }
 	}
-
+	activePins, err := st.ListActivePinIDs()
+	if err != nil { activePins = nil }
 	writeJSON(w, map[string]interface{}{
-		"agent_running":     s.isRunning(),
-		"total_stories":     len(allStories),
-		"pending_stories":   len(pending),
-		"analyzed_stories":  len(analyzed),
-		"branched_stories":  len(branched),
-		"active_pins":       len(activePins),
-		"total_branches":    branchCount,
-		"unlocked_branches": unlockedCount,
-		"llm_configured":    config.LLMAPIKey() != "",
+		"agent_running": s.isRunning(), "total_stories": len(allStories),
+		"pending_stories": pending, "analyzed_stories": analyzed,
+		"branched_stories": branched, "active_pins": len(activePins),
+		"total_branches": branchCount, "unlocked_branches": unlocked,
+		"llm_configured": config.LLMAPIKey() != "",
 	})
 }
 

@@ -44,7 +44,7 @@ func (g *Generator) Generate(ctx context.Context, story *model.StoryRecord, pivo
 		CharacterEmotion string   `json:"character_emotion"`
 		Tone             []string `json:"tone"`
 	}
-	if err := g.llmClient.ChatJSON(ctx, "", stylePrompt, &style); err != nil {
+	if err := g.llmClient.ChatJSONWithRetry(ctx, "", stylePrompt, &style, 3); err != nil {
 		log.Printf("[Generator] style extraction failed, falling back to default: %v", err)
 		style.StyleSummary = "保持原文风格"
 	}
@@ -75,7 +75,7 @@ func (g *Generator) Generate(ctx context.Context, story *model.StoryRecord, pivo
 		}())
 
 	var resp model.GenerateResponse
-	if err := g.llmClient.ChatJSON(ctx, "", prompt, &resp); err != nil {
+	if err := g.llmClient.ChatJSONWithRetry(ctx, "", prompt, &resp, 3); err != nil {
 		return nil, fmt.Errorf("generate branches: %w", err)
 	}
 
@@ -106,7 +106,7 @@ func (g *Generator) Continue(ctx context.Context, story *model.StoryRecord, pivo
 	contPrompt := llm.BuildContinuePrompt(story, pivot, styleSummary, stateContext, userPrompt)
 
 	var resp model.GenerateResponse
-	if err := g.llmClient.ChatJSON(ctx, "", contPrompt, &resp); err != nil {
+	if err := g.llmClient.ChatJSONWithRetry(ctx, "", contPrompt, &resp, 3); err != nil {
 		return nil, fmt.Errorf("continue story: %w", err)
 	}
 
@@ -138,7 +138,7 @@ func (g *Generator) GenerateUnlockStory(ctx context.Context, keyword string, sto
 	prompt := llm.BuildUnlockPrompt(keyword, story.Title, worldview, branch.Preview)
 	log.Printf("[Generator] 正在为关键词 '%s' 生成解锁剧情...", keyword)
 
-	text, err := g.llmClient.Chat(ctx, "", prompt)
+	text, err := g.llmClient.ChatWithRetry(ctx, "", prompt, 3)
 	if err != nil {
 		return "", fmt.Errorf("generate unlock story: %w", err)
 	}

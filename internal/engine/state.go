@@ -143,7 +143,7 @@ func (sm *StateManager) ExtractStateFromText(ctx context.Context, st *model.Stor
 	prompt := buildExtractStatePrompt(st, generatedText)
 
 	var result StateChanges
-	if err := sm.llmClient.ChatJSON(ctx, "", prompt, &result); err != nil {
+	if err := sm.llmClient.ChatJSONWithRetry(ctx, "", prompt, &result, 3); err != nil {
 		log.Printf("[StateManager] state extraction failed: %v", err)
 		// Non-fatal: return empty changes
 		return &StateChanges{}, nil

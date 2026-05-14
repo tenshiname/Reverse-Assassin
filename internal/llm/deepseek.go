@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"strings"
 	"time"
@@ -117,4 +118,66 @@ func (c *Client) ChatJSON(ctx context.Context, systemPrompt, userMessage string,
 		}
 	}
 	return nil
+}
+
+// RetryableError checks if an LLM error is worth retrying.
+func RetryableError(err error) bool {
+	if err == nil {
+		return false
+	}
+	msg := err.Error()
+	// Retry on timeouts, DNS, connection refused, 5xx, rate limits
+	return strings.Contains(msg, "timeout") ||
+		strings.Contains(msg, "connection refused") ||
+		strings.Contains(msg, "no such host") ||
+		strings.Contains(msg, "EOF") ||
+		strings.Contains(msg, "status 5") ||
+		strings.Contains(msg, "status 429") ||
+		strings.Contains(msg, "empty response")
+}
+
+// ChatWithRetry calls Chat with up to maxRetries on transient errors.
+func (c *Client) ChatWithRetry(ctx context.Context, systemPrompt, userMessage string, maxRetries int) (string, error) {
+	var lastErr error
+	for attempt := 0; attempt <= maxRetries; attempt++ {
+		text, err := c.Chat(ctx, systemPrompt, userMessage)
+		if err == nil {
+			return text, nil
+		}
+		lastErr = err
+		if !RetryableError(err) || attempt == maxRetries {
+			break
+		}
+		backoff := time.Duration(1<<uint(attempt)) * time.Second
+		log.Printf("[LLM] retry %d/%d after %v: %v", attempt+1, maxRetries, backoff, err)
+		select {
+		case <-ctx.Done():
+			return "", ctx.Err()
+		case <-time.After(backoff):
+		}
+	}
+	return "", fmt.Errorf("LLM request failed after %d retries: %w", maxRetries, lastErr)
+}
+
+// ChatJSONWithRetry calls ChatJSON with retry on transient errors.
+func (c *Client) ChatJSONWithRetry(ctx context.Context, systemPrompt, userMessage string, target interface{}, maxRetries int) error {
+	var lastErr error
+	for attempt := 0; attempt <= maxRetries; attempt++ {
+		err := c.ChatJSON(ctx, systemPrompt, userMessage, target)
+		if err == nil {
+			return nil
+		}
+		lastErr = err
+		if !RetryableError(err) || attempt == maxRetries {
+			break
+		}
+		backoff := time.Duration(1<<uint(attempt)) * time.Second
+		log.Printf("[LLM] retry %d/%d after %v: %v", attempt+1, maxRetries, backoff, err)
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		case <-time.After(backoff):
+		}
+	}
+	return fmt.Errorf("LLM JSON request failed after %d retries: %w", maxRetries, lastErr)
 }

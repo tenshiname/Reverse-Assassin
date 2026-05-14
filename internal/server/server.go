@@ -821,41 +821,50 @@ func (s *Server) handleConfig(w http.ResponseWriter, r *http.Request) {
 // ============================================================
 
 func (s *Server) runAgentLoop() {
-	s.hub.BroadcastLog("info", "agent", "Agent loop started")
+	s.hub.BroadcastLog("info", "agent", "Agent loop started (chained scheduling)")
 
-	s.analyzer.DiscoverAndAnalyze(context.Background())
-	s.analyzer.AnalyzePendingStories(context.Background())
-	triggerBranchingServer(context.Background(), s.store, s.monitor, s.generator, s.dispatcher, s.hub)
+	// Initial full cycle
+	s.runAgentCycle(context.Background())
 
-	storyTicker := time.NewTicker(time.Duration(config.StoryPollInterval) * time.Second)
-	monitorTicker := time.NewTicker(time.Duration(config.MonitorInterval) * time.Second)
-	interactTicker := time.NewTicker(time.Duration(config.BranchPollInterval) * time.Second)
-	defer storyTicker.Stop()
-	defer monitorTicker.Stop()
-	defer interactTicker.Stop()
+	// Continuous chained cycles with cooldown
+	cooldown := 30 * time.Second
+	timer := time.NewTimer(cooldown)
+	defer timer.Stop()
 
 	for {
 		select {
-		case <-storyTicker.C:
-			s.analyzer.DiscoverAndAnalyze(context.Background())
-			if n, err := s.analyzer.AnalyzePendingStories(context.Background()); err != nil {
-				s.hub.BroadcastLog("error", "agent", "Analyze pending error: "+err.Error())
-			} else if n > 0 {
-				s.hub.BroadcastLog("success", "agent", fmt.Sprintf("Discovered & analyzed %d new stories", n))
-				triggerBranchingServer(context.Background(), s.store, s.monitor, s.generator, s.dispatcher, s.hub)
-			}
-
-		case <-monitorTicker.C:
-			triggerBranchingServer(context.Background(), s.store, s.monitor, s.generator, s.dispatcher, s.hub)
-
-		case <-interactTicker.C:
-			scanInteractionsServer(context.Background(), s.store, s.monitor, s.generator, s.dispatcher, s.hub)
+		case <-timer.C:
+			s.runAgentCycle(context.Background())
+			timer.Reset(cooldown)
 
 		case <-s.stopCh:
 			s.hub.BroadcastLog("info", "agent", "Agent loop exited")
 			return
 		}
 	}
+}
+
+// runAgentCycle runs one complete agent cycle: discover → analyze → generate → scan
+func (s *Server) runAgentCycle(ctx context.Context) {
+	// Step 1: Discover new stories
+	if n, err := s.analyzer.DiscoverAndAnalyze(ctx); err != nil {
+		s.hub.BroadcastLog("error", "agent", "Discover: "+err.Error())
+	} else if n > 0 {
+		s.hub.BroadcastLog("success", "agent", fmt.Sprintf("Discovered %d new stories", n))
+	}
+
+	// Step 2: Analyze pending stories
+	if n, err := s.analyzer.AnalyzePendingStories(ctx); err != nil {
+		s.hub.BroadcastLog("error", "agent", "Analyze: "+err.Error())
+	} else if n > 0 {
+		s.hub.BroadcastLog("success", "agent", fmt.Sprintf("Analyzed %d stories", n))
+	}
+
+	// Step 3: Trigger branch generation for analyzed stories
+	triggerBranchingServer(ctx, s.store, s.monitor, s.generator, s.dispatcher, s.hub)
+
+	// Step 4: Scan interactions for keyword unlocks
+	scanInteractionsServer(ctx, s.store, s.monitor, s.generator, s.dispatcher, s.hub)
 }
 
 // ============================================================
@@ -1116,6 +1125,15 @@ func (s *Server) handleSettings(w http.ResponseWriter, r *http.Request) {
 		}
 		if key, ok := settings["llm_api_key"]; ok && len(key) > 8 {
 			settings["llm_api_key_masked"] = key[:4] + "****" + key[len(key)-4:]
+			delete(settings, "llm_api_key")
+		}
+		if tok, ok := settings["zhihu_token"]; ok && len(tok) > 4 {
+			settings["zhihu_token_masked"] = tok[:2] + "****"
+			delete(settings, "zhihu_token")
+		}
+		if sec, ok := settings["zhihu_secret"]; ok && len(sec) > 4 {
+			settings["zhihu_secret_masked"] = sec[:2] + "****"
+			delete(settings, "zhihu_secret")
 		}
 		writeJSON(w, settings)
 
@@ -1417,7 +1435,7 @@ func continueBranch(ctx context.Context, s *store.Store, lc *llm.Client, sm *eng
 
 	// Generate
 	var resp model.GenerateResponse
-	if err := lc.ChatJSON(ctx, "", prompt, &resp); err != nil {
+	if err := lc.ChatJSONWithRetry(ctx, "", prompt, &resp, 3); err != nil {
 		return 0, fmt.Errorf("continue branch: %w", err)
 	}
 
@@ -1676,7 +1694,7 @@ func (s *Server) handleOAuthCallback(w http.ResponseWriter, r *http.Request) {
 		writeError(w, "failed to read token response", 500)
 		return
 	}
-	log.Printf("[oauth] token exchange response: %s", string(respBody))
+	log.Printf("[oauth] token exchange completed (len=%d)", len(respBody))
 
 	var tokenResp struct {
 		AccessToken string `json:"access_token"`
@@ -1693,7 +1711,7 @@ func (s *Server) handleOAuthCallback(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if tokenResp.AccessToken == "" {
-		writeError(w, "oauth token exchange returned empty token: "+string(respBody), 400)
+		writeError(w, "oauth token exchange returned empty token", 400)
 		return
 	}
 

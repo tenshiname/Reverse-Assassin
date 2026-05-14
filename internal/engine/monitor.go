@@ -40,7 +40,7 @@ func (m *Monitor) AnalyzeComments(ctx context.Context, comments []model.Comment)
 	prompt := llm.BuildSentimentPrompt(comments)
 
 	var result SentimentResult
-	if err := m.llmClient.ChatJSON(ctx, "", prompt, &result); err != nil {
+	if err := m.llmClient.ChatJSONWithRetry(ctx, "", prompt, &result, 3); err != nil {
 		return nil, err
 	}
 	return &result, nil

@@ -131,7 +131,7 @@ func (a *Analyzer) analyzeStory(ctx context.Context, content string) (*model.Ana
 	prompt := llm.BuildAnalyzePrompt(content)
 
 	var result model.AnalysisResult
-	if err := a.llmClient.ChatJSON(ctx, "", prompt, &result); err != nil {
+	if err := a.llmClient.ChatJSONWithRetry(ctx, "", prompt, &result, 3); err != nil {
 		return nil, err
 	}
 

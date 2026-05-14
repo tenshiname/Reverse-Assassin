@@ -2954,7 +2954,10 @@ createApp({
     const ivoTab = ref("worldline");
     const ivoChars = ref([]);
     const ivoTimeline = ref([]);
-    const charsLoading = ref(false);
+    const ivoAllChars = ref([]);
+    const ivoAllTimeline = ref([]);
+    const ivoActiveBranchId = ref(0);
+        const charsLoading = ref(false);
     const selPivot = ref(-1);
     const customPrompt = ref("");
     const contBranch = ref(-1);
@@ -3559,15 +3562,28 @@ createApp({
       });
     };
 
+    const filterStateForBranch = () => {
+      if (!ivoActiveBranchId.value) {
+        ivoChars.value = ivoAllChars.value;
+        ivoTimeline.value = ivoAllTimeline.value;
+        return;
+      }
+      // Show timeline only up to the active branch
+      ivoTimeline.value = ivoAllTimeline.value.filter(e => e.branch_id === 0 || e.branch_id === ivoActiveBranchId.value || e.round <= 1);
+      ivoChars.value = ivoAllChars.value;
+    };
+    const selectBranchInIvo = (branchId) => {
+      ivoActiveBranchId.value = branchId;
+      filterStateForBranch();
+    };
     const loadIvoState = async () => {
       if (!ivoStory.value?.work_id) return;
       charsLoading.value = true;
-      let path = "/states/" + ivoStory.value.work_id;
-      if (ivoSelectedNodeId.value > 0) path += "?node_id=" + ivoSelectedNodeId.value;
-      const j = await api(path);
+      const j = await api("/states/" + ivoStory.value.work_id);
       if (j.status === 0) {
-        ivoChars.value = j.data.characters || [];
-        ivoTimeline.value = j.data.timeline || [];
+        ivoAllChars.value = j.data.characters || [];
+        ivoAllTimeline.value = j.data.timeline || [];
+        filterStateForBranch();
       }
       charsLoading.value = false;
     };
@@ -3968,7 +3984,7 @@ createApp({
       runningBranchIDs,
       loadRing,
       retry,
-      loadIvoState,
+      loadIvoState,selectBranchInIvo,ivoActiveBranchId,ivoAllChars,ivoAllTimeline,
       loadIvoWorldline,
       oauthLogin,
       

@@ -1038,6 +1038,11 @@ func (s *Server) namespaceMiddleware(next http.Handler) http.Handler {
 
 func gzipMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// Skip gzip for SSE
+		if strings.HasPrefix(r.URL.Path, "/api/events") {
+			next.ServeHTTP(w, r)
+			return
+		}
 		if !strings.Contains(r.Header.Get("Accept-Encoding"), "gzip") {
 			next.ServeHTTP(w, r)
 			return

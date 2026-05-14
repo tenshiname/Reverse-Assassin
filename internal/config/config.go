@@ -73,13 +73,8 @@ func AppSecret() string {
 	return ""
 }
 
-// OAuth 回调地址 (必须与知乎开放平台注册的一致)
+// OAuth 回调地址 (必须与知乎开放平台注册的一致，不从DB读取)
 func OAuthRedirectURI() string {
-	if p := getProvider(); p != nil {
-		if v, err := p.GetSetting("oauth_redirect_uri"); err == nil && v != "" {
-			return v
-		}
-	}
 	if v := os.Getenv("OAUTH_REDIRECT_URI"); v != "" {
 		return v
 	}

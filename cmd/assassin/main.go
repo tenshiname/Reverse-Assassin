@@ -21,7 +21,7 @@ func main() {
 	flag.Parse()
 
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
-	log.Println("🗡️  反转刺客 (Reverse Assassin)")
+	log.Println("🗡️  ZHIFORK")
 
 	if config.LLMAPIKey() == "" {
 		log.Println("⚠️  未配置 LLM API Key:")
@@ -67,7 +67,7 @@ func runServer(dbPath, port string) {
 		os.Exit(0)
 	}()
 
-	log.Printf("🌐 反转刺客 Web 服务启动在 http://0.0.0.0:%s", port)
+	log.Printf("🌐 ZHIFORK Web 服务启动在 http://0.0.0.0:%s", port)
 	log.Printf("📊 仪表盘: http://localhost:%s/", port)
 	log.Printf("📡 API 文档: http://localhost:%s/api/status", port)
 	log.Printf("💡 启动 Agent: POST http://localhost:%s/api/action/agent?action=start", port)

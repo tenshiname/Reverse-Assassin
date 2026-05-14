@@ -6,7 +6,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, max-age=0">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>反转刺客 | Reverse Assassin</title>
+<title>ZHIFORK</title>
 <script src="/vue.min.js"></script>
 <style>
 [v-cloak]{display:none}
@@ -1319,9 +1319,9 @@ button{cursor:pointer}
 </style>
 </head>
 <body>
-<div id="app-loading"><div style="text-align:center;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%)"><div class="pulse" style="margin:0 auto 20px"></div><div style="font-size:15px;font-weight:600;color:#1f2d3d;margin-bottom:4px">反转刺客</div><div id="load-tip" style="font-size:12px;color:#8b9bb0">正在准备你的故事宇宙...</div></div></div>
+<div id="app-loading"><div style="text-align:center;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%)"><div class="pulse" style="margin:0 auto 20px"></div><div style="font-size:15px;font-weight:600;color:#1f2d3d;margin-bottom:4px">ZHIFORK</div><div id="load-tip" style="font-size:12px;color:#8b9bb0">正在准备你的故事宇宙...</div></div></div>
 
-<div class="app-loader" id="app-loader"><div style="text-align:center;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%)"><div class="pulse" style="margin:0 auto 16px"></div><div style="font-size:14px;color:#8b9bb0">反转刺客</div></div></div>
+<div class="app-loader" id="app-loader"><div style="text-align:center;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%)"><div class="pulse" style="margin:0 auto 16px"></div><div style="font-size:14px;color:#8b9bb0">ZHIFORK</div></div></div>
 <div id="app" class="app-shell" v-cloak>
   <div class="orb a"></div>
   <div class="orb b"></div>
@@ -1335,7 +1335,7 @@ button{cursor:pointer}
     <div class="login-card" data-reveal>
       <img src="/logo.png" alt="Logo">
       <div class="eyebrow">AI Native Story Engine</div>
-      <h2>反转刺客</h2>
+      <h2>ZHIFORK</h2>
       <div class="desc">
         从知乎故事抓取、AI 解析、支线生成到世界线演化，整套内容流水线集中在一个界面里。
         使用知乎 OAuth 登录，或直接进入路演演示模式。
@@ -1543,7 +1543,7 @@ button{cursor:pointer}
         <div class="brand">
           <div class="brand-mark"><img src="/logo.png" alt="Logo"></div>
           <div class="brand-copy">
-            <h1>反转刺客</h1>
+            <h1>ZHIFORK</h1>
             <p>Reverse Assassin</p>
           </div>
         </div>
@@ -2431,17 +2431,26 @@ createApp({
         return;
       }
       stories.value = (j.data.items || []).map((s) => ({ ...s, _branches: [] }));
-      for (const s of stories.value) {
-        const b = await api("/branches?story_id=" + s.work_id + "&page_size=50");
-        if (b.status === 0) s._branches = b.data.items || [];
-      }
     };
 
     const loadBranches = async () => {
       branchesError.value = "";
       const j = await api("/branches?page_size=200");
-      if (j.status === 0) branches.value = j.data.items || [];
-      else branchesError.value = j.msg || "加载分支失败";
+      if (j.status === 0) {
+        const allBranches = j.data.items || [];
+        branches.value = allBranches;
+        // Match branches to stories
+        const branchMap = {};
+        allBranches.forEach(b => {
+          if (!branchMap[b.story_work_id]) branchMap[b.story_work_id] = [];
+          branchMap[b.story_work_id].push(b);
+        });
+        stories.value.forEach(s => {
+          s._branches = branchMap[s.work_id] || [];
+        });
+      } else {
+        branchesError.value = j.msg || "加载分支失败";
+      }
     };
 
     const loadRing = async () => {

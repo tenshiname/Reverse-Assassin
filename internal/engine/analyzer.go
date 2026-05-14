@@ -88,11 +88,11 @@ func (a *Analyzer) AnalyzePendingStories(ctx context.Context) (int, error) {
 		}
 
 		if analysis.Classification == "real_modern" {
-			log.Printf("[Analyzer] 拦截近现代史: %s", story.Title)
+			log.Printf("[Analyzer] classified as real_modern: %s", story.Title)
+			// Save analysis but mark as analyzed (not blocked) so UI shows normally
 			if err := a.resolveStore(ctx).UpdateStoryAnalysis(story.WorkID, analysis); err != nil {
-				log.Printf("[Analyzer] 保存分析结果失败: %v", err)
+				log.Printf("[Analyzer] save failed: %v", err)
 			}
-			a.resolveStore(ctx).UpdateStoryStatus(story.WorkID, "blocked")
 			continue
 		}
 
@@ -120,9 +120,7 @@ func (a *Analyzer) AnalyzeOneStory(ctx context.Context, workID string) error {
 		return err
 	}
 	if analysis.Classification == "real_modern" {
-		a.resolveStore(ctx).UpdateStoryAnalysis(workID, analysis)
-		a.resolveStore(ctx).UpdateStoryStatus(workID, "blocked")
-		return fmt.Errorf("内容涉及近现代真实历史，已拦截")
+		return a.resolveStore(ctx).UpdateStoryAnalysis(workID, analysis)
 	}
 	return a.resolveStore(ctx).UpdateStoryAnalysis(workID, analysis)
 }

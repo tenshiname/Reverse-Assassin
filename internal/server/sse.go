@@ -9,6 +9,25 @@ import (
 	"time"
 )
 
+var (
+	globalLogBuf []logEntry
+	globalLogMu  sync.Mutex
+)
+
+func pushGlobalLog(level, module, msg string) {
+	globalLogMu.Lock()
+	globalLogBuf = append(globalLogBuf, logEntry{Module: module, Msg: msg, Level: level, Time: time.Now().UnixMilli()})
+	if len(globalLogBuf) > 100 { globalLogBuf = globalLogBuf[1:] }
+	globalLogMu.Unlock()
+}
+
+type logEntry struct {
+	Module  string `json:"module"`
+	Msg     string `json:"msg"`
+	Level   string `json:"level"`
+	Time    int64  `json:"time"`
+}
+
 // SSEEvent 实时事件
 type SSEEvent struct {
 	Type      string      `json:"type"`
@@ -61,6 +80,7 @@ func (h *SSEHub) Broadcast(event SSEEvent) {
 
 // BroadcastLog 广播一条日志事件
 func (h *SSEHub) BroadcastLog(level, module, msg string) {
+	pushGlobalLog(level, module, msg)
 	h.Broadcast(SSEEvent{
 		Type:      "log",
 		Timestamp: time.Now().UnixMilli(),

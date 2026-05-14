@@ -3,22 +3,16 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, max-age=0">
-<meta http-equiv="Pragma" content="no-cache">
-<meta http-equiv="Expires" content="0">
 <title>ZHIFORK</title>
 <script src="/vue.min.js"></script>
-<style>
-[v-cloak]{display:none}
-.app-loader{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#f6f8fc;z-index:9999}
-.app-loader .pulse{width:36px;height:36px;border-radius:50%;background:#056de8;animation:loadpulse 1.2s ease-in-out infinite}
-@keyframes loadpulse{0%,100%{transform:scale(.6);opacity:.4}50%{transform:scale(1);opacity:1}}
-</style>
 <style>
 :root{
   color-scheme:light;
   --bg:#f6f8fc;
   --bg-soft:#eef3fb;
+  --bg-accent:rgba(217,235,255,.7);
+  --bg-start:#f7f9fc;
+  --bg-end:#f3f7fb;
   --panel:#ffffff;
   --panel-2:#f8fbff;
   --panel-3:#edf4ff;
@@ -30,6 +24,7 @@
   --brand:#056de8;
   --brand-2:#1381ff;
   --brand-3:#d9ebff;
+  --brand-rgb:5,109,232;
   --ok:#12b76a;
   --warn:#f79009;
   --danger:#f04438;
@@ -41,6 +36,152 @@
   --radius-md:16px;
   --radius-sm:12px;
   --font:'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;
+  --grid-line:rgba(5,109,232,.03);
+  --sidebar-bg:linear-gradient(180deg, rgba(247,250,255,.94), rgba(243,247,251,.92));
+  --side-panel-bg:linear-gradient(180deg, #ffffff, #f9fbff);
+  --hero-bg:linear-gradient(135deg, #fafdff 0%, #eef6ff 62%, #ffffff 100%);
+  --hero-border:#dbe7f5;
+  --eyebrow-bg:#edf5ff;
+  --eyebrow-border:#d8e9ff;
+  --surface-1:#ffffff;
+  --surface-2:#f9fbff;
+  --surface-3:#f7faff;
+  --surface-4:#f5f9ff;
+  --surface-5:#edf5ff;
+  --surface-6:#f8fbff;
+  --btn-bg:#ffffff;
+  --btn-border:#d8e4f2;
+  --btn-hover-bg:#f5f9ff;
+  --btn-hover-border:#c9dbf2;
+  --ghost-bg:#f7faff;
+  --toggle-bg:#f6faff;
+  --toggle-track:#d8e4f2;
+  --nav-hover-bg:#f4f8ff;
+  --nav-hover-border:#d9e8fb;
+  --nav-active-bg:#edf5ff;
+  --nav-active-border:#cfe3fb;
+  --nav-icon-bg:#f5f8fd;
+  --nav-icon-border:#edf1f7;
+  --nav-icon-active-bg:#dfeeff;
+  --nav-icon-active-border:#d2e5ff;
+  --badge-bg:#eff6ff;
+  --badge-active-bg:#dcecff;
+  --field-border:#d9e5f3;
+  --field-focus:#8ebfff;
+  --field-focus-ring:rgba(5,109,232,.08);
+  --canvas-bg:#f8fbff;
+  --canvas-grid:rgba(5,109,232,.04);
+  --overlay-bg:rgba(230,239,250,.72);
+  --modal-bg:rgba(236,243,252,.88);
+  --text-soft:#425466;
+  --text-softer:#3c4a5b;
+  --danger-bg:#fff1f2;
+  --danger-border:#ffd5d8;
+  --ok-bg:#ecfdf3;
+  --ok-border:#ccefdc;
+  --warn-bg:#fffaeb;
+  --warn-border:#f9e3b0;
+  --violet-bg:#f4f0ff;
+  --violet-border:#dcd0ff;
+  --portal-kicker-text:#17365d;
+  --portal-kicker-bg:rgba(5,109,232,.12);
+  --portal-kicker-border:rgba(5,109,232,.18);
+}
+:root[data-scheme="dark"]{
+  color-scheme:dark;
+  --bg:#0f1724;
+  --bg-soft:#132033;
+  --bg-accent:rgba(24,119,242,.18);
+  --bg-start:#0c1420;
+  --bg-end:#111c2b;
+  --panel:#152131;
+  --panel-2:#182638;
+  --panel-3:#1d2e44;
+  --line:#24364d;
+  --line-strong:#335071;
+  --text:#e8eef8;
+  --muted:#a1b2c7;
+  --muted-2:#7f93aa;
+  --shadow:0 28px 60px rgba(0,0,0,.38);
+  --shadow-soft:0 14px 32px rgba(0,0,0,.28);
+  --grid-line:rgba(255,255,255,.04);
+  --sidebar-bg:linear-gradient(180deg, rgba(13,22,35,.94), rgba(15,25,39,.96));
+  --side-panel-bg:linear-gradient(180deg, #162334, #121e2d);
+  --hero-bg:linear-gradient(135deg, #17263b 0%, #13273f 48%, #101a29 100%);
+  --hero-border:#25405f;
+  --eyebrow-bg:rgba(255,255,255,.06);
+  --eyebrow-border:rgba(255,255,255,.08);
+  --surface-1:#152131;
+  --surface-2:#182638;
+  --surface-3:#1a2a3d;
+  --surface-4:#1d3047;
+  --surface-5:rgba(255,255,255,.07);
+  --surface-6:#172637;
+  --btn-bg:#19273a;
+  --btn-border:#2a405c;
+  --btn-hover-bg:#20324a;
+  --btn-hover-border:#355375;
+  --ghost-bg:#182638;
+  --toggle-bg:#172434;
+  --toggle-track:#334a68;
+  --nav-hover-bg:#19293d;
+  --nav-hover-border:#2d4563;
+  --nav-active-bg:#1c314b;
+  --nav-active-border:#35597f;
+  --nav-icon-bg:#182637;
+  --nav-icon-border:#25374d;
+  --nav-icon-active-bg:#1d3856;
+  --nav-icon-active-border:#335a80;
+  --badge-bg:#1c3047;
+  --badge-active-bg:#223b59;
+  --field-border:#2c425f;
+  --field-focus:#5b9cff;
+  --field-focus-ring:rgba(91,156,255,.16);
+  --canvas-bg:#142234;
+  --canvas-grid:rgba(255,255,255,.05);
+  --overlay-bg:rgba(7,12,20,.72);
+  --modal-bg:rgba(10,18,28,.84);
+  --text-soft:#c3d0e0;
+  --text-softer:#b8c7d9;
+  --danger-bg:rgba(240,68,56,.12);
+  --danger-border:rgba(240,68,56,.28);
+  --ok-bg:rgba(18,183,106,.12);
+  --ok-border:rgba(18,183,106,.24);
+  --warn-bg:rgba(247,144,9,.12);
+  --warn-border:rgba(247,144,9,.24);
+  --violet-bg:rgba(122,90,248,.14);
+  --violet-border:rgba(122,90,248,.28);
+  --portal-kicker-text:#eef5ff;
+  --portal-kicker-bg:rgba(255,255,255,.08);
+  --portal-kicker-border:rgba(125,211,252,.18);
+}
+:root[data-palette="coast"]{
+  --brand:#056de8;
+  --brand-2:#1381ff;
+  --brand-3:#d9ebff;
+  --brand-rgb:5,109,232;
+  --violet:#7a5af8;
+}
+:root[data-palette="forest"]{
+  --brand:#0d8a6a;
+  --brand-2:#19a77f;
+  --brand-3:#d7f3ea;
+  --brand-rgb:13,138,106;
+  --violet:#5f8f2e;
+}
+:root[data-palette="amber"]{
+  --brand:#c96f12;
+  --brand-2:#e2871f;
+  --brand-3:#fff0d9;
+  --brand-rgb:201,111,18;
+  --violet:#9c5c13;
+}
+:root[data-palette="slate"]{
+  --brand:#526b8a;
+  --brand-2:#6582a4;
+  --brand-3:#dde6f1;
+  --brand-rgb:82,107,138;
+  --violet:#556987;
 }
 *{box-sizing:border-box}
 html{font-size:16px;scroll-behavior:smooth}
@@ -49,8 +190,8 @@ body{
   font-family:var(--font);
   color:var(--text);
   background:
-    linear-gradient(180deg, rgba(217,235,255,.7), rgba(246,248,252,0) 240px),
-    linear-gradient(180deg, #f7f9fc 0%, #f3f7fb 100%);
+    linear-gradient(180deg, var(--bg-accent), rgba(246,248,252,0) 240px),
+    linear-gradient(180deg, var(--bg-start) 0%, var(--bg-end) 100%);
   min-height:100vh;
   -webkit-font-smoothing:antialiased;
 }
@@ -60,8 +201,8 @@ body::before{
   inset:0;
   pointer-events:none;
   background-image:
-    linear-gradient(rgba(5,109,232,.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(5,109,232,.03) 1px, transparent 1px);
+    linear-gradient(var(--grid-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
   background-size:96px 96px;
   mask-image:linear-gradient(180deg, rgba(0,0,0,.25), transparent 65%);
   opacity:.6;
@@ -102,7 +243,7 @@ button{cursor:pointer}
   top:0;
   height:100vh;
   padding:28px 18px 22px;
-  background:linear-gradient(180deg, rgba(247,250,255,.94), rgba(243,247,251,.92));
+  background:var(--sidebar-bg);
   border-right:1px solid var(--line);
   backdrop-filter:blur(18px);
 }
@@ -111,7 +252,7 @@ button{cursor:pointer}
   padding:18px;
   border:1px solid var(--line);
   border-radius:30px;
-  background:linear-gradient(180deg, #ffffff, #f9fbff);
+  background:var(--side-panel-bg);
   box-shadow:0 8px 30px rgba(15,72,145,.06);
   display:flex;
   flex-direction:column;
@@ -174,14 +315,14 @@ button{cursor:pointer}
 }
 .nav-item:hover{
   color:var(--text);
-  background:#f4f8ff;
-  border-color:#d9e8fb;
+  background:var(--nav-hover-bg);
+  border-color:var(--nav-hover-border);
   transform:translateY(-1px);
 }
 .nav-item.active{
   color:var(--brand);
-  background:#edf5ff;
-  border-color:#cfe3fb;
+  background:var(--nav-active-bg);
+  border-color:var(--nav-active-border);
   box-shadow:none;
 }
 .nav-icon{
@@ -190,14 +331,14 @@ button{cursor:pointer}
   border-radius:12px;
   display:grid;
   place-items:center;
-  background:#f5f8fd;
-  border:1px solid #edf1f7;
+  background:var(--nav-icon-bg);
+  border:1px solid var(--nav-icon-border);
   font-size:1rem;
   flex-shrink:0;
 }
 .nav-item.active .nav-icon{
-  background:#dfeeff;
-  border-color:#d2e5ff;
+  background:var(--nav-icon-active-bg);
+  border-color:var(--nav-icon-active-border);
 }
 .nav-label{font-size:.95rem;font-weight:600}
 .nav-badge{
@@ -207,16 +348,16 @@ button{cursor:pointer}
   text-align:center;
   border-radius:999px;
   color:var(--brand);
-  background:#eff6ff;
+  background:var(--badge-bg);
   font-size:.72rem;
 }
-.nav-item.active .nav-badge{background:#dcecff}
+.nav-item.active .nav-badge{background:var(--badge-active-bg)}
 
 .side-status{
   margin-top:auto;
   padding:14px;
   border-radius:22px;
-  background:#f7faff;
+  background:var(--surface-3);
   border:1px solid var(--line);
 }
 .status-pill{
@@ -225,7 +366,7 @@ button{cursor:pointer}
   gap:8px;
   padding:7px 12px;
   border-radius:999px;
-  background:#eef5ff;
+  background:var(--surface-5);
   color:var(--muted);
   font-size:.8rem;
 }
@@ -261,9 +402,9 @@ button{cursor:pointer}
   overflow:hidden;
   padding:28px;
   border-radius:28px;
-  border:1px solid #dbe7f5;
+  border:1px solid var(--hero-border);
   background:
-    linear-gradient(135deg, #fafdff 0%, #eef6ff 62%, #ffffff 100%);
+    var(--hero-bg);
   box-shadow:var(--shadow-soft);
 }
 .hero::after{
@@ -290,8 +431,8 @@ button{cursor:pointer}
   padding:8px 14px;
   border-radius:999px;
   color:var(--brand);
-  background:#edf5ff;
-  border:1px solid #d8e9ff;
+  background:var(--eyebrow-bg);
+  border:1px solid var(--eyebrow-border);
   font-size:.8rem;
   letter-spacing:.04em;
 }
@@ -322,8 +463,8 @@ button{cursor:pointer}
 }
 .metric-card,.card,.panel{
   border-radius:24px;
-  border:1px solid #e4edf8;
-  background:#ffffff;
+  border:1px solid var(--line);
+  background:var(--surface-1);
 }
 .metric-card{
   padding:18px;
@@ -339,7 +480,7 @@ button{cursor:pointer}
   right:-20px;
   top:-20px;
   border-radius:50%;
-  background:radial-gradient(circle, rgba(5,109,232,.12), transparent 72%);
+  background:radial-gradient(circle, rgba(var(--brand-rgb),.16), transparent 72%);
 }
 .metric-label{
   color:var(--muted);
@@ -386,8 +527,8 @@ button{cursor:pointer}
 .surface{
   border-radius:24px;
   padding:20px;
-  border:1px solid #e4edf8;
-  background:#ffffff;
+  border:1px solid var(--line);
+  background:var(--surface-1);
   box-shadow:var(--shadow-soft);
 }
 .kpi-row{
@@ -398,8 +539,8 @@ button{cursor:pointer}
 .signal-card{
   padding:18px;
   border-radius:22px;
-  border:1px solid #e9f0f8;
-  background:#f9fbff;
+  border:1px solid var(--line);
+  background:var(--surface-2);
 }
 .signal-card b{
   display:block;
@@ -414,8 +555,8 @@ button{cursor:pointer}
   border-radius:16px;
   padding:11px 16px;
   color:var(--text);
-  background:#ffffff;
-  border:1px solid #d8e4f2;
+  background:var(--btn-bg);
+  border:1px solid var(--btn-border);
   transition:transform .18s ease, box-shadow .18s ease, background .18s ease, border-color .18s ease, opacity .18s ease;
   display:inline-flex;
   align-items:center;
@@ -426,26 +567,24 @@ button{cursor:pointer}
 }
 .btn:hover:not(:disabled){
   transform:translateY(-1px) scale(1.01);
-  background:#f5f9ff;
-  border-color:#c9dbf2;
+  background:var(--btn-hover-bg);
+  border-color:var(--btn-hover-border);
 }
 .btn:disabled{opacity:.45;cursor:not-allowed}
 .btn-primary{
   color:#fff;
   background:linear-gradient(180deg, #1772f6, #056de8);
   border-color:#0567da;
-  box-shadow:0 10px 20px rgba(5,109,232,.18);
+  box-shadow:0 10px 20px rgba(var(--brand-rgb),.22);
 }
 .btn-primary:hover:not(:disabled){
   background:linear-gradient(180deg, #2a7dfa, #1171ef);
 }
-.btn-ghost{
-  background:#f7faff;
-}
+.btn-ghost{background:var(--ghost-bg)}
 .btn-danger{
-  background:#fff1f2;
+  background:var(--danger-bg);
   color:var(--danger);
-  border-color:#ffd5d8;
+  border-color:var(--danger-border);
 }
 .btn-xs{padding:8px 12px;min-height:34px;border-radius:12px;font-size:.82rem}
 .btn-sm{padding:9px 14px;min-height:38px;border-radius:14px;font-size:.88rem}
@@ -458,8 +597,8 @@ button{cursor:pointer}
   padding:6px 10px;
   border-radius:999px;
   color:var(--muted);
-  background:#f6faff;
-  border:1px solid #dae7f6;
+  background:var(--toggle-bg);
+  border:1px solid var(--line);
   user-select:none;
 }
 .toggle-track{
@@ -467,7 +606,7 @@ button{cursor:pointer}
   height:24px;
   border-radius:999px;
   position:relative;
-  background:#d8e4f2;
+  background:var(--toggle-track);
 }
 .toggle-thumb{
   position:absolute;
@@ -487,8 +626,8 @@ button{cursor:pointer}
   padding:5px;
   gap:6px;
   border-radius:18px;
-  background:#f6faff;
-  border:1px solid #dce8f5;
+  background:var(--surface-3);
+  border:1px solid var(--line);
 }
 .story-switch .btn.active{
   color:#fff;
@@ -500,15 +639,17 @@ button{cursor:pointer}
 .story-card{
   position:relative;
   overflow:hidden;
+  display:flex;
+  flex-direction:column;
   padding:22px;
   border-radius:18px;
-  border:1px solid #e5edf7;
-  background:#ffffff;
+  border:1px solid var(--line);
+  background:var(--surface-1);
   transition:transform .22s ease, border-color .22s ease, box-shadow .22s ease;
 }
 .story-card:hover{
   transform:translateY(-3px);
-  border-color:#cfe1f6;
+  border-color:var(--line-strong);
   box-shadow:0 12px 28px rgba(15,72,145,.12);
 }
 .story-card::before{
@@ -541,7 +682,7 @@ button{cursor:pointer}
 }
 .story-summary{
   margin:14px 0 18px;
-  color:#425466;
+  color:var(--text-soft);
   line-height:1.8;
   font-size:.96rem;
 }
@@ -558,34 +699,36 @@ button{cursor:pointer}
   padding:0 12px;
   border-radius:999px;
   font-size:.78rem;
-  color:#49637f;
-  background:#f5f8fc;
-  border:1px solid #e2eaf4;
+  color:var(--text-soft);
+  background:var(--surface-4);
+  border:1px solid var(--line);
 }
-.chip.blue{background:#edf5ff;border-color:#d7e8ff;color:var(--brand)}
-.chip.green{background:#ecfdf3;border-color:#ccefdc;color:var(--ok)}
-.chip.amber{background:#fffaeb;border-color:#f9e3b0;color:#b54708}
-.chip.gray{background:#f3f6fa;border-color:#e3eaf2;color:#7a8797}
-.status-chip.pending{background:#f3f6fa;color:#6b7785}
-.status-chip.analyzed{background:#edf5ff;color:var(--brand)}
-.status-chip.branched{background:#f4f0ff;color:var(--violet)}
-.status-chip.blocked{background:#fff1f2;color:var(--danger)}
-.class-chip.fiction{background:#ecfdf3;color:var(--ok)}
-.class-chip.real_history{background:#fffaeb;color:#b54708}
-.class-chip.real_modern{background:#fff1f2;color:var(--danger)}
+.chip.blue{background:var(--surface-5);border-color:var(--line-strong);color:var(--brand)}
+.chip.green{background:var(--ok-bg);border-color:var(--ok-border);color:var(--ok)}
+.chip.amber{background:var(--warn-bg);border-color:var(--warn-border);color:var(--warn)}
+.chip.gray{background:var(--surface-4);border-color:var(--line);color:var(--muted)}
+.status-chip.pending{background:var(--surface-4);color:var(--muted)}
+.status-chip.analyzed{background:var(--surface-5);color:var(--brand)}
+.status-chip.branched{background:var(--violet-bg);color:var(--violet)}
+.status-chip.blocked{background:var(--danger-bg);color:var(--danger)}
+.class-chip.fiction{background:var(--ok-bg);color:var(--ok)}
+.class-chip.real_history{background:var(--warn-bg);color:var(--warn)}
+.class-chip.real_modern{background:var(--danger-bg);color:var(--danger)}
 
 .story-actions{
-  display:flex;
-  flex-wrap:wrap;
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
   gap:10px;
-  align-items:center;
-  justify-content:space-between;
+  align-items:end;
+  margin-top:auto;
 }
 .story-actions-left{
   display:flex;
   gap:8px;
   flex-wrap:wrap;
+  min-height:28px;
 }
+.story-actions .section-tools{justify-self:end}
 
 .grid-two{
   display:grid;
@@ -611,8 +754,8 @@ button{cursor:pointer}
   gap:16px;
   padding:22px 24px;
   border-radius:20px;
-  border:1px solid #deebf7;
-  background:linear-gradient(180deg, #ffffff, #f6faff);
+  border:1px solid var(--line);
+  background:linear-gradient(180deg, var(--surface-1), var(--surface-3));
   box-shadow:var(--shadow-soft);
 }
 .page-banner.compact{padding:18px 22px}
@@ -634,8 +777,8 @@ button{cursor:pointer}
   min-width:118px;
   padding:14px 16px;
   border-radius:16px;
-  border:1px solid #e5eef9;
-  background:#ffffff;
+  border:1px solid var(--line);
+  background:var(--surface-1);
   text-align:left;
 }
 .mini-stat b{
@@ -656,8 +799,8 @@ button{cursor:pointer}
 .plain-panel{
   padding:18px 20px;
   border-radius:18px;
-  border:1px solid #e5edf7;
-  background:#ffffff;
+  border:1px solid var(--line);
+  background:var(--surface-1);
 }
 .plain-panel h4{
   margin:0 0 8px;
@@ -687,8 +830,8 @@ button{cursor:pointer}
 .story-kpi{
   padding:16px 18px;
   border-radius:18px;
-  background:#ffffff;
-  border:1px solid #e5edf7;
+  background:var(--surface-1);
+  border:1px solid var(--line);
 }
 .story-kpi b{
   display:block;
@@ -713,8 +856,8 @@ button{cursor:pointer}
 .action-card{
   padding:18px;
   border-radius:18px;
-  border:1px solid #e3ecf7;
-  background:#ffffff;
+  border:1px solid var(--line);
+  background:var(--surface-1);
 }
 .action-card h4{
   margin:0 0 8px;
@@ -733,8 +876,8 @@ button{cursor:pointer}
 .settings-intro{
   padding:22px;
   border-radius:20px;
-  border:1px solid #dce9f7;
-  background:linear-gradient(180deg, #ffffff, #f5f9ff);
+  border:1px solid var(--line);
+  background:linear-gradient(180deg, var(--surface-1), var(--surface-3));
 }
 .settings-intro h3{
   margin:0 0 8px;
@@ -767,8 +910,8 @@ button{cursor:pointer}
 
 .ring-post,.br-card,.cfg-card,.char-card,.ivo-branch,.worldline-card{
   border-radius:18px;
-  border:1px solid #e5edf7;
-  background:#ffffff;
+  border:1px solid var(--line);
+  background:var(--surface-1);
 }
 .ring-post,.br-card,.cfg-card,.char-card,.ivo-branch,.worldline-card{padding:20px}
 .br-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px}
@@ -825,24 +968,24 @@ button{cursor:pointer}
 .fi,.custom-input,.select{
   width:100%;
   border-radius:16px;
-  border:1px solid #d9e5f3;
-  background:#ffffff;
+  border:1px solid var(--field-border);
+  background:var(--surface-1);
   color:var(--text);
   padding:13px 14px;
   outline:none;
   transition:border-color .18s ease, box-shadow .18s ease, background .18s ease;
 }
 .fi:focus,.custom-input:focus,.select:focus{
-  border-color:#8ebfff;
-  box-shadow:0 0 0 4px rgba(5,109,232,.08);
+  border-color:var(--field-focus);
+  box-shadow:0 0 0 4px var(--field-focus-ring);
 }
 .custom-input{min-height:86px;resize:vertical}
 .field-inline{display:flex;gap:10px}
 
 .log-box{
   border-radius:18px;
-  border:1px solid #deebf7;
-  background:#f8fbff;
+  border:1px solid var(--line);
+  background:var(--surface-2);
   padding:12px;
   max-height:420px;
   overflow:auto;
@@ -854,10 +997,10 @@ button{cursor:pointer}
   gap:10px;
   padding:8px 10px;
   border-radius:14px;
-  color:#4d5f72;
+  color:var(--text-softer);
   font-size:.8rem;
 }
-.log-line:nth-child(odd){background:#ffffff}
+.log-line:nth-child(odd){background:var(--surface-1)}
 
 .empty,.loading-page{
   padding:56px 24px;
@@ -870,8 +1013,8 @@ button{cursor:pointer}
   overflow:hidden;
   border-radius:18px;
   height:116px;
-  border:1px solid #e5edf7;
-  background:#f4f8fd;
+  border:1px solid var(--line);
+  background:var(--surface-4);
 }
 .skeleton::after{
   content:"";
@@ -895,9 +1038,9 @@ button{cursor:pointer}
   min-width:260px;
   padding:14px 16px;
   border-radius:18px;
-  border:1px solid #dbe8f7;
+  border:1px solid var(--line);
   backdrop-filter:blur(18px);
-  background:#ffffff;
+  background:var(--surface-1);
   color:var(--text);
   box-shadow:var(--shadow-soft);
   animation:slideIn .22s ease;
@@ -916,56 +1059,437 @@ button{cursor:pointer}
   gap:12px;
   padding:14px 16px;
   border-radius:18px;
-  border:1px solid #ffd3d7;
-  background:#fff4f5;
+  border:1px solid var(--danger-border);
+  background:var(--danger-bg);
   color:#c4322a;
 }
 .err-banner button{margin-left:auto}
 
-.login-overlay,.ivo{
+.ivo{
   position:fixed;
   inset:0;
   z-index:1500;
 }
-.login-overlay{
+.portal-page{
+  min-height:100vh;
+  overflow:auto;
+  padding:0 0 56px;
+}
+.portal-shell{
+  width:min(1180px,calc(100% - 40px));
+  margin:0 auto;
   display:grid;
-  place-items:center;
-  padding:24px;
-  background:rgba(230,239,250,.72);
-  backdrop-filter:blur(18px);
+  gap:28px;
 }
-.login-card{
-  width:min(520px,100%);
-  padding:34px;
-  border-radius:32px;
-  border:1px solid #d9e6f5;
-  background:linear-gradient(180deg, #ffffff, #f5f9ff);
-  box-shadow:var(--shadow);
-  text-align:left;
-}
-.login-card img{
-  width:84px;
-  height:84px;
+.portal-topbar{
+  position:sticky;
+  top:14px;
+  z-index:20;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:16px;
+  margin:18px auto 0;
+  padding:14px 18px;
   border-radius:24px;
+  border:1px solid rgba(125,211,252,.18);
+  background:linear-gradient(180deg, rgba(18,31,54,.9), rgba(12,22,40,.84));
+  backdrop-filter:blur(16px);
+  box-shadow:0 18px 40px rgba(7,18,40,.22);
+}
+.portal-topbar-brand{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  min-width:0;
+}
+.portal-topbar-brand img{
+  width:40px;
+  height:40px;
+  border-radius:14px;
+  object-fit:cover;
+  box-shadow:0 12px 26px rgba(var(--brand-rgb),.2);
+}
+.portal-topbar-copy{
+  min-width:0;
+}
+.portal-topbar-copy strong{
   display:block;
+  font-size:.92rem;
+  letter-spacing:.08em;
+  color:#f7fbff;
+}
+.portal-topbar-copy span{
+  display:block;
+  margin-top:4px;
+  color:rgba(226,236,248,.78);
+  font-size:.78rem;
+}
+.portal-topbar-nav{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  flex-wrap:wrap;
+  justify-content:flex-end;
+}
+.portal-topbar-nav a{
+  color:rgba(236,244,255,.82);
+  text-decoration:none;
+  font-size:.84rem;
+  padding:8px 12px;
+  border-radius:999px;
+  transition:color .2s ease, background .2s ease, box-shadow .2s ease;
+}
+.portal-topbar-nav a:hover{
+  color:#fff;
+  background:rgba(125,211,252,.14);
+  box-shadow:inset 0 0 0 1px rgba(125,211,252,.12);
+}
+.portal-hero{
+  position:relative;
+  overflow:hidden;
+  min-height:min(920px, calc(100vh - 110px));
+  display:grid;
+  align-items:center;
+  padding:110px 52px 92px;
+  border-radius:0 0 40px 40px;
+  border:1px solid rgba(255,255,255,.08);
+  background:
+    radial-gradient(circle at 12% 18%, rgba(var(--brand-rgb),.18), transparent 32%),
+    radial-gradient(circle at 80% 22%, rgba(93,189,255,.13), transparent 24%),
+    radial-gradient(circle at 50% 84%, rgba(255,255,255,.08), transparent 34%),
+    linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02) 36%, rgba(255,255,255,0));
+  box-shadow:0 30px 90px rgba(8,20,44,.2);
+}
+.portal-hero::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  border-radius:inherit;
+  border:1px solid rgba(255,255,255,.18);
+}
+.portal-head{
+  display:grid;
+  gap:28px;
+  position:relative;
+  z-index:1;
+}
+.portal-brand{
+  max-width:980px;
+}
+.portal-brand-row{
+  display:flex;
+  align-items:center;
+  gap:16px;
   margin-bottom:18px;
 }
-.login-card h2{
-  margin:0;
-  font-size:2rem;
-  letter-spacing:-.03em;
+.portal-mark{
+  width:78px;
+  height:78px;
+  border-radius:22px;
+  overflow:hidden;
+  box-shadow:0 18px 32px rgba(var(--brand-rgb),.24);
+  flex-shrink:0;
 }
-.login-card .desc{
-  margin:12px 0 24px;
+.portal-mark img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  display:block;
+}
+.portal-title{
+  margin:0;
+  font-size:clamp(3.4rem,8vw,6.2rem);
+  letter-spacing:-.05em;
+  line-height:.92;
+}
+.portal-sub{
+  margin:0;
+  color:var(--muted);
+  font-size:1.12rem;
+  line-height:1.95;
+  max-width:760px;
+}
+.portal-brief{
+  max-width:720px;
+  color:var(--text-soft);
+  line-height:1.95;
+  font-size:1rem;
+}
+.portal-brief strong{
+  color:var(--text);
+}
+.portal-hero-actions{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  flex-wrap:wrap;
+}
+.portal-hero-meta{
+  display:grid;
+  grid-template-columns:1.2fr .95fr;
+  gap:22px;
+  align-items:end;
+}
+.portal-hero-panel{
+  padding:22px 22px 20px;
+  border-radius:28px;
+  border:1px solid rgba(255,255,255,.08);
+  background:linear-gradient(180deg, rgba(255,255,255,.1), rgba(255,255,255,.03));
+  backdrop-filter:blur(14px);
+  box-shadow:var(--shadow-soft);
+}
+.portal-hero-panel h4{
+  margin:0 0 10px;
+  font-size:1rem;
+}
+.portal-hero-panel p{
+  margin:0;
   color:var(--muted);
   line-height:1.8;
+}
+.portal-mini-list{
+  display:grid;
+  gap:10px;
+}
+.portal-mini-item{
+  display:flex;
+  gap:10px;
+  align-items:flex-start;
+  color:var(--text-soft);
+  font-size:.92rem;
+  line-height:1.7;
+}
+.portal-mini-dot{
+  width:24px;
+  height:24px;
+  flex:0 0 24px;
+  display:grid;
+  place-items:center;
+  border-radius:999px;
+  background:rgba(var(--brand-rgb),.14);
+  color:var(--brand);
+  font-size:.8rem;
+  box-shadow:inset 0 0 0 1px rgba(var(--brand-rgb),.16);
+}
+.portal-divider{
+  width:100%;
+  height:1px;
+  margin:4px 0 0;
+  background:linear-gradient(90deg, rgba(var(--brand-rgb),.34), rgba(255,255,255,.08) 44%, transparent 100%);
+}
+.portal-scroll-cue{
+  display:inline-flex;
+  align-items:center;
+  gap:10px;
+  width:max-content;
+  margin-top:8px;
+  color:var(--muted);
+  text-decoration:none;
+  font-size:.88rem;
+}
+.portal-scroll-cue i{
+  display:grid;
+  place-items:center;
+  width:30px;
+  height:30px;
+  border-radius:999px;
+  border:1px solid rgba(255,255,255,.1);
+  background:rgba(255,255,255,.04);
+  animation:portalBob 1.8s ease-in-out infinite;
+}
+@keyframes portalBob{
+  0%,100%{transform:translateY(0)}
+  50%{transform:translateY(5px)}
+}
+.portal-section{
+  display:grid;
+  gap:20px;
+  padding:8px 0;
+}
+.portal-section-head{
+  display:grid;
+  gap:10px;
+  max-width:980px;
+}
+.portal-kicker{
+  display:inline-flex;
+  align-items:center;
+  width:max-content;
+  padding:5px 10px;
+  border-radius:999px;
+  color:var(--portal-kicker-text);
+  background:var(--portal-kicker-bg);
+  border:1px solid var(--portal-kicker-border);
+  font-size:.72rem;
+  letter-spacing:.08em;
+}
+.portal-section-head h3{
+  margin:0;
+  font-size:clamp(1.6rem,3.3vw,2.8rem);
+  letter-spacing:-.03em;
+  line-height:1.08;
+  white-space:nowrap;
+}
+.portal-section-head p{
+  margin:0;
+  color:var(--muted);
+  line-height:1.9;
+}
+.portal-grid{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:18px;
+  padding:0;
+}
+.portal-card{
+  position:relative;
+  padding:24px 24px 22px;
+  border-radius:26px;
+  border:1px solid rgba(255,255,255,.08);
+  background:linear-gradient(180deg, rgba(255,255,255,.1), rgba(255,255,255,.04));
+  box-shadow:var(--shadow-soft);
+  backdrop-filter:blur(14px);
+  transition:transform .22s ease, border-color .22s ease, box-shadow .22s ease;
+}
+.portal-card::before{
+  content:"";
+  position:absolute;
+  left:24px;
+  right:24px;
+  top:0;
+  height:1px;
+  background:linear-gradient(90deg, rgba(var(--brand-rgb),.34), transparent 86%);
+}
+.portal-card:hover{
+  transform:translateY(-4px);
+  border-color:rgba(var(--brand-rgb),.18);
+  box-shadow:0 20px 38px rgba(8,20,44,.14);
+}
+.portal-icon{
+  width:50px;
+  height:50px;
+  display:grid;
+  place-items:center;
+  border-radius:18px;
+  margin-bottom:14px;
+  background:rgba(var(--brand-rgb),.14);
+  color:var(--brand);
+  font-size:1.08rem;
+  box-shadow:inset 0 0 0 1px rgba(var(--brand-rgb),.14);
+}
+.portal-card h4{
+  margin:0 0 8px;
+  font-size:1.08rem;
+}
+.portal-card p{
+  margin:0;
+  color:var(--muted);
+  line-height:1.8;
+}
+.portal-flow{
+  display:grid;
+  grid-template-columns:1.08fr .92fr;
+  gap:18px;
+}
+.portal-flow-panel{
+  padding:26px;
+  border-radius:30px;
+  border:1px solid rgba(255,255,255,.08);
+  background:linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.03));
+  box-shadow:var(--shadow-soft);
+}
+.portal-flow-copy{
+  color:var(--muted);
+  line-height:1.92;
+}
+.portal-flow-copy strong{
+  color:var(--text);
+}
+.portal-flow-list{
+  display:grid;
+  gap:12px;
+}
+.portal-flow-step{
+  display:grid;
+  grid-template-columns:auto 1fr;
+  gap:14px;
+  padding:16px 0;
+  border-top:1px solid rgba(255,255,255,.08);
+}
+.portal-flow-step:first-child{
+  padding-top:0;
+  border-top:none;
+}
+.portal-flow-no{
+  width:34px;
+  height:34px;
+  display:grid;
+  place-items:center;
+  border-radius:999px;
+  background:rgba(var(--brand-rgb),.14);
+  color:var(--brand);
+  font-size:.82rem;
+  font-weight:700;
+}
+.portal-flow-step b{
+  display:block;
+  margin-bottom:4px;
+  font-size:.98rem;
+}
+.portal-flow-step span{
+  color:var(--muted);
+  line-height:1.78;
+  font-size:.92rem;
+}
+.portal-feature-strip{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:16px;
+}
+.portal-feature-chip{
+  padding:20px 20px 18px;
+  border-radius:24px;
+  border:1px solid rgba(255,255,255,.08);
+  background:rgba(255,255,255,.04);
+}
+.portal-feature-chip strong{
+  display:block;
+  margin-top:10px;
+  margin-bottom:8px;
+  font-size:.98rem;
+}
+.portal-feature-chip p{
+  margin:0;
+  color:var(--muted);
+  line-height:1.78;
+  font-size:.9rem;
+}
+.portal-login-wrap{
+  display:grid;
+  justify-items:center;
+  padding:22px 0 18px;
+}
+.portal-login-actions{
+  display:flex;
+  justify-content:center;
+  gap:12px;
+  flex-wrap:wrap;
+  margin-top:0;
+}
+.portal-final-note{
+  margin-top:12px;
+  color:var(--muted);
+  font-size:.86rem;
+  text-align:center;
 }
 .login-actions{display:flex;gap:10px;flex-wrap:wrap}
 
 .ivo{
   display:flex;
   flex-direction:column;
-  background:rgba(236,243,252,.88);
+  background:var(--modal-bg);
   backdrop-filter:blur(18px);
 }
 .ivo-shell{
@@ -981,8 +1505,8 @@ button{cursor:pointer}
   gap:12px;
   padding:18px 22px;
   border-radius:28px 28px 20px 20px;
-  border:1px solid #d9e6f5;
-  background:#ffffff;
+  border:1px solid var(--line);
+  background:var(--surface-1);
 }
 .ivo-title{
   min-width:0;
@@ -1016,8 +1540,8 @@ button{cursor:pointer}
   overflow:auto;
   padding:22px;
   border-radius:24px;
-  border:1px solid #dfe9f6;
-  background:#ffffff;
+  border:1px solid var(--line);
+  background:var(--surface-1);
 }
 .ivo-label{
   font-size:.75rem;
@@ -1029,14 +1553,14 @@ button{cursor:pointer}
 .ivo-orig{
   white-space:pre-wrap;
   line-height:1.95;
-  color:#314255;
+  color:var(--text-soft);
 }
 .ivo-analysis{
   margin-top:18px;
   padding:18px;
   border-radius:20px;
-  border:1px solid #d8e9ff;
-  background:#f3f8ff;
+  border:1px solid var(--line-strong);
+  background:var(--surface-5);
 }
 .pivot-option{
   margin-top:10px;
@@ -1044,8 +1568,8 @@ button{cursor:pointer}
   gap:10px;
   padding:14px;
   border-radius:18px;
-  border:1px solid #e3ecf7;
-  background:#fafcff;
+  border:1px solid var(--line);
+  background:var(--surface-2);
   cursor:pointer;
   transition:border-color .18s ease, transform .18s ease, background .18s ease;
 }
@@ -1054,8 +1578,8 @@ button{cursor:pointer}
   border-color:rgba(125,211,252,.22);
 }
 .pivot-option.sel{
-  border-color:#b7d6fb;
-  background:#edf5ff;
+  border-color:var(--line-strong);
+  background:var(--surface-5);
 }
 .pivot-option input{display:none}
 .ivo-tabs{
@@ -1063,8 +1587,8 @@ button{cursor:pointer}
   gap:6px;
   padding:6px;
   border-radius:18px;
-  background:#f5f9ff;
-  border:1px solid #dce8f6;
+  background:var(--surface-3);
+  border:1px solid var(--line);
   margin-bottom:16px;
 }
 .ivo-tab{
@@ -1087,8 +1611,8 @@ button{cursor:pointer}
 .ivo-tree-panel{
   padding:16px;
   border-radius:18px;
-  border:1px solid #e2ebf7;
-  background:#f8fbff;
+  border:1px solid var(--line);
+  background:var(--surface-2);
 }
 .ivo-tree-canvas{
   min-height:380px;
@@ -1097,8 +1621,8 @@ button{cursor:pointer}
 .ivo-detail-card{
   padding:18px;
   border-radius:18px;
-  border:1px solid #e5edf7;
-  background:#ffffff;
+  border:1px solid var(--line);
+  background:var(--surface-1);
 }
 .ivo-detail-card h4{
   margin:0 0 8px;
@@ -1120,8 +1644,8 @@ button{cursor:pointer}
 .ivo-empty-card{
   padding:24px 18px;
   border-radius:16px;
-  border:1px dashed #cfe0f6;
-  background:#f9fbff;
+  border:1px dashed var(--line-strong);
+  background:var(--surface-2);
   color:var(--muted);
   text-align:center;
 }
@@ -1129,8 +1653,8 @@ button{cursor:pointer}
 .worldline-panel{
   padding:18px;
   border-radius:18px;
-  border:1px solid #e0eaf6;
-  background:#ffffff;
+  border:1px solid var(--line);
+  background:var(--surface-1);
 }
 .wl-toolbar{
   display:flex;
@@ -1156,11 +1680,11 @@ button{cursor:pointer}
   padding:0;
   border-radius:18px;
   background:
-    linear-gradient(rgba(5,109,232,.04) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(5,109,232,.04) 1px, transparent 1px),
-    #f8fbff;
+    linear-gradient(var(--canvas-grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--canvas-grid) 1px, transparent 1px),
+    var(--canvas-bg);
   background-size:80px 80px;
-  border:1px solid #e2ebf7;
+  border:1px solid var(--line);
   user-select:none;
   cursor:grab;
 }
@@ -1191,8 +1715,8 @@ button{cursor:pointer}
   max-width:240px;
   padding:14px;
   border-radius:18px;
-  border:1px solid #dfe9f6;
-  background:#ffffff;
+  border:1px solid var(--line);
+  background:var(--surface-1);
   box-shadow:0 8px 18px rgba(15,72,145,.08);
   transition:border-color .18s ease, box-shadow .18s ease;
 }
@@ -1200,9 +1724,9 @@ button{cursor:pointer}
   border-color:#c9ddf5;
   box-shadow:0 12px 20px rgba(15,72,145,.12);
 }
-.wl-node-card.root{border-color:#a9cdfc}
+.wl-node-card.root{border-color:var(--line-strong)}
 .wl-node-card.selected{
-  border-color:#c8bcff;
+  border-color:var(--violet-border);
   box-shadow:0 0 0 1px rgba(122,90,248,.18), 0 12px 24px rgba(15,72,145,.1);
 }
 .wl-toolbar-meta{
@@ -1219,7 +1743,7 @@ button{cursor:pointer}
   display:inline-flex;
   padding:4px 8px;
   border-radius:999px;
-  color:#27415b;
+  color:var(--text-soft);
   font-size:.72rem;
   margin-bottom:8px;
 }
@@ -1251,8 +1775,8 @@ button{cursor:pointer}
   width:44px;
   height:44px;
   border-radius:14px;
-  border:1px solid #dae6f4;
-  background:#ffffff;
+  border:1px solid var(--line);
+  background:var(--surface-1);
   color:var(--text);
 }
 .spinner-sm,.spin{
@@ -1284,6 +1808,9 @@ button{cursor:pointer}
   .hero-grid{grid-template-columns:repeat(2, minmax(0,1fr))}
   .grid-two,.story-shell,.feed-layout,.control-layout,.config-layout{grid-template-columns:1fr}
   .ivo-body{grid-template-columns:1fr}
+  .portal-hero-meta,.portal-flow{grid-template-columns:1fr}
+  .portal-feature-strip{grid-template-columns:1fr 1fr}
+  .portal-grid{grid-template-columns:1fr 1fr}
 }
 @media (max-width:980px){
   .layout{grid-template-columns:1fr}
@@ -1306,6 +1833,21 @@ button{cursor:pointer}
   }
   .hamburger{display:grid;place-items:center}
   .hero{padding:22px}
+  .portal-page{padding:0 0 40px}
+  .portal-shell{width:min(1180px,calc(100% - 24px));gap:20px}
+  .portal-topbar{
+    top:10px;
+    flex-direction:column;
+    align-items:flex-start;
+    margin-top:12px;
+  }
+  .portal-topbar-nav{justify-content:flex-start}
+  .portal-hero{
+    min-height:auto;
+    padding:92px 24px 56px;
+    border-radius:0 0 30px 30px;
+  }
+  .portal-section-head h3{white-space:normal}
 }
 @media (max-width:720px){
   .hero-top,.section-head,.wl-toolbar,.ivo-bar{flex-direction:column;align-items:flex-start}
@@ -1315,14 +1857,19 @@ button{cursor:pointer}
   .toast{min-width:unset}
   .ivo-shell{padding:10px}
   .ivo-bar,.ivo-panel{padding:16px}
+  .portal-feature-strip,
+  .portal-grid{grid-template-columns:1fr}
+  .portal-brand-row{align-items:flex-start}
+  .portal-title{font-size:clamp(2.7rem,16vw,4.4rem)}
+  .portal-topbar-copy span{display:none}
+  .portal-hero-actions,.portal-login-actions{width:100%}
+  .portal-hero-actions .btn,
+  .portal-login-actions .btn{flex:1 1 100%}
 }
 </style>
 </head>
 <body>
-<div id="app-loading"><div style="text-align:center;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%)"><div class="pulse" style="margin:0 auto 20px"></div><div style="font-size:15px;font-weight:600;color:#1f2d3d;margin-bottom:4px">ZHIFORK</div><div id="load-tip" style="font-size:12px;color:#8b9bb0">正在准备你的故事宇宙...</div></div></div>
-
-<div class="app-loader" id="app-loader"><div style="text-align:center;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%)"><div class="pulse" style="margin:0 auto 16px"></div><div style="font-size:14px;color:#8b9bb0">ZHIFORK</div></div></div>
-<div id="app" class="app-shell" v-cloak>
+<div id="app" class="app-shell">
   <div class="orb a"></div>
   <div class="orb b"></div>
   <div class="orb c"></div>
@@ -1331,33 +1878,201 @@ button{cursor:pointer}
     <div v-for="t in toasts" :key="t.id" :class="'toast toast-' + t.type">{{ t.msg }}</div>
   </div>
 
-  <div v-if="!loggedIn" class="login-overlay">
-    <div class="login-card" data-reveal>
-      <img src="/logo.png" alt="Logo">
-      <div class="eyebrow">AI Native Story Engine</div>
-      <h2>ZHIFORK</h2>
-      <div class="desc">
-        从知乎故事抓取、AI 解析、支线生成到世界线演化，整套内容流水线集中在一个界面里。
-        使用知乎 OAuth 登录，或直接进入路演演示模式。
-      </div>
-      <div class="login-actions">
-        <button class="btn btn-primary btn-lg" @click="oauthLogin">登录知乎账号</button>
-        <button class="btn btn-ghost btn-lg" @click="skipLogin">跳过，进入 Demo</button>
-      </div>
-      <div v-if="loginMsg" style="margin-top:14px;color:#ffd5dc;">{{ loginMsg }}</div>
+  <div v-if="!loggedIn" class="portal-page">
+    <div class="portal-shell">
+      <nav class="portal-topbar" data-reveal>
+        <div class="portal-topbar-brand">
+          <img src="/logo.png" alt="ZHIFORK">
+          <div class="portal-topbar-copy">
+            <strong>ZHIFORK</strong>
+            <span>故事分支工作台</span>
+          </div>
+        </div>
+        <div class="portal-topbar-nav">
+          <a href="#portal-overview">概览</a>
+          <a href="#portal-guide">使用指引</a>
+          <a href="#portal-features">功能</a>
+          <a href="#portal-start">开始</a>
+        </div>
+      </nav>
+
+      <section class="portal-hero" data-reveal>
+        <div class="portal-head">
+          <div class="portal-brand">
+            <div class="portal-brand-row">
+              <div class="portal-mark"><img src="/logo.png" alt="ZHIFORK"></div>
+              <div>
+                <div class="eyebrow">Branch stories without losing the thread</div>
+                <h2 class="portal-title">ZHIFORK</h2>
+              </div>
+            </div>
+            <p class="portal-sub">
+              从一篇原始内容出发，把关键节点拆开、延展、回溯，再整理成真正能阅读和发布的完整故事。
+            </p>
+            <div class="portal-brief">
+              <strong>ZHIFORK</strong> 把故事抓取、世界线推进、角色状态追踪、路线整理和发布放进同一条工作流里。
+              你不需要在零散片段之间来回拼接，只需要沿着当前选中的节点继续推进，就能得到一条完整、可复查、可导出的叙事路径。
+            </div>
+            <div class="portal-hero-actions">
+              <button class="btn btn-primary btn-lg" @click="oauthLogin">登录知乎账号</button>
+              <a href="https://github.com/tenshiname/Reverse-Assassin" target="_blank" class="btn btn-ghost btn-lg">GitHub</a>
+            </div>
+            <div class="portal-divider"></div>
+          </div>
+          <div class="portal-hero-meta">
+            <div class="portal-hero-panel">
+              <h4>适合什么场景</h4>
+              <p>适合把原始故事拆成可编辑的节点，再沿着多条路线持续推进。你可以在同一工作台里整理世界线、补全角色变化、生成分支，并把当前路线导出成一篇完整文本。</p>
+            </div>
+            <div class="portal-hero-panel">
+              <h4>你会在这里完成</h4>
+              <div class="portal-mini-list">
+                <div class="portal-mini-item">
+                  <span class="portal-mini-dot">1</span>
+                  <span>抓取原始内容，识别关键节点与分支入口。</span>
+                </div>
+                <div class="portal-mini-item">
+                  <span class="portal-mini-dot">2</span>
+                  <span>围绕当前路线追踪状态变化，继续生成新的世界线。</span>
+                </div>
+                <div class="portal-mini-item">
+                  <span class="portal-mini-dot">3</span>
+                  <span>从当前节点回溯整条路径，发布或下载成完整故事。</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <a class="portal-scroll-cue" href="#portal-overview">
+            <i>↓</i>
+            <span>继续下滚查看门户内容</span>
+          </a>
+        </div>
+      </section>
+
+      <section id="portal-overview" class="portal-section" data-reveal>
+        <div class="portal-section-head">
+          <div class="portal-kicker">概览</div>
+          <h3>先把故事路线理清，再决定它要走向哪里</h3>
+          <p>门户页的首屏负责告诉你 ZHIFORK 能做什么，下面的章节则把实际的使用方式和功能组织成一条连续阅读路径，避免像工具说明页那样把信息拆得太碎。</p>
+        </div>
+        <div class="portal-grid">
+          <article class="portal-card">
+            <div class="portal-icon">⑂</div>
+            <h4>状态随路线独立演化</h4>
+            <p>每条世界线都保留各自的角色状态、记忆和事件变化，切换节点时可以直接查看当前路线的真实进展。</p>
+          </article>
+          <article class="portal-card">
+            <div class="portal-icon">✦</div>
+            <h4>从节点回溯完整故事</h4>
+            <p>发布或导出时会沿当前节点回溯整条路径，把分支内容整理成一篇连续故事，而不是拆散的片段集合。</p>
+          </article>
+          <article class="portal-card">
+            <div class="portal-icon">◎</div>
+            <h4>图谱、生成与发布一体化</h4>
+            <p>从故事列表、世界线图谱到工作台和圈子发布都保持连通，适合持续整理、扩展和运营同一批内容。</p>
+          </article>
+        </div>
+      </section>
+
+      <section id="portal-guide" class="portal-section" data-reveal>
+        <div class="portal-section-head">
+          <div class="portal-kicker">指引</div>
+          <h3>使用路径保持简单，但每一步都能继续深入</h3>
+          <p>你不需要先理解整套系统再开始。门户页只保留最短的进入路径，进入工作台后再围绕故事本身逐步展开。</p>
+        </div>
+        <div class="portal-flow">
+          <div class="portal-flow-panel">
+            <div class="portal-flow-copy">
+              <strong>第一步先进入故事工作台。</strong>
+              从主页抓取或挑选原始内容，把它放进同一个故事列表里开始整理。
+              <br><br>
+              <strong>第二步沿着当前节点继续推进。</strong>
+              进入工作台后围绕具体节点生成支线、切换世界线，并同步查看角色和事件变化。
+              <br><br>
+              <strong>第三步再把当前路线整理成完整输出。</strong>
+              当你决定发布或导出时，系统会从当前节点向上回溯整条路径，把这条线收束成一篇连续故事。
+            </div>
+          </div>
+          <div class="portal-flow-panel">
+            <div class="portal-flow-list">
+              <div class="portal-flow-step">
+                <div class="portal-flow-no">01</div>
+                <div>
+                  <b>进入故事工作台</b>
+                  <span>从故事广场打开已有内容，或者把新的原始故事加入列表。</span>
+                </div>
+              </div>
+              <div class="portal-flow-step">
+                <div class="portal-flow-no">02</div>
+                <div>
+                  <b>沿节点继续推进</b>
+                  <span>围绕当前节点生成支线、切换世界线，并同步查看角色和事件变化。</span>
+                </div>
+              </div>
+              <div class="portal-flow-step">
+                <div class="portal-flow-no">03</div>
+                <div>
+                  <b>导出或发布完整路线</b>
+                  <span>从当前节点向上回溯整条路径，把它整理成一篇连续故事再输出。</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="portal-features" class="portal-section" data-reveal>
+        <div class="portal-section-head">
+          <div class="portal-kicker">功能</div>
+          <h3>功能不是孤立摆放，而是围着同一条故事链联动</h3>
+          <p>下面这些功能会在工作流里连续出现。它们不是互相割裂的页面，而是针对同一条内容路线的不同操作面。</p>
+        </div>
+        <div class="portal-feature-strip">
+          <article class="portal-feature-chip">
+            <div class="portal-icon">⌘</div>
+            <strong>故事抓取与整理</strong>
+            <p>保留原始内容入口，让后续的分支生成和路线整理都建立在同一篇故事上。</p>
+          </article>
+          <article class="portal-feature-chip">
+            <div class="portal-icon">↗</div>
+            <strong>世界线与节点编辑</strong>
+            <p>围绕节点生成平行支线，删除不需要的路线，并清楚区分不同世界线的状态。</p>
+          </article>
+          <article class="portal-feature-chip">
+            <div class="portal-icon">☰</div>
+            <strong>发布与文本导出</strong>
+            <p>按照当前选中的路线回溯整条路径，发布到圈子，或下载为本地完整文本。</p>
+          </article>
+        </div>
+      </section>
+
+      <section id="portal-start" class="portal-login-wrap" data-reveal>
+        <div class="portal-section-head" style="justify-items:center;text-align:center;max-width:640px;">
+          <div class="portal-kicker">开始</div>
+          <h3>准备好之后，直接进入故事工作流</h3>
+          <p>登录后进入完整工作台，也可以先用 Demo 浏览当前界面与主要功能布局。</p>
+        </div>
+        <div class="portal-login-actions">
+          <button class="btn btn-primary btn-lg" @click="oauthLogin">登录知乎账号</button>
+          <a href="https://github.com/tenshiname/Reverse-Assassin" target="_blank" class="btn btn-ghost btn-lg">GitHub</a>
+        </div>
+        <div class="portal-final-note">登录仅用于连接你的知乎账号与内容入口，不会在门户页展示冗余步骤。</div>
+        <div v-if="loginMsg" style="margin-top:14px;color:#ffd5dc;">{{ loginMsg }}</div>
+      </section>
     </div>
   </div>
 
-  <div v-if="ivo" class="ivo">
+  <div v-if="loggedIn && ivo" class="ivo">
     <div class="ivo-shell">
       <div class="ivo-bar">
         <div class="ivo-title">
           <b>{{ ivoStory?.title }}</b>
-          <span>原始故事、支线生成与角色状态在同一工作台内联动</span>
+          <span>原始故事、分支推进与角色状态在同一工作台内联动</span>
         </div>
         <div class="ivo-actions">
           <span v-if="ivoPublished" class="chip green">已发布到圈子</span>
-          <button v-if="ivoBranches.length > 0 && !ivoPublished" class="btn btn-ghost btn-sm" @click="publishBranches" :disabled="acting">发布到圈子</button>
+          <button v-if="selectedIvoNodeBranchID > 0" class="btn btn-ghost btn-sm" @click="publishBranches" :disabled="acting">发布当前路线</button>
+          <button v-if="selectedIvoNodeBranchID > 0" class="btn btn-ghost btn-sm" @click="downloadBranchText" :disabled="acting">下载文本</button>
           <button class="btn btn-primary btn-sm" @click="genBranches" :disabled="acting">
             <span v-if="acting" class="spinner-sm"></span>
             {{ acting ? '生成中...' : '生成平行支线' }}
@@ -1398,22 +2113,22 @@ button{cursor:pointer}
             <div class="cfg-card" style="margin-top:16px;">
               <div class="cfg-head">
                 <h4>自由分支</h4>
-                <span class="chip blue">Agent Prompt</span>
+                <span class="chip blue">自定义设定</span>
               </div>
               <div class="fg">
                 <label class="fl">从哪个场景开始改写</label>
-                <textarea v-model="freeScene" class="custom-input" placeholder="例如：秦始皇在登基前夜做了一个预知未来的梦"></textarea>
+                <textarea v-model="freeScene" class="custom-input" :placeholder="freeScenePlaceholder"></textarea>
               </div>
               <div class="fg">
                 <label class="fl">希望故事如何偏转</label>
-                <textarea v-model="freeDirection" class="custom-input" placeholder="例如：梦境把他引向一个月球上的秦制文明"></textarea>
+                <textarea v-model="freeDirection" class="custom-input" :placeholder="freeDirectionPlaceholder"></textarea>
               </div>
               <button class="btn btn-primary btn-sm" @click="genFreeBranch" :disabled="acting || !freeScene">生成自由支线</button>
             </div>
 
             <div style="margin-top:14px;">
               <label class="fl">自定义分支方向</label>
-              <textarea v-model="customPrompt" class="custom-input" placeholder="例如：如果主角在这一刻选择原谅而不是复仇，会进入怎样的世界线？"></textarea>
+              <textarea v-model="customPrompt" class="custom-input" :placeholder="customPromptPlaceholder"></textarea>
             </div>
           </div>
         </div>
@@ -1427,7 +2142,7 @@ button{cursor:pointer}
           <div v-if="ivoTab === 'worldline'" class="ivo-tree-shell">
             <div v-if="ivoBranches.length === 0" class="ivo-empty-card">
               <strong style="display:block;color:var(--text);margin-bottom:8px;">还没有生成支线</strong>
-              点击上方按钮，让 Agent 从故事转折点开始演化新的宇宙。
+              点击上方按钮，从故事转折点开始展开新的分支。
             </div>
 
             <template v-else>
@@ -1472,16 +2187,21 @@ button{cursor:pointer}
                   <span :class="'chip ' + (selectedIvoBranch.unlocked ? 'green' : 'blue')">{{ selectedIvoBranch.unlocked ? '已解锁' : '待解锁' }}</span>
                   <span class="chip blue">{{ selectedIvoBranch.keyword }}</span>
                   <span class="chip gray">{{ selectedIvoBranch.tag }}</span>
+                  <span v-if="runningBranchIDs.includes(selectedIvoBranch.id)" class="chip blue">生成中</span>
                 </div>
                 <h4>{{ selectedIvoBranch.title }}</h4>
                 <div class="ivo-detail-body">
                   <textarea v-model="selectedIvoBranch.preview" class="custom-input" placeholder="预告片段"></textarea>
                   <textarea v-model="selectedIvoBranch.full_story" class="custom-input" style="min-height:220px;" placeholder="完整正文"></textarea>
                 </div>
+                <div class="section-tools" style="margin-top:10px;">
+                  <button class="btn btn-ghost btn-xs" @click="loadIvoState">刷新角色状态</button>
+                  <button class="btn btn-danger btn-xs" @click="deleteSelectedWorldlineNode" :disabled="acting">删除这条世界线</button>
+                </div>
                 <div class="cfg-card" style="margin-top:12px;">
                   <div class="fg" style="margin-bottom:10px;">
                     <label class="fl">继续推进方向</label>
-                    <textarea v-model="contPrompt" class="custom-input" placeholder="例如：主角决定背叛皇帝，故事进入一条更黑暗的政治支线"></textarea>
+                    <textarea v-model="contPrompt" class="custom-input" :placeholder="continuePromptPlaceholder"></textarea>
                   </div>
                   <div class="section-tools">
                     <button class="btn btn-primary btn-xs" @click="doContinueBranch(selectedIvoBranch)" :disabled="acting || !contPrompt">在此基础上继续推进</button>
@@ -1537,19 +2257,23 @@ button{cursor:pointer}
     </div>
   </div>
 
-  <div class="layout">
+  <div v-if="loggedIn" class="layout">
     <aside :class="['sidebar', sidebarOpen ? 'open' : '']">
       <div class="side-panel">
         <div class="brand">
           <div class="brand-mark"><img src="/logo.png" alt="Logo"></div>
           <div class="brand-copy">
             <h1>ZHIFORK</h1>
-            <p>Reverse Assassin</p>
+            <p>ZHIFORK</p>
           </div>
         </div>
 
         <div class="nav-section-title">Workspace</div>
         <div class="nav-list" @click="sidebarOpen = false">
+          <button :class="['nav-item', page === 'home' ? 'active' : '']" @click="setPage('home')">
+            <span class="nav-icon">⌂</span>
+            <span class="nav-label">主页总览</span>
+          </button>
           <button :class="['nav-item', page === 'stories' ? 'active' : '']" @click="setPage('stories')">
             <span class="nav-icon">✦</span>
             <span class="nav-label">故事广场</span>
@@ -1586,12 +2310,12 @@ button{cursor:pointer}
         <div class="side-status">
           <div class="status-pill">
             <span :class="['dot', stats.agent_running ? 'live' : '']"></span>
-            {{ stats.agent_running ? 'Agent 运行中' : 'Agent 待机中' }}
+            {{ stats.agent_running ? '任务引擎运行中' : '任务引擎待机中' }}
           </div>
           <div class="account-row">
             <div class="account-meta">
-              <strong>{{ oauthUser ? (oauthUser.fullname || oauthUser.uid) : '未登录' }}</strong>
-              <span>{{ oauthUser ? '知乎 OAuth 已连接' : '可切换到演示模式' }}</span>
+              <strong>{{ userDisplayName }}</strong>
+              <span>{{ userStatusText }}</span>
             </div>
             <button class="btn btn-ghost btn-xs" @click="oauthUser ? doOAuthLogout() : (loggedIn = false)">{{ oauthUser ? '退出' : '登录' }}</button>
           </div>
@@ -1602,17 +2326,17 @@ button{cursor:pointer}
     <main class="main" @click="sidebarOpen = false">
       <div class="mobile-bar">
         <button class="hamburger" @click.stop="sidebarOpen = !sidebarOpen">☰</button>
-        <div class="eyebrow">Reverse Assassin</div>
+        <div class="eyebrow">ZHIFORK</div>
       </div>
 
-      <section class="hero" data-reveal>
+      <section v-if="page === 'home'" class="hero" data-reveal>
         <div class="hero-top">
           <div class="hero-copy">
-            <div class="eyebrow">Narrative Intelligence · Agentic Workflow</div>
-            <h2>把知乎故事，演化成可运营的平行宇宙内容系统。</h2>
+            <div class="eyebrow">Story Workflow · Editorial Console</div>
+            <h2>把故事素材，演化成可持续推进的平行宇宙内容系统。</h2>
             <p>
-              从抓取、解析、支线生成到世界线推进，这不是一个传统后台，而是一个面向内容 AI 产品的操作台。
-              所有动作都围绕故事智能展开：发现可分叉节点、生成新宇宙、沉淀角色状态，并把结果发布回社区。
+              从抓取、解析、支线生成到世界线推进，所有关键环节都集中在这里。
+              你可以整理故事素材、扩展分支内容、查看角色状态，并将成果发布到圈子。
             </p>
             <div class="hero-actions">
               <button class="btn btn-primary btn-lg" @click="setPage('stories'); doAction('discover')" :disabled="acting">
@@ -1627,7 +2351,7 @@ button{cursor:pointer}
             </div>
           </div>
           <div class="surface" style="min-width:min(320px,100%);max-width:360px;">
-            <div class="ivo-label">Engine Summary</div>
+            <div class="ivo-label">Overview</div>
             <div class="stack">
               <div class="signal-card">
                 <b>{{ stats.total_stories || 0 }}</b>
@@ -1657,14 +2381,12 @@ button{cursor:pointer}
             <div class="metric-sub">已发布到圈子的动态分支</div>
           </div>
           <div class="metric-card">
-            <div class="metric-label">内容安全拦截</div>
-            <div class="metric-value">{{ blockedCount }}</div>
-            <div class="metric-sub">近现代史内容会被自动拦截</div>
+            
           </div>
           <div class="metric-card">
-            <div class="metric-label">AI 配置状态</div>
-            <div class="metric-value">{{ llmConfigured ? 'Ready' : 'Pending' }}</div>
-            <div class="metric-sub">{{ llmConfigured ? 'LLM 接口已接入' : '请先完成模型配置' }}</div>
+            <div class="metric-label">模型配置状态</div>
+            <div class="metric-value">{{ llmConfigured ? '已就绪' : '待配置' }}</div>
+            <div class="metric-sub">{{ llmConfigured ? '模型接口已接入' : '请先完成模型配置' }}</div>
           </div>
         </div>
       </section>
@@ -1686,12 +2408,41 @@ button{cursor:pointer}
       </div>
 
       <template v-if="!pageLoading">
+        <section v-if="page === 'home'" class="section" data-reveal>
+          <div class="surface">
+            <div class="section-head">
+              <div>
+                <h3>工作流总览</h3>
+                <p>集中查看当前项目的整体数据与运行概况。</p>
+              </div>
+              <div class="section-tools">
+                <button class="btn btn-primary btn-sm" @click="setPage('stories')">进入故事广场</button>
+                <button class="btn btn-ghost btn-sm" @click="setPage('worldline')">查看世界线</button>
+              </div>
+            </div>
+            <div class="story-kpis">
+              <div class="story-kpi">
+                <b>{{ stats.total_stories || 0 }}</b>
+                <span>故事总数</span>
+              </div>
+              <div class="story-kpi">
+                <b>{{ stats.total_branches || 0 }}</b>
+                <span>分支总数</span>
+              </div>
+              <div class="story-kpi">
+                <b>{{ stats.unlocked_branches || 0 }}</b>
+                <span>可继续推进</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
         <section v-if="page === 'stories'" class="section story-shell" data-reveal>
           <div class="story-board">
             <div class="page-banner">
               <div>
                 <h3>故事广场</h3>
-                <p>像知乎内容页一样把重点放在阅读与筛选，不再用同一种大卡片把整个页面撑满。</p>
+                <p>查看已抓取故事、分析结果与分支生成进度。</p>
               </div>
               <div class="banner-stats">
                 <div class="mini-stat">
@@ -1715,8 +2466,7 @@ button{cursor:pointer}
                 <span>分析完成率</span>
               </div>
               <div class="story-kpi">
-                <b>{{ blockedCount }}</b>
-                <span>安全拦截数</span>
+                
               </div>
               <div class="story-kpi">
                 <b>{{ stats.unlocked_branches || 0 }}</b>
@@ -1728,7 +2478,7 @@ button{cursor:pointer}
               <div class="section-head">
                 <div>
                   <h3>故事列表</h3>
-                  <p>从左到右先看标题与摘要，再决定是否进入支线工作台。</p>
+                  <p>选择一条故事，继续分析、生成支线或进入工作台。</p>
                 </div>
                 <div class="section-tools">
                   <div class="story-switch">
@@ -1750,7 +2500,7 @@ button{cursor:pointer}
               </div>
 
               <div v-else class="story-list">
-                <article v-for="s in filteredStories" :key="s.work_id" class="story-card">
+                <article v-for="s in enrichedStories" :key="s.work_id" class="story-card">
                   <div v-if="demoMode && storyTab === 'discover'" class="chip amber" style="position:absolute;top:16px;right:16px;">路演沙盒</div>
                   <div class="story-head">
                     <div>
@@ -1763,11 +2513,14 @@ button{cursor:pointer}
                         </span>
                       </div>
                     </div>
-                    <span :class="'chip status-chip ' + s.status">{{ statusLabel(s.status) }}</span>
+                    <div class="chip-row">
+                      <span :class="'chip status-chip ' + s.status">{{ statusLabel(s.status) }}</span>
+                      <span v-if="s.isRunning" class="chip blue">生成中</span>
+                    </div>
                   </div>
 
                   <div class="story-summary">
-                    {{ s.analysis_result?.worldview || s.content?.slice(0, 180) || '点击解析按钮，让 AI 抽取世界观、角色和分支枢纽。' }}
+                    {{ s.analysis_result?.worldview || s.content?.slice(0, 180) || '点击解析按钮，先整理这个故事的世界观、角色和关键转折点。' }}
                   </div>
 
                   <div class="story-actions">
@@ -1777,10 +2530,12 @@ button{cursor:pointer}
                       </template>
                     </div>
                     <div class="section-tools">
-                      <button v-if="s.status === 'pending'" class="btn btn-primary btn-xs" @click="analyzeOne(s.work_id)" :disabled="acting">AI 解析</button>
-                      <button v-else-if="s.status === 'analyzed'" class="btn btn-primary btn-xs" @click="openIvo(s)">生成支线</button>
-                      <button v-else-if="s.status === 'branched'" class="btn btn-ghost btn-xs" @click="openIvo(s)">打开工作台</button>
-                      <span v-else-if="s.status === 'blocked'" class="chip gray">近现代史 · 已拦截</span>
+                      <button v-if="s.status === 'pending'" class="btn btn-primary btn-xs" @click="analyzeOne(s.work_id)" :disabled="acting || s.isRunning">解析故事</button>
+                      <button v-else-if="(s.status === 'analyzed' || s.status === 'blocked') && (s.analysis_result||{}).classification === 'real_modern'" class="btn btn-ghost btn-xs" disabled>无需分支</button>
+                      <button v-else-if="s.status === 'analyzed' || s.status === 'blocked' && !s.isRunning" class="btn btn-primary btn-xs" @click="openIvo(s)">生成支线</button>
+                      <button v-else-if="s.status === 'analyzed' || s.status === 'blocked' && s.isRunning" class="btn btn-ghost btn-xs" @click="openIvo(s)">查看生成进度</button>
+                      <button v-else-if="s.status === 'branched' || s.isRunning" class="btn btn-ghost btn-xs" @click="openIvo(s)">打开工作台</button>
+                      <span v-else-if="s.status === 'blocked'" class="chip gray">已解析</span>
                     </div>
                   </div>
                 </article>
@@ -1790,13 +2545,17 @@ button{cursor:pointer}
 
           <div class="aside-column">
             <div class="plain-panel">
-              <h4>Agent 状态</h4>
-              <p>这一列保留轻量摘要，不再用大面积装饰卡片抢主内容。</p>
+              <h4>运行状态</h4>
+              <p>查看当前任务进度、待处理内容与分支产出情况。</p>
             </div>
             <div class="panel-list">
               <div class="signal-card">
                 <b>{{ stats.agent_running ? '运行中' : '待机中' }}</b>
                 <span>执行器状态</span>
+              </div>
+              <div class="signal-card">
+                <b>{{ runningStoryIDs.length }}</b>
+                <span>正在生成的故事</span>
               </div>
               <div class="signal-card">
                 <b>{{ stats.pending_stories || 0 }}</b>
@@ -1808,13 +2567,13 @@ button{cursor:pointer}
               </div>
             </div>
             <div class="section-tools">
-              <button v-if="!stats.agent_running" class="btn btn-ghost btn-sm" @click="ctrlAgent('start')">启动 Agent</button>
-              <button v-if="stats.agent_running" class="btn btn-danger btn-sm" @click="ctrlAgent('stop')">停止 Agent</button>
+              <button v-if="!stats.agent_running" class="btn btn-ghost btn-sm" @click="ctrlAgent('start')">启动任务引擎</button>
+              <button v-if="stats.agent_running" class="btn btn-danger btn-sm" @click="ctrlAgent('stop')">停止任务引擎</button>
               <button class="btn btn-ghost btn-sm" @click="doAction('analyze')">批量解析</button>
             </div>
             <div class="plain-panel">
               <h4>叙事引擎说明</h4>
-              <p>系统会先抓取故事，再识别可安全分支题材，最后生成支线并沉淀角色状态。</p>
+              <p>系统会识别关键节点，生成支线内容，并持续记录角色状态与事件变化。</p>
             </div>
           </div>
         </section>
@@ -1824,7 +2583,7 @@ button{cursor:pointer}
             <div class="page-banner compact">
               <div>
                 <h3>圈子广场</h3>
-                <p>用轻量流式阅读布局展示社区反馈，更接近知乎的信息流而不是控制台卡片墙。</p>
+                <p>查看支线内容发布后的圈子动态与互动反馈。</p>
               </div>
               <div class="section-tools">
                 <button class="btn btn-ghost btn-sm" @click="loadRing">刷新内容</button>
@@ -1855,7 +2614,7 @@ button{cursor:pointer}
           <div class="side-feed">
             <div class="plain-panel">
               <h4>内容回流</h4>
-              <p>这里强调“支线发布后会回流到社区”，适合作为路演时的闭环说明。</p>
+              <p>这里汇总发布后的内容反馈，方便持续跟进传播情况。</p>
             </div>
             <div class="signal-card">
               <b>{{ ringContents.length }}</b>
@@ -1872,7 +2631,7 @@ button{cursor:pointer}
           <div class="page-banner compact" style="margin-bottom:16px;">
             <div>
               <h3>平行宇宙</h3>
-              <p>这里改成内容资产库视角，先看总体规模，再往下翻分支卡片。</p>
+                <p>按故事查看已生成的分支内容与对应状态。</p>
             </div>
             <div class="banner-stats">
               <div class="mini-stat">
@@ -1892,17 +2651,28 @@ button{cursor:pointer}
           </div>
           <div v-else-if="branches.length === 0" class="empty">
             <strong>还没有分支</strong>
-            先在故事广场中解析故事，再打开工作台生成平行宇宙。
+            先解析故事，再进入工作台生成新的分支内容。
           </div>
-          <div v-else class="branches-stream">
-            <article v-for="b in branches" :key="b.id" class="br-card" @click="openBranchStory(b)">
-              <div class="chip-row">
-                <span :class="'chip ' + (b.unlocked ? 'green' : 'amber')">{{ b.unlocked ? '已解锁' : '待解锁' }}</span>
-                <span class="chip blue">{{ b.keyword }}</span>
+          <div v-else class="stack">
+            <section v-for="group in groupedBranches" :key="group.story_work_id" class="surface">
+              <div class="section-head" style="margin-bottom:14px;">
+                <div>
+                  <h3>{{ group.story_title }}</h3>
+                  <p>{{ group.items.length }} 条平行宇宙分支</p>
+                </div>
               </div>
-              <h4 style="margin:14px 0 8px;font-size:1.05rem;">{{ b.tag }} · {{ b.title }}</h4>
-              <div style="color:#425466;line-height:1.8;">{{ b.preview?.slice(0, 100) }}...</div>
-            </article>
+              <div class="branches-stream">
+                <article v-for="b in group.items" :key="b.id" class="br-card" @click="openBranchStory(b)">
+                  <div class="chip-row">
+                    <span :class="'chip ' + (b.unlocked ? 'green' : 'amber')">{{ b.unlocked ? '已解锁' : '待解锁' }}</span>
+                    <span class="chip blue">{{ b.keyword }}</span>
+                    <span v-if="runningBranchIDs.includes(b.id)" class="chip blue">生成中</span>
+                  </div>
+                  <h4 style="margin:14px 0 8px;font-size:1.05rem;">{{ b.tag }} · {{ b.title }}</h4>
+                  <div style="color:#425466;line-height:1.8;">{{ b.preview?.slice(0, 100) }}...</div>
+                </article>
+              </div>
+            </section>
           </div>
         </section>
 
@@ -1910,7 +2680,7 @@ button{cursor:pointer}
           <div class="page-banner compact">
             <div>
               <h3>世界线</h3>
-              <p>这个页面保留图谱主导的视觉重心，不再套额外大卡片，让世界线本身成为主角。</p>
+                <p>从图谱中查看故事分叉路径，并继续编辑或推进当前路线。</p>
             </div>
             <div class="section-tools">
               <select v-model="wlStoryFilter" @change="loadWorldlineTree" class="select" style="min-width:240px;">
@@ -1966,6 +2736,9 @@ button{cursor:pointer}
                     <div v-if="wlSelectedNode === n.id" class="wl-nc-actions">
                       <button class="btn btn-primary btn-xs" @click.stop="openWlNodeStory(n)">查看内容</button>
                       <button v-if="n.branch_id > 0" class="btn btn-ghost btn-xs" @click.stop="continueFromWlNode(n)">继续推进</button>
+                      <button v-if="n.branch_id > 0" class="btn btn-ghost btn-xs" @click.stop="publishWorldlineNode(n)">发布此路线</button>
+                      <button v-if="n.branch_id > 0" class="btn btn-ghost btn-xs" @click.stop="downloadWorldlineNode(n)">下载文本</button>
+                      <button v-if="n.depth > 0" class="btn btn-danger btn-xs" @click.stop="deleteWorldlineNode(n, false)">删除</button>
                     </div>
                   </div>
                 </div>
@@ -1978,10 +2751,10 @@ button{cursor:pointer}
           <div class="action-stack">
             <div class="action-card">
               <h4>引擎控制</h4>
-              <p>这一栏是动作面板，和中间的日志区分开，不再共用同一张大卡片。</p>
+              <p>启动、停止或手动触发当前任务流程。</p>
               <div class="section-tools">
-                <button v-if="!stats.agent_running" class="btn btn-primary btn-sm" @click="ctrlAgent('start')">启动 Agent</button>
-                <button v-else class="btn btn-danger btn-sm" @click="ctrlAgent('stop')">停止 Agent</button>
+                <button v-if="!stats.agent_running" class="btn btn-primary btn-sm" @click="ctrlAgent('start')">启动任务引擎</button>
+                <button v-else class="btn btn-danger btn-sm" @click="ctrlAgent('stop')">停止任务引擎</button>
               </div>
             </div>
             <div class="action-card">
@@ -1999,7 +2772,7 @@ button{cursor:pointer}
             <div class="section-head">
               <div>
                 <h3>实时日志</h3>
-                <p>中间主区只保留日志流，让信息密度和阅读效率更清晰。</p>
+                <p>记录最近的任务执行过程与系统反馈。</p>
               </div>
             </div>
             <div class="log-box">
@@ -2014,7 +2787,7 @@ button{cursor:pointer}
           <div class="panel-list">
             <div class="plain-panel">
               <h4>流水线概览</h4>
-              <p>右侧显示摘要指标，不再与日志共用一个大容器。</p>
+              <p>汇总当前内容规模与处理进度。</p>
             </div>
             <div class="signal-card">
               <b>{{ stats.total_stories || 0 }}</b>
@@ -2022,7 +2795,7 @@ button{cursor:pointer}
             </div>
             <div class="signal-card">
               <b>{{ stats.analyzed_stories || 0 }}</b>
-              <span>AI 已解析故事</span>
+              <span>已完成解析的故事</span>
             </div>
             <div class="signal-card">
               <b>{{ stats.total_branches || 0 }}</b>
@@ -2034,7 +2807,7 @@ button{cursor:pointer}
         <section v-if="page === 'config'" class="section config-layout" data-reveal>
           <div class="settings-intro">
             <h3>设置</h3>
-            <p>把说明区和表单区拆开，视觉上更接近知乎创作后台的轻量信息布局，而不是一整页大盒子。</p>
+            <p>管理账号连接、模型接口与界面偏好设置。</p>
             <div class="panel-list" style="margin-top:18px;">
               <div class="signal-card">
                 <b>{{ oauthUser ? '已授权' : '未授权' }}</b>
@@ -2042,7 +2815,11 @@ button{cursor:pointer}
               </div>
               <div class="signal-card">
                 <b>{{ llmConfigured ? '已连接' : '待配置' }}</b>
-                <span>LLM API 状态</span>
+                <span>模型接口状态</span>
+              </div>
+              <div class="signal-card">
+                <b>{{ activeThemeLabel }}</b>
+                <span>当前界面主题</span>
               </div>
             </div>
           </div>
@@ -2050,24 +2827,28 @@ button{cursor:pointer}
           <div class="cfg-grid">
             <div class="cfg-card">
               <div class="cfg-head">
-                <h4>知乎 OAuth</h4>
-                <span v-if="oauthUser" class="chip green">已授权</span>
+                <h4>界面风格</h4>
+                <span class="chip blue">{{ themeMode === 'system' ? '跟随系统' : '手动主题' }}</span>
               </div>
               <div class="fg">
-                <label class="fl">App ID</label>
-                <input v-model="oauthForm.app_id" class="fi" placeholder="黑客松项目 App ID">
+                <label class="fl">明暗模式</label>
+                <select v-model="themeMode" class="select" @change="saveThemePreference">
+                  <option value="system">跟随系统</option>
+                  <option value="light">浅色</option>
+                  <option value="dark">深色</option>
+                </select>
               </div>
               <div class="fg">
-                <label class="fl">App Key</label>
-                <input v-model="oauthForm.app_key" class="fi" placeholder="黑客松项目 App Key">
+                <label class="fl">配色预设</label>
+                <select v-model="themePalette" class="select" @change="saveThemePreference">
+                  <option v-for="opt in themePaletteOptions" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
+                </select>
               </div>
-              <button class="btn btn-primary btn-sm" @click="saveOAuth" :disabled="saving">保存 OAuth 配置</button>
-              <div class="fh">创建知乎黑客松项目后自动生成，用于 OAuth 授权登录。</div>
+              <div class="fh">支持跟随系统明暗，也可以在几套预设配色中手动切换。你的选择会保存在本地浏览器。</div>
             </div>
-
-            <div class="cfg-card">
+<div class="cfg-card">
               <div class="cfg-head">
-                <h4>LLM API</h4>
+                <h4>模型接口</h4>
                 <span v-if="llmConfigured" class="chip green">已连接</span>
               </div>
               <div class="fg">
@@ -2101,7 +2882,7 @@ const { createApp, ref, computed, watch, onMounted, onUnmounted, nextTick } = Vu
 createApp({
   setup() {
     const A = "/api";
-    const page = ref("stories");
+    const page = ref("home");
     const sidebarOpen = ref(false);
     const acting = ref(false);
 
@@ -2117,12 +2898,34 @@ createApp({
     const showKey = ref(false);
     const saving = ref(false);
     const saveMsg = ref("");
+    const themeMode = ref("system");
+    const themePalette = ref("coast");
+    const themePaletteOptions = [
+      { value: "coast", label: "海岸蓝" },
+      { value: "forest", label: "森林绿" },
+      { value: "amber", label: "琥珀金" },
+      { value: "slate", label: "石板灰" }
+    ];
 
     const oauthForm = ref({ app_id: "", app_key: "" });
     const zhihuForm = ref({ token: "", secret: "" });
 
     const llmConfigured = computed(() => !!settings.value.llm_api_key_masked || !!llmForm.value.api_key);
     const zhihuConfigured = computed(() => !!config.value.zhihu_configured || !!oauthForm.value.app_key || !!stats.value.llm_configured);
+    const userDisplayName = computed(() => {
+      if (oauthUser.value) return oauthUser.value.fullname || oauthUser.value.name || oauthUser.value.uid || "已登录用户";
+      return loggedIn.value ? "演示模式" : "未登录";
+    });
+    const userStatusText = computed(() => {
+      if (oauthUser.value) return "知乎 OAuth 已连接";
+      return loggedIn.value ? "当前使用本地演示模式" : "可切换到演示模式";
+    });
+
+    const activeThemeLabel = computed(() => {
+      const paletteLabel = themePaletteOptions.find((opt) => opt.value === themePalette.value)?.label || "海岸蓝";
+      const modeLabel = themeMode.value === "system" ? "跟随系统" : themeMode.value === "dark" ? "深色" : "浅色";
+      return `${modeLabel} · ${paletteLabel}`;
+    });
 
     const toasts = ref([]);
     let tid = 0;
@@ -2170,6 +2973,8 @@ createApp({
     const demoMode = ref(true);
     const storyTab = ref("mine");
     const logLines = ref([]);
+    const runningStoryIDs = ref([]);
+    const runningBranchIDs = ref([]);
 
     const wlStories = ref([]);
     const wlTreeData = ref(null);
@@ -2188,12 +2993,51 @@ createApp({
       options = options || {}; options.headers = options.headers || {}; options.headers['X-Namespace'] = NS;
       try {
         const resp = await fetch(A + path, options);
-        const data = await resp.json();
-        return data;
+        const text = await resp.text();
+        try { return JSON.parse(text); } catch (_) {
+          return { status: 1, msg: text ? text.slice(0, 200) : ("HTTP " + resp.status + " empty response") };
+        }
       } catch (e) {
-        return { status: 1, msg: String(e.message || e) };
+        return { status: 1, msg: "Network error: " + String(e.message || e) };
       }
     };
+
+    let themeMediaQuery = null;
+    const resolveScheme = () => {
+      if (themeMode.value === "dark") return "dark";
+      if (themeMode.value === "light") return "light";
+      return themeMediaQuery?.matches ? "dark" : "light";
+    };
+    const applyThemePreference = () => {
+      const root = document.documentElement;
+      root.dataset.scheme = resolveScheme();
+      root.dataset.palette = themePalette.value || "coast";
+    };
+    const saveThemePreference = () => {
+      localStorage.setItem("ra_theme_mode", themeMode.value);
+      localStorage.setItem("ra_theme_palette", themePalette.value);
+      applyThemePreference();
+    };
+    const loadThemePreference = () => {
+      const savedMode = localStorage.getItem("ra_theme_mode");
+      const savedPalette = localStorage.getItem("ra_theme_palette");
+      if (savedMode && ["system", "light", "dark"].includes(savedMode)) themeMode.value = savedMode;
+      if (savedPalette && themePaletteOptions.some((opt) => opt.value === savedPalette)) themePalette.value = savedPalette;
+      applyThemePreference();
+    };
+
+
+    const storyTheme = computed(() => {
+      const title = (ivoStory.value?.title || "").trim();
+      if (title) return title.slice(0, 18);
+      const activeBranch = selectedIvoBranch.value;
+      if (activeBranch?.title) return activeBranch.title.slice(0, 18);
+      return "当前故事";
+    });
+    const freeScenePlaceholder = computed(() => `可以写：在“${storyTheme.value}”里，准备从哪一幕开始改写`);
+    const freeDirectionPlaceholder = computed(() => `可以写：希望这条线朝什么方向发展，人物关系会因此发生什么变化`);
+    const customPromptPlaceholder = computed(() => `可以写：从当前节点继续分叉后，这条世界线最值得展开的走向`);
+    const continuePromptPlaceholder = computed(() => `可以写：沿着当前节点继续推进，下一段最想看到的变化`);
 
     const addLog = (module, msg) => {
       const ts = new Date().toTimeString().slice(0, 8);
@@ -2402,7 +3246,11 @@ createApp({
 
     const ls = async () => {
       const j = await api("/status");
-      if (j.status === 0) stats.value = j.data;
+      if (j.status === 0) {
+        stats.value = j.data;
+        runningStoryIDs.value = j.data.running_story_ids || [];
+        runningBranchIDs.value = j.data.running_branch_ids || [];
+      }
       else storiesError.value = j.msg || "获取状态失败";
     };
 
@@ -2419,7 +3267,7 @@ createApp({
         if (!llmForm.value.model) llmForm.value.model = settings.value.llm_model || "";
         if (!oauthForm.value.app_id) oauthForm.value.app_id = settings.value.oauth_app_id || "";
         if (!oauthForm.value.app_key) oauthForm.value.app_key = settings.value.oauth_app_key || "";
-        loggedIn.value = !!(j.data || {}).oauth_access_token;
+        // Portal always shows first — user chooses to enter
       }
     };
 
@@ -2437,17 +3285,11 @@ createApp({
       branchesError.value = "";
       const j = await api("/branches?page_size=200");
       if (j.status === 0) {
-        const allBranches = j.data.items || [];
-        branches.value = allBranches;
-        // Match branches to stories
-        const branchMap = {};
-        allBranches.forEach(b => {
-          if (!branchMap[b.story_work_id]) branchMap[b.story_work_id] = [];
-          branchMap[b.story_work_id].push(b);
-        });
-        stories.value.forEach(s => {
-          s._branches = branchMap[s.work_id] || [];
-        });
+        const all = j.data.items || [];
+        branches.value = all;
+        const byStory = {};
+        all.forEach(b => { if (!byStory[b.story_work_id]) byStory[b.story_work_id] = []; byStory[b.story_work_id].push(b); });
+        stories.value.forEach(s => { s._branches = byStory[s.work_id] || []; });
       } else {
         branchesError.value = j.msg || "加载分支失败";
       }
@@ -2471,30 +3313,33 @@ createApp({
       revealSections();
     };
 
+    const refreshStatusOnly = async () => {
+      await Promise.all([ls(), loadOAuthUser()]);
+    };
+
     const retry = () => rf();
 
     const loadOAuthUser = async () => {
       const j = await api("/oauth/user");
-      if (j.status === 0) oauthUser.value = j.data;
+      if (j.status === 0) {
+        oauthUser.value = j.data;
+        return;
+      }
+      oauthUser.value = null;
     };
 
-    const oauthLogin = async () => {
-      // Save OAuth config first, then redirect to backend which knows the correct app_id
+    const oauthLogin = () => {
+      // Save OAuth config if user filled it in, then redirect
       if (oauthForm.value.app_id) {
-        await api("/settings", {
+        api("/settings", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ oauth_app_id: oauthForm.value.app_id, oauth_app_key: oauthForm.value.app_key })
         });
       }
-      // Redirect directly - backend handles the correct app_id
       window.location.href = "/api/oauth/authorize";
     };
 
-    const skipLogin = () => {
-      loggedIn.value = true;
-      toast("已进入演示模式", "info");
-    };
 
     const doOAuthLogout = async () => {
       await api("/oauth/logout", { method: "POST" });
@@ -2566,6 +3411,7 @@ createApp({
 
     const analyzeOne = async (workID) => {
       acting.value = true;
+      toast("AI 正在解析故事结构，最长约 30 秒...", "info");
       const j = await api("/action/analyze_one?work_id=" + workID, { method: "POST" });
       toast(j.status === 0 ? "解析完成" : (j.msg || "解析失败"), j.status === 0 ? "ok" : "err");
       acting.value = false;
@@ -2596,6 +3442,7 @@ createApp({
     const genBranches = async () => {
       if (!ivoStory.value?.work_id) return;
       acting.value = true;
+      toast("正在生成平行支线，最长约 2 分钟...", "info");
       const workID = ivoStory.value.work_id;
       let url = "/action/generate?work_id=" + workID + "&publish=false";
       if (selPivot.value >= 0) url += "&pivot_index=" + selPivot.value;
@@ -2623,6 +3470,7 @@ createApp({
     const genFreeBranch = async () => {
       if (!ivoStory.value?.work_id || !freeScene.value) return;
       acting.value = true;
+      toast("正在从自由场景生成分支...", "info");
       const workID = ivoStory.value.work_id;
       const body = {
         method: "POST",
@@ -2659,6 +3507,7 @@ createApp({
         return;
       }
       acting.value = true;
+      toast("正在推进分支剧情...", "info");
       const j = await api("/action/continue_branch?branch_id=" + branch.id, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -2681,11 +3530,24 @@ createApp({
 
     const publishBranches = async () => {
       if (!ivoStory.value?.work_id) return;
+      if (!selectedIvoNodeBranchID.value) {
+        toast("请先选中一条世界线节点", "err");
+        return;
+      }
       acting.value = true;
-      const j = await api("/action/publish_branches?work_id=" + ivoStory.value.work_id, { method: "POST" });
+      const j = await api("/action/publish_branches?work_id=" + ivoStory.value.work_id + "&node_id=" + ivoSelectedNodeId.value, { method: "POST" });
       toast(j.status === 0 ? "已发布到圈子" : (j.msg || "发布失败"), j.status === 0 ? "ok" : "err");
       if (j.status === 0) ivoPublished.value = true;
       acting.value = false;
+    };
+
+    const downloadBranchText = async () => {
+      if (!ivoStory.value?.work_id || !ivoSelectedNodeId.value) {
+        toast("请先选中一条世界线节点", "err");
+        return;
+      }
+      const url = `/api/action/download_branch_text?work_id=${encodeURIComponent(ivoStory.value.work_id)}&node_id=${ivoSelectedNodeId.value}`;
+      window.open(url, "_blank");
     };
 
     const toggleDemo = async () => {
@@ -2700,7 +3562,9 @@ createApp({
     const loadIvoState = async () => {
       if (!ivoStory.value?.work_id) return;
       charsLoading.value = true;
-      const j = await api("/states/" + ivoStory.value.work_id);
+      let path = "/states/" + ivoStory.value.work_id;
+      if (ivoSelectedNodeId.value > 0) path += "?node_id=" + ivoSelectedNodeId.value;
+      const j = await api(path);
       if (j.status === 0) {
         ivoChars.value = j.data.characters || [];
         ivoTimeline.value = j.data.timeline || [];
@@ -2713,8 +3577,31 @@ createApp({
     };
 
     const filteredStories = computed(() => {
-      if (storyTab.value === "mine") return stories.value.filter((s) => s.status !== "blocked");
+      if (storyTab.value === "mine") return stories.value;
       return demoMode.value ? stories.value : [];
+    });
+
+    const enrichedStories = computed(() =>
+      filteredStories.value.map((story) => ({
+        ...story,
+        isRunning: runningStoryIDs.value.includes(story.work_id),
+      }))
+    );
+
+    const groupedBranches = computed(() => {
+      const groups = new Map();
+      for (const branch of branches.value) {
+        const key = branch.story_work_id || "unknown";
+        if (!groups.has(key)) {
+          groups.set(key, {
+            story_work_id: key,
+            story_title: branch.story_title || "未命名故事",
+            items: [],
+          });
+        }
+        groups.get(key).items.push(branch);
+      }
+      return Array.from(groups.values());
     });
 
     const completionRate = computed(() => {
@@ -2725,7 +3612,7 @@ createApp({
 
     const blockedCount = computed(() => stories.value.filter((s) => s.status === "blocked").length);
 
-    const classLabel = (c) => c === "fiction" ? "虚构故事" : c === "real_history" ? "历史纪实" : c === "real_modern" ? "近现代史" : "";
+    const classLabel = (c) => c === "fiction" ? "虚构" : c === "real_history" ? "历史" : c === "real_modern" ? "近现代史" : "";
     const statusLabel = (s) => s === "pending" ? "待解析" : s === "analyzed" ? "已解析" : s === "branched" ? "已分支" : s === "blocked" ? "已拦截" : s;
     const stripHtml = (s) => {
       const d = document.createElement("div");
@@ -2774,6 +3661,11 @@ createApp({
       return ivoBranches.value.find((b) => b.id === node.branch_id) || null;
     });
 
+    const selectedIvoNodeBranchID = computed(() => {
+      const node = ivoWlLayoutNodes.value.find((n) => n.id === ivoSelectedNodeId.value);
+      return node?.branch_id || 0;
+    });
+
     const selectIvoNode = (node) => {
       ivoSelectedNodeId.value = ivoSelectedNodeId.value === node.id ? -1 : node.id;
       if (ivoSelectedNodeId.value === -1) {
@@ -2784,9 +3676,11 @@ createApp({
       if (node.branch_id > 0) {
         contBranch.value = node.branch_id;
         contPrompt.value = "";
+        if (ivoTab.value === "chars") loadIvoState();
       } else {
         contBranch.value = -1;
         contPrompt.value = "";
+        if (ivoTab.value === "chars") loadIvoState();
       }
     };
 
@@ -2836,6 +3730,62 @@ createApp({
       }
     };
 
+    const deleteWorldlineNode = async (node, reloadIvo = true) => {
+      if (!node?.id || node.depth === 0) {
+        toast("根节点不能删除", "err");
+        return;
+      }
+      if (!confirm("删除后，这个节点及其后续世界线都会被移除。确定继续吗？")) return;
+      acting.value = true;
+      const j = await api("/worldline/" + node.story_work_id + "?node_id=" + node.id, { method: "DELETE" });
+      toast(j.status === 0 ? "已删除世界线" : (j.msg || "删除失败"), j.status === 0 ? "ok" : "err");
+      if (j.status === 0) {
+        if (reloadIvo && ivoStory.value?.work_id === node.story_work_id) {
+          const detail = await api("/stories/" + node.story_work_id);
+          if (detail.status === 0) {
+            ivoStory.value = detail.data.story;
+            ivoBranches.value = detail.data.branches || [];
+          }
+          ivoSelectedNodeId.value = -1;
+          contBranch.value = -1;
+          await loadIvoWorldline();
+          if (ivoTab.value === "chars") {
+            ivoChars.value = [];
+            ivoTimeline.value = [];
+          }
+        }
+        if (wlStoryFilter.value === node.story_work_id) {
+          wlSelectedNode.value = -1;
+          await loadWorldlineTree();
+        }
+        await rf();
+      }
+      acting.value = false;
+    };
+
+    const deleteSelectedWorldlineNode = async () => {
+      const node = ivoWlLayoutNodes.value.find((n) => n.id === ivoSelectedNodeId.value);
+      if (!node) {
+        toast("请先选中要删除的节点", "err");
+        return;
+      }
+      await deleteWorldlineNode(node, true);
+    };
+
+    const publishWorldlineNode = async (node) => {
+      if (!node?.branch_id) return;
+      acting.value = true;
+      const j = await api("/action/publish_branches?work_id=" + node.story_work_id + "&node_id=" + node.id, { method: "POST" });
+      toast(j.status === 0 ? "已发布到圈子" : (j.msg || "发布失败"), j.status === 0 ? "ok" : "err");
+      acting.value = false;
+    };
+
+    const downloadWorldlineNode = async (node) => {
+      if (!node?.branch_id) return;
+      const url = `/api/action/download_branch_text?work_id=${encodeURIComponent(node.story_work_id)}&node_id=${node.id}`;
+      window.open(url, "_blank");
+    };
+
     const continueFromWlNode = async (node) => {
       if (node.branch_id > 0) {
         const allBranches = await api("/branches?page_size=200");
@@ -2856,20 +3806,16 @@ createApp({
       }
     };
 
-    let evt = null;
-    const sse = () => {
-      evt = new EventSource(A + "/events");
-      evt.addEventListener("log", (e) => {
-        try {
-          const d = JSON.parse(e.data).data || {};
-          addLog(d.module || "", d.msg || "");
-        } catch (_) {}
-      });
-      evt.onerror = () => {
-        evt.close();
-        setTimeout(sse, 5000);
-      };
+    let logPollTimer = null;
+    const pollLogs = async () => {
+      try {
+        const j = await api("/logs");
+        if (j.status === 0 && j.data.logs) {
+          j.data.logs.forEach(l => addLog(l.module || "", l.msg || ""));
+        }
+      } catch (_) {}
     };
+    const startLogPoll = () => { logPollTimer = setInterval(pollLogs, 3000); };
 
     let revealObserver = null;
     const revealSections = () => {
@@ -2884,26 +3830,39 @@ createApp({
       document.querySelectorAll("[data-reveal]").forEach((el) => revealObserver.observe(el));
     };
 
+    const handleThemeMediaChange = () => {
+      if (themeMode.value === "system") applyThemePreference();
+    };
+
     watch(page, async () => {
       await nextTick();
       revealSections();
     });
 
+    watch(loggedIn, async (isLoggedIn) => {
+      await nextTick();
+      revealSections();
+      if (isLoggedIn) window.scrollTo({ top: 0, behavior: "instant" });
+    });
+
     let pollTimer = null;
     onMounted(async () => {
+      themeMediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+      loadThemePreference();
+      if (themeMediaQuery.addEventListener) themeMediaQuery.addEventListener("change", handleThemeMediaChange);
+      else if (themeMediaQuery.addListener) themeMediaQuery.addListener(handleThemeMediaChange);
       await lset();
       await lc();
       await rf();
-      document.getElementById("app-loader").style.display = "none";
-      loadOAuthUser();
-      sse();
+      // loadOAuthUser called only after explicit login
+      startLogPoll();
       window.addEventListener("mousemove", updateCanvasDrag);
       window.addEventListener("mouseup", stopCanvasDrag);
-      pollTimer = setInterval(rf, 25000);
+      pollTimer = setInterval(refreshStatusOnly, 12000);
       const url = new URL(location.href);
       if (url.searchParams.get("oauth") === "success") {
         loggedIn.value = true;
-        loadOAuthUser();
+        // loadOAuthUser called only after explicit login
         toast("授权成功", "ok");
         window.history.replaceState({}, "", "/");
       }
@@ -2912,8 +3871,10 @@ createApp({
 
     onUnmounted(() => {
       clearInterval(pollTimer);
-      if (evt) evt.close();
+      if (logPollTimer) clearInterval(logPollTimer);
       if (revealObserver) revealObserver.disconnect();
+      if (themeMediaQuery?.removeEventListener) themeMediaQuery.removeEventListener("change", handleThemeMediaChange);
+      else if (themeMediaQuery?.removeListener) themeMediaQuery.removeListener(handleThemeMediaChange);
       window.removeEventListener("mousemove", updateCanvasDrag);
       window.removeEventListener("mouseup", stopCanvasDrag);
     });
@@ -2949,6 +3910,10 @@ createApp({
       showKey,
       saving,
       saveMsg,
+      themeMode,
+      themePalette,
+      themePaletteOptions,
+      activeThemeLabel,
       llmConfigured,
       zhihuConfigured,
       toasts,
@@ -2987,18 +3952,30 @@ createApp({
       startCanvasDrag,
       handleCanvasWheel,
       filteredStories,
+      enrichedStories,
+      groupedBranches,
       completionRate,
       blockedCount,
       selectedIvoBranch,
+      selectedIvoNodeBranchID,
+      userDisplayName,
+      userStatusText,
+      freeScenePlaceholder,
+      freeDirectionPlaceholder,
+      customPromptPlaceholder,
+      continuePromptPlaceholder,
+      runningStoryIDs,
+      runningBranchIDs,
       loadRing,
       retry,
       loadIvoState,
       loadIvoWorldline,
       oauthLogin,
-      skipLogin,
+      
       doOAuthLogout,
       saveZhihu,
-      saveOAuth,
+      
+      saveThemePreference,
       doAction,
       analyzeOne,
       ctrlAgent,
@@ -3011,6 +3988,11 @@ createApp({
       tagColor,
       selectIvoNode,
       openWlNodeStory,
+      publishWorldlineNode,
+      downloadWorldlineNode,
+      deleteWorldlineNode,
+      deleteSelectedWorldlineNode,
+      downloadBranchText,
       continueFromWlNode,
       publishBranches,
       startContinueBranch,

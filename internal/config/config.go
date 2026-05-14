@@ -78,7 +78,7 @@ func OAuthRedirectURI() string {
 	if v := os.Getenv("OAUTH_REDIRECT_URI"); v != "" {
 		return v
 	}
-	return "https://reverse-assassin.serveousercontent.com/oauth/callback"
+	return "https://drawings-translated-animation-reid.trycloudflare.com/oauth/callback"
 }
 
 // OAuth 凭证 — 优先级: DB 存储 > 环境变量 > 默认值

@@ -166,6 +166,7 @@ func (s *Server) registerRoutes() {
 		absDir = staticDir
 	}
 
+	s.mux.HandleFunc("/api/logs", s.handleLogs)
 	s.mux.HandleFunc("/api/events", s.hub.SSEHandler)
 	s.mux.HandleFunc("/api/status", s.handleStatus)
 	s.mux.HandleFunc("/api/states/", s.handleState)
@@ -1080,6 +1081,14 @@ func writeError(w http.ResponseWriter, msg string, code int) {
 	})
 }
 
+func (s *Server) handleLogs(w http.ResponseWriter, r *http.Request) {
+	globalLogMu.Lock()
+	entries := make([]logEntry, len(globalLogBuf))
+	copy(entries, globalLogBuf)
+	globalLogMu.Unlock()
+	writeJSON(w, map[string]interface{}{"logs": entries})
+}
+
 func maxF(a, b float64) float64 {
 	if a > b {
 		return a
@@ -1142,9 +1151,8 @@ func directGenerate(ctx context.Context, s *store.Store, a *engine.Analyzer, g *
 
 	// Content moderation: check LLM classification
 	if story.AnalysisResult != nil {
-		if blocked := engine.CheckStoryBlocked(story.AnalysisResult, story.Title, story.Content); blocked.Blocked {
-			s.UpdateStoryStatus(workID, "blocked")
-			return 0, fmt.Errorf("%s", blocked.Reason)
+		if engine.CheckStoryBlocked(story.AnalysisResult, story.Title, story.Content).Blocked {
+			return 0, nil
 		}
 	}
 

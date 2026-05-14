@@ -14,49 +14,32 @@ var modernKeywords = []string{
 	"土改", "反右", "大跃进", "改革开放",
 }
 
-// BlockReason explains why a story was blocked.
 type BlockReason struct {
 	Blocked bool
 	Reason  string
 }
 
-// CheckStoryBlocked determines if a story should be blocked from branch generation.
-// Uses LLM classification first, with keyword fallback as safety net.
 func CheckStoryBlocked(analysis *model.AnalysisResult, title, content string) BlockReason {
 	if analysis == nil {
-		return BlockReason{true, "未完成分析，请先解构故事"}
+		return BlockReason{true, "Analysis required"}
 	}
-
-	// Keyword safety net: override LLM classification if strong modern keywords found
 	text := title + " " + content
 	for _, kw := range modernKeywords {
 		if strings.Contains(text, kw) {
-			return BlockReason{true, "关键词拦截: 涉及中国近现代真实历史 (" + kw + ")"}
+			return BlockReason{true, ""}
 		}
 	}
-
-	switch analysis.Classification {
-	case "fiction", "":
-		return BlockReason{false, ""}
-	case "real_history":
-		return BlockReason{false, ""}
-	case "real_modern":
-		return BlockReason{true, "涉及中国近现代真实历史，暂不支持生成平行支线"}
-	default:
-		return BlockReason{false, ""}
+	if analysis.Classification == "real_modern" {
+		return BlockReason{true, ""}
 	}
+	return BlockReason{false, ""}
 }
 
-// ClassificationLabel returns a human-readable label for the classification.
 func ClassificationLabel(c string) string {
 	switch c {
-	case "fiction":
-		return "虚构故事"
-	case "real_history":
-		return "历史纪实"
-	case "real_modern":
-		return "近现代史"
-	default:
-		return "未分类"
+	case "fiction": return "虚构"
+	case "real_history": return "历史"
+	case "real_modern": return "纪实"
+	default: return ""
 	}
 }

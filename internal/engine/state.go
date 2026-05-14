@@ -281,12 +281,12 @@ func parseCharacter(raw string) *model.CharacterState {
 	}
 	return &model.CharacterState{
 		Name:        name,
-		Role:        "supporting",
-		Traits:      []string{},
-		Emotion:     "neutral",
-		Goal:        "",
+		Role:        guessRole(desc),
+		Traits:      extractTraits(desc),
+		Emotion:     "平静",
+		Goal:        extractFirstSentence(desc),
 		Status:      "alive",
-		Location:    "",
+		Location:    "故事中",
 		Relations:   make(map[string]string),
 		Memories:    []string{},
 		ArcSummary:  desc,
@@ -302,6 +302,35 @@ func extractCharNames(chars []string) []string {
 		}
 	}
 	return names
+}
+
+func guessRole(desc string) string {
+	desc = strings.ToLower(desc)
+	if strings.Contains(desc, "主角") || strings.Contains(desc, "穿越") || strings.Contains(desc, "第一") {
+		return "protagonist"
+	}
+	if strings.Contains(desc, "反派") || strings.Contains(desc, "敌") || strings.Contains(desc, "对") {
+		return "antagonist"
+	}
+	return "supporting"
+}
+
+func extractTraits(desc string) []string {
+	var traits []string
+	for _, t := range []string{"机智", "勇敢", "忠诚", "狡猾", "冷静", "暴躁", "善良", "多疑", "果断", "温柔"} {
+		if strings.Contains(desc, t) { traits = append(traits, t) }
+	}
+	return traits
+}
+
+func extractFirstSentence(desc string) string {
+	if idx := strings.IndexAny(desc, "。，,."); idx > 0 {
+		return desc[:idx]
+	}
+	if len([]rune(desc)) > 30 {
+		return string([]rune(desc)[:30]) + "..."
+	}
+	return desc
 }
 
 func truncateStr(s string, n int) string {
